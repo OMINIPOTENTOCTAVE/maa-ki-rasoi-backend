@@ -1,34 +1,20 @@
 const express = require("express");
+const {
+  listAvailableMenu,
+  listAdminMenu,
+  createMenuItem,
+  updateMenuItem
+} = require("./menu.controller");
+const { validate } = require("../../middleware/validate.middleware");
+const { menuItemSchema, menuItemUpdateSchema } = require("./menu.validation");
+const { requireAdminAuth } = require("../../middleware/auth.middleware");
+
 const router = express.Router();
 
-// Temporary dummy data (we will replace with DB later)
-const menuItems = [
-  {
-    id: 1,
-    name: "Veg Thali",
-    description: "Dal, Sabzi, 4 Roti, Rice",
-    price: 120
-  },
-  {
-    id: 2,
-    name: "Paneer Thali",
-    description: "Paneer Sabzi, Dal, 4 Roti, Rice",
-    price: 160
-  },
-  {
-    id: 3,
-    name: "Student Special",
-    description: "Dal, Rice, Pickle",
-    price: 80
-  }
-];
+router.get("/", listAvailableMenu);
 
-// GET all menu items
-router.get("/", (req, res) => {
-  res.json({
-    success: true,
-    data: menuItems
-  });
-});
+router.get("/admin", requireAdminAuth, listAdminMenu);
+router.post("/admin", requireAdminAuth, validate(menuItemSchema), createMenuItem);
+router.patch("/admin/:id", requireAdminAuth, validate(menuItemUpdateSchema), updateMenuItem);
 
 module.exports = router;
