@@ -1,34 +1,14 @@
 const express = require("express");
 const router = express.Router();
+const menuController = require("./menu.controller");
+const authMiddleware = require("../../middleware/auth");
 
-// Temporary dummy data (we will replace with DB later)
-const menuItems = [
-  {
-    id: 1,
-    name: "Veg Thali",
-    description: "Dal, Sabzi, 4 Roti, Rice",
-    price: 120
-  },
-  {
-    id: 2,
-    name: "Paneer Thali",
-    description: "Paneer Sabzi, Dal, 4 Roti, Rice",
-    price: 160
-  },
-  {
-    id: 3,
-    name: "Student Special",
-    description: "Dal, Rice, Pickle",
-    price: 80
-  }
-];
+// Public
+router.get("/", menuController.getMenuItems);
 
-// GET all menu items
-router.get("/", (req, res) => {
-  res.json({
-    success: true,
-    data: menuItems
-  });
-});
+// Protected
+router.post("/", authMiddleware, menuController.createMenuItem);
+router.put("/:id", authMiddleware, menuController.updateMenuItem);
+router.patch("/:id/toggle", authMiddleware, menuController.toggleAvailability);
 
 module.exports = router;
