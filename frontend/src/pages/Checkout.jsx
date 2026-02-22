@@ -8,6 +8,7 @@ export default function Checkout({ cart, updateQty, clearCart }) {
     const [formData, setFormData] = useState({ name: '', phone: '', address: '' });
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
+    const [errorMsg, setErrorMsg] = useState('');
 
     const cartTotalAmount = cart.reduce((acc, c) => acc + (c.price * c.qty), 0);
 
@@ -25,6 +26,7 @@ export default function Checkout({ cart, updateQty, clearCart }) {
     const handlePlaceOrder = async (e) => {
         e.preventDefault();
         setLoading(true);
+        setErrorMsg('');
         try {
             const payload = {
                 customerName: formData.name,
@@ -37,7 +39,7 @@ export default function Checkout({ cart, updateQty, clearCart }) {
             setSuccess(true);
             clearCart();
         } catch (err) {
-            alert(err.response?.data?.message || 'Error placing order. Please try again.');
+            setErrorMsg(err.response?.data?.message || 'Error placing order. Please try again.');
         } finally {
             setLoading(false);
         }
@@ -57,63 +59,94 @@ export default function Checkout({ cart, updateQty, clearCart }) {
     }
 
     return (
-        <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
-                <button onClick={() => navigate('/')} style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
-                    <ArrowLeft size={24} color="var(--primary)" />
+        <div style={{ animation: 'fadeIn 0.4s ease-out' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem', background: 'var(--card-bg)', backdropFilter: 'blur(8px)', padding: '1rem', borderRadius: '16px', boxShadow: 'var(--glass-shadow)' }}>
+                <button onClick={() => navigate('/')} style={{ background: 'rgba(255,87,34,0.1)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '40px', height: '40px', borderRadius: '50%', transition: 'all 0.2s' }}>
+                    <ArrowLeft size={20} color="var(--primary)" />
                 </button>
-                <h2 style={{ margin: 0 }}>Checkout</h2>
+                <h2 style={{ margin: 0, fontWeight: 800 }}>Complete Your Order</h2>
             </div>
 
-            <div className="card" style={{ marginBottom: '1.5rem' }}>
-                <h3 style={{ marginBottom: '1rem', borderBottom: '1px solid var(--border)', paddingBottom: '0.5rem' }}>Order Summary</h3>
+            <div className="card" style={{ marginBottom: '1.5rem', padding: '1.5rem' }}>
+                <h3 style={{ marginBottom: '1.25rem', borderBottom: '1px solid rgba(0,0,0,0.05)', paddingBottom: '0.75rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <span style={{ fontSize: '1.2rem' }}>🛒</span> Order Summary
+                </h3>
                 {cart.map(item => (
-                    <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
+                    <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.85rem', alignItems: 'center' }}>
                         <div>
-                            <span>{item.name}</span>
-                            <span style={{ color: 'var(--text-muted)', marginLeft: '0.5rem' }}>x{item.qty}</span>
+                            <span style={{ fontWeight: 600 }}>{item.name}</span>
+                            <span style={{ color: 'var(--primary)', marginLeft: '0.5rem', fontWeight: 700, background: 'rgba(255,87,34,0.1)', padding: '0.1rem 0.4rem', borderRadius: '12px', fontSize: '0.8rem' }}>x{item.qty}</span>
                         </div>
-                        <span>₹{item.price * item.qty}</span>
+                        <span style={{ fontWeight: 600 }}>₹{item.price * item.qty}</span>
                     </div>
                 ))}
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '1rem', paddingTop: '1rem', borderTop: '1px dashed var(--border)', fontWeight: 'bold', fontSize: '1.1rem' }}>
-                    <span>Total To Pay</span>
-                    <span>₹{cartTotalAmount}</span>
-                </div>
-                <div style={{ textAlign: 'right', fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '0.5rem' }}>
-                    * Cash on Delivery Only
+
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '1.25rem', paddingTop: '1.25rem', borderTop: '2px dashed rgba(255,87,34,0.2)', fontWeight: '800', fontSize: '1.2rem' }}>
+                    <span>Total Amount</span>
+                    <span style={{ color: 'var(--primary)' }}>₹{cartTotalAmount}</span>
                 </div>
             </div>
 
-            <form onSubmit={handlePlaceOrder} className="card">
-                <h3 style={{ marginBottom: '1rem' }}>Delivery Details</h3>
-                <input
-                    className="input-field"
-                    placeholder="Your Full Name"
-                    required
-                    value={formData.name}
-                    onChange={e => setFormData({ ...formData, name: e.target.value })}
-                />
-                <input
-                    className="input-field"
-                    placeholder="Phone Number (e.g. 9876543210)"
-                    required
-                    type="tel"
-                    pattern="[0-9]{10}"
-                    value={formData.phone}
-                    onChange={e => setFormData({ ...formData, phone: e.target.value })}
-                />
-                <textarea
-                    className="input-field"
-                    placeholder="Complete Delivery Address"
-                    required
-                    rows="3"
-                    value={formData.address}
-                    onChange={e => setFormData({ ...formData, address: e.target.value })}
-                ></textarea>
+            <form onSubmit={handlePlaceOrder} className="card" style={{ padding: '1.5rem' }}>
+                <h3 style={{ marginBottom: '1.25rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <span style={{ fontSize: '1.2rem' }}>📍</span> Delivery Details
+                </h3>
 
-                <button className="btn btn-block" disabled={loading} style={{ marginTop: '0.5rem' }}>
-                    {loading ? 'Processing...' : 'Place Order'}
+                <div style={{ marginBottom: '1rem' }}>
+                    <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '0.5rem' }}>Full Name</label>
+                    <input
+                        className="input-field"
+                        placeholder="John Doe"
+                        required
+                        value={formData.name}
+                        onChange={e => setFormData({ ...formData, name: e.target.value })}
+                        style={{ background: 'rgba(0,0,0,0.02)', border: '1px solid transparent' }}
+                    />
+                </div>
+
+                <div style={{ marginBottom: '1rem' }}>
+                    <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '0.5rem' }}>Phone Number</label>
+                    <input
+                        className="input-field"
+                        placeholder="10-digit mobile number"
+                        required
+                        type="tel"
+                        pattern="[0-9]{10}"
+                        value={formData.phone}
+                        onChange={e => setFormData({ ...formData, phone: e.target.value })}
+                        style={{ background: 'rgba(0,0,0,0.02)', border: '1px solid transparent' }}
+                    />
+                </div>
+
+                <div style={{ marginBottom: '1rem' }}>
+                    <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '0.5rem' }}>Complete Delivery Address</label>
+                    <textarea
+                        className="input-field"
+                        placeholder="House/Flat No., Building Name, Street, Landmark"
+                        required
+                        rows="3"
+                        value={formData.address}
+                        onChange={e => setFormData({ ...formData, address: e.target.value })}
+                        style={{ background: 'rgba(0,0,0,0.02)', border: '1px solid transparent', resize: 'vertical' }}
+                    ></textarea>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem', padding: '0.85rem', background: 'rgba(255,152,0,0.1)', borderRadius: '8px', border: '1px dashed rgba(255,152,0,0.3)', color: 'var(--text-main)', fontSize: '0.9rem', fontWeight: 600 }}>
+                    <span style={{ fontSize: '1.2rem' }}>💵</span> Please keep exact change ready for Cash on Delivery.
+                </div>
+
+                {errorMsg && (
+                    <div style={{ color: 'white', background: '#dc3545', padding: '0.75rem', borderRadius: '8px', marginBottom: '1rem', textAlign: 'center', fontSize: '0.9rem', fontWeight: 600 }}>
+                        {errorMsg}
+                    </div>
+                )}
+
+                <button className="btn btn-block" disabled={loading} style={{ padding: '1rem', fontSize: '1.1rem', background: 'linear-gradient(90deg, #ff5722 0%, #ff9800 100%)', boxShadow: '0 4px 15px rgba(255, 87, 34, 0.4)' }}>
+                    {loading ? (
+                        <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><span className="spinner">↻</span> Processing Order...</span>
+                    ) : (
+                        <span>Place Order • ₹{cartTotalAmount}</span>
+                    )}
                 </button>
             </form>
         </div>

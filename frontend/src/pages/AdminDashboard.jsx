@@ -72,28 +72,28 @@ export default function AdminDashboard() {
 
     return (
         <div style={{ padding: '0.5rem' }}>
-            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', overflowX: 'auto' }}>
-                <button className={`btn ${activeTab !== 'orders' ? 'btn-secondary' : ''}`} onClick={() => setActiveTab('orders')}>Orders</button>
-                <button className={`btn ${activeTab !== 'menu' ? 'btn-secondary' : ''}`} onClick={() => setActiveTab('menu')}>Menu Items</button>
-                <button className={`btn ${activeTab !== 'stats' ? 'btn-secondary' : ''}`} onClick={() => setActiveTab('stats')}>Revenue Stats</button>
-                <button className="btn btn-secondary" style={{ marginLeft: 'auto' }} onClick={() => { localStorage.removeItem('adminToken'); navigate('/admin/login'); }}>Logout</button>
+            <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.5rem', overflowX: 'auto', paddingBottom: '0.5rem' }}>
+                <button className={`category-pill ${activeTab === 'orders' ? 'active' : ''}`} onClick={() => setActiveTab('orders')}>Orders ({orders.length})</button>
+                <button className={`category-pill ${activeTab === 'stats' ? 'active' : ''}`} onClick={() => setActiveTab('stats')}>Revenue Stats</button>
+                <button className={`category-pill ${activeTab === 'menu' ? 'active' : ''}`} onClick={() => setActiveTab('menu')}>Menu Items</button>
+                <button className="category-pill" style={{ marginLeft: 'auto', background: 'transparent', borderColor: 'var(--text-muted)' }} onClick={() => { localStorage.removeItem('adminToken'); navigate('/admin/login'); }}>Logout</button>
             </div>
 
             {activeTab === 'stats' && stats && (
-                <div className="card">
-                    <h2>Today's Overview</h2>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginTop: '1rem' }}>
-                        <div style={{ background: '#f8f9fa', padding: '1rem', borderRadius: '8px', textAlign: 'center' }}>
-                            <div style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--success)' }}>₹{stats.revenueToday}</div>
-                            <div style={{ color: 'var(--text-muted)' }}>Revenue (Delivered)</div>
+                <div className="card" style={{ padding: '2rem 1.5rem' }}>
+                    <h2 style={{ marginBottom: '1.5rem', textAlign: 'center', fontWeight: '800' }}>Today's Overview</h2>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+                        <div style={{ background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.3)', padding: '1.5rem', borderRadius: '16px', textAlign: 'center' }}>
+                            <div style={{ fontSize: '2.5rem', fontWeight: '800', color: 'var(--success)' }}>₹{stats.revenueToday}</div>
+                            <div style={{ color: 'var(--text-main)', fontWeight: '600' }}>Revenue (Delivered)</div>
                         </div>
-                        <div style={{ background: '#f8f9fa', padding: '1rem', borderRadius: '8px', textAlign: 'center' }}>
-                            <div style={{ fontSize: '2rem', fontWeight: 'bold' }}>{stats.totalOrdersToday}</div>
-                            <div style={{ color: 'var(--text-muted)' }}>Total Orders</div>
+                        <div style={{ background: 'rgba(255, 152, 0, 0.1)', border: '1px solid rgba(255, 152, 0, 0.3)', padding: '1.5rem', borderRadius: '16px', textAlign: 'center' }}>
+                            <div style={{ fontSize: '2.5rem', fontWeight: '800', color: 'var(--primary)' }}>{stats.pendingCount}</div>
+                            <div style={{ color: 'var(--text-main)', fontWeight: '600' }}>Pending Orders</div>
                         </div>
-                        <div style={{ background: '#f8f9fa', padding: '1rem', borderRadius: '8px', textAlign: 'center', gridColumn: 'span 2' }}>
-                            <div style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--warning)' }}>{stats.pendingCount}</div>
-                            <div style={{ color: 'var(--text-muted)' }}>Pending Orders</div>
+                        <div style={{ background: 'rgba(0,0,0,0.03)', padding: '1.5rem', borderRadius: '16px', textAlign: 'center', gridColumn: 'span 2' }}>
+                            <div style={{ fontSize: '2rem', fontWeight: '800' }}>{stats.totalOrdersToday}</div>
+                            <div style={{ color: 'var(--text-muted)' }}>Total Orders Today</div>
                         </div>
                     </div>
                 </div>
@@ -101,22 +101,23 @@ export default function AdminDashboard() {
 
             {activeTab === 'menu' && (
                 <>
-                    <form className="card" onSubmit={handleAddMenu}>
-                        <h3>Add New Item</h3>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', marginTop: '1rem' }}>
-                            <input className="input-field" placeholder="Name" required value={menuForm.name} onChange={e => setMenuForm({ ...menuForm, name: e.target.value })} style={{ marginBottom: 0 }} />
-                            <input className="input-field" placeholder="Price" type="number" required value={menuForm.price} onChange={e => setMenuForm({ ...menuForm, price: e.target.value })} style={{ marginBottom: 0 }} />
+                    <form className="card" onSubmit={handleAddMenu} style={{ marginBottom: '2rem' }}>
+                        <h3 style={{ marginBottom: '1rem' }}>Add New Menu Item</h3>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                            <input className="input-field" placeholder="Name (e.g. Rajma Chawal)" required value={menuForm.name} onChange={e => setMenuForm({ ...menuForm, name: e.target.value })} style={{ marginBottom: 0 }} />
+                            <input className="input-field" placeholder="Price (₹)" type="number" required value={menuForm.price} onChange={e => setMenuForm({ ...menuForm, price: e.target.value })} style={{ marginBottom: 0 }} />
                             <input className="input-field" placeholder="Category" required value={menuForm.category} onChange={e => setMenuForm({ ...menuForm, category: e.target.value })} style={{ marginBottom: 0 }} />
-                            <input className="input-field" placeholder="Description" required value={menuForm.description} onChange={e => setMenuForm({ ...menuForm, description: e.target.value })} style={{ marginBottom: 0 }} />
+                            <input className="input-field" placeholder="Short Description" required value={menuForm.description} onChange={e => setMenuForm({ ...menuForm, description: e.target.value })} style={{ marginBottom: 0 }} />
                         </div>
-                        <button className="btn" style={{ marginTop: '1rem' }}>Save Item</button>
+                        <button className="btn btn-block" style={{ marginTop: '1.5rem' }}>+ Add Item to Menu</button>
                     </form>
 
-                    <div style={{ overflowX: 'auto', background: 'white', borderRadius: '12px', border: '1px solid var(--border)' }}>
+                    <h3 style={{ marginBottom: '1rem', paddingLeft: '0.5rem' }}>Current Menu ({menuItems.length})</h3>
+                    <div style={{ overflowX: 'auto', background: 'rgba(255,255,255,0.8)', borderRadius: '16px', border: '1px solid var(--border)', boxShadow: 'var(--glass-shadow)' }}>
                         <table className="admin-table">
                             <thead>
-                                <tr style={{ background: '#f8f9fa' }}>
-                                    <th>Name</th>
+                                <tr style={{ background: 'rgba(255,87,34,0.05)' }}>
+                                    <th>Item Details</th>
                                     <th>Price</th>
                                     <th>Status</th>
                                     <th>Action</th>
@@ -125,9 +126,16 @@ export default function AdminDashboard() {
                             <tbody>
                                 {menuItems.map(m => (
                                     <tr key={m.id}>
-                                        <td>{m.name} <br /><small style={{ color: 'gray' }}>{m.category}</small></td>
-                                        <td>₹{m.price}</td>
-                                        <td>{m.isAvailable ? 'Available' : 'Hidden'}</td>
+                                        <td>
+                                            <div style={{ fontWeight: '700' }}>{m.name}</div>
+                                            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{m.category}</span>
+                                        </td>
+                                        <td style={{ fontWeight: '600' }}>₹{m.price}</td>
+                                        <td>
+                                            <span style={{ fontSize: '0.85rem', fontWeight: '600', color: m.isAvailable ? 'var(--success)' : 'var(--text-muted)' }}>
+                                                {m.isAvailable ? '● Available' : '○ Hidden'}
+                                            </span>
+                                        </td>
                                         <td>
                                             <button className="btn btn-secondary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }} onClick={() => handleToggleMenu(m.id)}>
                                                 Toggle
@@ -142,43 +150,52 @@ export default function AdminDashboard() {
             )}
 
             {activeTab === 'orders' && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                     {orders.map(o => (
-                        <div key={o.id} className="card" style={{ padding: '0' }}>
-                            <div style={{ padding: '1rem', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#fcf9f5', borderRadius: '12px 12px 0 0' }}>
+                        <div key={o.id} className="card" style={{ padding: '0', overflow: 'hidden' }}>
+                            <div style={{ padding: '1.25rem', borderBottom: '1px solid rgba(0,0,0,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,87,34,0.03)' }}>
                                 <div>
-                                    <strong>{o.customerName}</strong>
-                                    <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{o.customerPhone}</div>
+                                    <strong style={{ fontSize: '1.1rem' }}>{o.customerName}</strong>
+                                    <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>📞 {o.customerPhone}</div>
                                 </div>
                                 <div style={{ textAlign: 'right' }}>
-                                    <div style={{ fontWeight: 'bold' }}>₹{o.totalAmount}</div>
-                                    <div style={{ fontSize: '0.8rem', color: 'gray' }}>{new Date(o.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                                    <div style={{ fontWeight: '800', fontSize: '1.2rem', color: 'var(--primary)' }}>₹{o.totalAmount}</div>
+                                    <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{new Date(o.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
                                 </div>
                             </div>
-                            <div style={{ padding: '1rem' }}>
-                                <p style={{ fontSize: '0.9rem', marginBottom: '0.5rem' }}>📍 {o.address}</p>
-                                <div style={{ fontSize: '0.9rem', marginBottom: '1rem', color: '#444' }}>
-                                    {o.items.map(item => (
-                                        <div key={item.id}>• {item.quantity}x {item.menuItem?.name}</div>
-                                    ))}
+                            <div style={{ padding: '1.25rem' }}>
+                                <div style={{ fontSize: '0.95rem', marginBottom: '1.25rem', background: 'rgba(0,0,0,0.02)', padding: '0.75rem', borderRadius: '8px' }}>
+                                    <strong>Delivery To:</strong><br />
+                                    <span style={{ color: 'var(--text-muted)' }}>{o.address}</span>
                                 </div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                    <span className={`status-badge status-${o.status}`}>{o.status}</span>
+                                <div style={{ fontSize: '0.95rem', marginBottom: '1.5rem' }}>
+                                    <strong style={{ display: 'block', marginBottom: '0.5rem' }}>Order Details:</strong>
+                                    <ul style={{ listStyle: 'none', padding: 0 }}>
+                                        {o.items.map(item => (
+                                            <li key={item.id} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.3rem', borderBottom: '1px dashed rgba(0,0,0,0.05)', paddingBottom: '0.3rem' }}>
+                                                <span><strong style={{ color: 'var(--primary)' }}>{item.quantity}x</strong> {item.menuItem?.name || 'Item deleted'}</span>
+                                                <span style={{ color: 'var(--text-muted)' }}>₹{item.price}</span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(0,0,0,0.02)', padding: '0.75rem', borderRadius: '8px' }}>
+                                    <div style={{ fontWeight: '600', fontSize: '0.9rem' }}>Update Status:</div>
                                     <select
                                         value={o.status}
                                         onChange={(e) => handleStatusChange(o.id, e.target.value)}
-                                        style={{ padding: '0.4rem', borderRadius: '4px', border: '1px solid var(--border)' }}
+                                        style={{ padding: '0.5rem 1rem', borderRadius: '8px', border: '1px solid var(--border)', fontWeight: '600', outline: 'none', background: 'white' }}
                                     >
-                                        <option value="Pending">Pending</option>
-                                        <option value="Confirmed">Confirmed</option>
-                                        <option value="Preparing">Preparing</option>
-                                        <option value="Delivered">Delivered</option>
+                                        <option value="Pending">🟠 Pending</option>
+                                        <option value="Confirmed">🔵 Confirmed</option>
+                                        <option value="Preparing">🟡 Preparing</option>
+                                        <option value="Delivered">🟢 Delivered</option>
                                     </select>
                                 </div>
                             </div>
                         </div>
                     ))}
-                    {orders.length === 0 && <div style={{ textAlign: 'center', padding: '2rem' }}>No orders yet.</div>}
+                    {orders.length === 0 && <div className="card" style={{ textAlign: 'center', padding: '3rem 1rem', color: 'var(--text-muted)' }}>No recent orders to display. Catch your breath!</div>}
                 </div>
             )}
         </div>

@@ -62,10 +62,12 @@ This project is built to be deployed seamlessly on modern PaaS providers.
 - Build Command: `npm install && npx prisma generate && npx prisma db push`
 - Start Command: `npm start`
 - Environment Variables:
-  - `DATABASE_URL`
-  - `DIRECT_URL`
-  - `JWT_SECRET` (generate a secure random string)
-  - `PORT=5000`
+  - `DATABASE_URL` (From Supabase Transaction Pooler)
+  - `DIRECT_URL` (From Supabase Session Pooler)
+  - `JWT_SECRET` (Generate a secure random string)
+  - `PORT` = `5000`
+  - `NODE_ENV` = `production`
+  - `CORS_ORIGIN` = `https://your-frontend.vercel.app` (Once Vercel is deployed)
 - Deploy your backend and note down the Render URL (e.g., `https://maakirasoi-api.onrender.com`).
 
 ### 3. Frontend (Vercel)

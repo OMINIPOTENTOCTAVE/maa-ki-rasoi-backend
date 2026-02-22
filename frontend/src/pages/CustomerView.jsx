@@ -15,8 +15,7 @@ export default function CustomerView({ cart, addToCart, updateQty }) {
                 setMenuItems(res.data.data.filter(item => item.isAvailable));
                 setLoading(false);
             })
-            .catch(err => {
-                console.error(err);
+            .catch(() => {
                 setLoading(false);
             });
     }, []);
@@ -34,20 +33,33 @@ export default function CustomerView({ cart, addToCart, updateQty }) {
 
     return (
         <div>
-            <div style={{ display: 'flex', gap: '0.5rem', overflowX: 'auto', marginBottom: '1rem', paddingBottom: '0.5rem' }}>
+            <div style={{
+                height: '180px',
+                borderRadius: '20px',
+                marginBottom: '1.5rem',
+                backgroundImage: 'url("https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80")',
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                boxShadow: '0 8px 30px rgba(0,0,0,0.12)',
+                display: 'flex',
+                alignItems: 'flex-end',
+                padding: '1.5rem',
+                color: 'white',
+                position: 'relative',
+                overflow: 'hidden'
+            }}>
+                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 100%)' }}></div>
+                <h2 style={{ position: 'relative', fontSize: '1.8rem', fontWeight: 800, textShadow: '0 2px 10px rgba(0,0,0,0.5)', lineHeight: 1.2 }}>
+                    Fresh. Home Style.<br />Made with Love.
+                </h2>
+            </div>
+
+            <div style={{ display: 'flex', gap: '0.75rem', overflowX: 'auto', marginBottom: '1.5rem', paddingBottom: '0.5rem' }}>
                 {categories.map(c => (
                     <button
                         key={c}
                         onClick={() => setSelectedCategory(c)}
-                        style={{
-                            padding: '0.5rem 1rem',
-                            borderRadius: '20px',
-                            border: '1px solid var(--border)',
-                            background: selectedCategory === c ? 'var(--primary)' : 'white',
-                            color: selectedCategory === c ? 'white' : 'var(--text-main)',
-                            cursor: 'pointer',
-                            whiteSpace: 'nowrap'
-                        }}
+                        className={`category-pill ${selectedCategory === c ? 'active' : ''}`}
                     >
                         {c}
                     </button>
@@ -89,9 +101,9 @@ export default function CustomerView({ cart, addToCart, updateQty }) {
 
             {cartTotalItems > 0 && (
                 <div className="sticky-cart">
-                    <div>
-                        <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>{cartTotalItems} items</div>
-                        <div style={{ fontWeight: 'bold', fontSize: '1.2rem' }}>₹{cartTotalAmount}</div>
+                    <div className="cart-info">
+                        <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.95rem', fontWeight: 500 }}>{cartTotalItems} items • Total</div>
+                        <div style={{ fontWeight: '800', fontSize: '1.4rem' }}>₹{cartTotalAmount}</div>
                     </div>
                     <button className="btn" onClick={() => navigate('/checkout')}>
                         <ShoppingCart size={20} />

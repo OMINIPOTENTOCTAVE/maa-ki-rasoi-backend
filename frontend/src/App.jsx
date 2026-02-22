@@ -1,12 +1,14 @@
 import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense, lazy } from 'react';
 import axios from 'axios';
 import { ShoppingCart } from 'lucide-react';
 
 import CustomerView from './pages/CustomerView';
 import Checkout from './pages/Checkout';
-import AdminLogin from './pages/AdminLogin';
-import AdminDashboard from './pages/AdminDashboard';
+
+// Lazy load admin pages for smaller initial bundle
+const AdminLogin = lazy(() => import('./pages/AdminLogin'));
+const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 axios.defaults.baseURL = API_URL;
@@ -43,12 +45,14 @@ function App() {
                 </header>
 
                 <main className="main-content">
-                    <Routes>
-                        <Route path="/" element={<CustomerView cart={cart} addToCart={addToCart} updateQty={updateQty} />} />
-                        <Route path="/checkout" element={<Checkout cart={cart} updateQty={updateQty} clearCart={clearCart} />} />
-                        <Route path="/admin/login" element={<AdminLogin />} />
-                        <Route path="/admin/*" element={<AdminDashboard />} />
-                    </Routes>
+                    <Suspense fallback={<div style={{ padding: '2rem', textAlign: 'center', opacity: 0.7 }}>Loading Maa Ki Rasoi...</div>}>
+                        <Routes>
+                            <Route path="/" element={<CustomerView cart={cart} addToCart={addToCart} updateQty={updateQty} />} />
+                            <Route path="/checkout" element={<Checkout cart={cart} updateQty={updateQty} clearCart={clearCart} />} />
+                            <Route path="/admin/login" element={<AdminLogin />} />
+                            <Route path="/admin/*" element={<AdminDashboard />} />
+                        </Routes>
+                    </Suspense>
                 </main>
             </div>
         </BrowserRouter>
