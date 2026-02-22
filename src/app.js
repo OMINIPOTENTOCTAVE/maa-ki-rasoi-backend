@@ -8,6 +8,7 @@ const authRoutes = require("./modules/auth/auth.routes");
 const menuRoutes = require("./modules/menu/menu.routes");
 const orderRoutes = require("./modules/order/order.routes");
 const subscriptionRoutes = require("./modules/subscription/subscription.routes");
+const deliveryRoutes = require("./modules/delivery/delivery.routes");
 
 const app = express();
 
@@ -31,6 +32,7 @@ const apiLimiter = rateLimit({
 });
 app.use("/auth", apiLimiter);
 app.use("/orders", apiLimiter);
+app.use("/delivery/auth", apiLimiter);
 
 const errorHandler = require("./middleware/error");
 
@@ -38,6 +40,7 @@ app.use("/auth", authRoutes);
 app.use("/menu", menuRoutes);
 app.use("/orders", orderRoutes);
 app.use("/subscriptions", subscriptionRoutes);
+app.use("/delivery", deliveryRoutes);
 
 app.get("/health", (req, res) => {
   res.status(200).json({ status: "OK", timestamp: new Date().toISOString() });

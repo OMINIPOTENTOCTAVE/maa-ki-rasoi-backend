@@ -38,6 +38,9 @@ model Order {
   customerId    String?
   customer      Customer?   @relation(fields: [customerId], references: [id])
   
+  deliveryPartnerId String?
+  deliveryPartner   DeliveryPartner? @relation(fields: [deliveryPartnerId], references: [id])
+
   items         OrderItem[]
 }
 
@@ -86,4 +89,18 @@ model SubscriptionDelivery {
   createdAt      DateTime     @default(now())
   
   subscription   Subscription @relation(fields: [subscriptionId], references: [id])
+  deliveryPartnerId String?
+  deliveryPartner   DeliveryPartner? @relation(fields: [deliveryPartnerId], references: [id])
+}
+
+model DeliveryPartner {
+  id             String                 @id @default(uuid())
+  name           String
+  phone          String                 @unique
+  vehicleDetails String?
+  status         String                 @default("Active") // Active, Inactive
+  createdAt      DateTime               @default(now())
+  
+  orders         Order[]                
+  deliveries     SubscriptionDelivery[] 
 }
