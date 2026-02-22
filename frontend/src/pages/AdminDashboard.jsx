@@ -3,10 +3,12 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
 export default function AdminDashboard() {
-    const [activeTab, setActiveTab] = useState('orders'); // orders, menu, stats
+    const [activeTab, setActiveTab] = useState('subscriptions'); // subscriptions, orders, menu, stats
     const [orders, setOrders] = useState([]);
     const [menuItems, setMenuItems] = useState([]);
     const [stats, setStats] = useState(null);
+    const [subscriptions, setSubscriptions] = useState([]);
+    const [dailyProduction, setDailyProduction] = useState(null);
     const [menuForm, setMenuForm] = useState({ name: '', description: '', price: '', category: '' });
 
     const navigate = useNavigate();
@@ -32,6 +34,11 @@ export default function AdminDashboard() {
             } else if (activeTab === 'stats') {
                 const res = await axios.get('/orders/stats');
                 setStats(res.data.data);
+            } else if (activeTab === 'subscriptions') {
+                const subRes = await axios.get('/subscriptions');
+                setSubscriptions(subRes.data.data);
+                const prodRes = await axios.get('/subscriptions/production/today');
+                setDailyProduction(prodRes.data);
             }
         } catch (err) {
             if (err.response?.status === 401) {
@@ -70,10 +77,21 @@ export default function AdminDashboard() {
         }
     };
 
+    const handleToggleSubscription = async (id, currentStatus) => {
+        const newStatus = currentStatus === 'Active' ? 'Paused' : 'Active';
+        try {
+            await axios.patch(`/subscriptions/${id}/status`, { status: newStatus });
+            fetchData();
+        } catch (err) {
+            alert('Error toggling subscription status');
+        }
+    };
+
     return (
         <div style={{ padding: '0.5rem' }}>
             <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.5rem', overflowX: 'auto', paddingBottom: '0.5rem' }}>
-                <button className={`category-pill ${activeTab === 'orders' ? 'active' : ''}`} onClick={() => setActiveTab('orders')}>Orders ({orders.length})</button>
+                <button className={`category-pill ${activeTab === 'subscriptions' ? 'active' : ''}`} onClick={() => setActiveTab('subscriptions')}>Subscriptions</button>
+                <button className={`category-pill ${activeTab === 'orders' ? 'active' : ''}`} onClick={() => setActiveTab('orders')}>Instant Orders ({orders.length})</button>
                 <button className={`category-pill ${activeTab === 'stats' ? 'active' : ''}`} onClick={() => setActiveTab('stats')}>Revenue Stats</button>
                 <button className={`category-pill ${activeTab === 'menu' ? 'active' : ''}`} onClick={() => setActiveTab('menu')}>Menu Items</button>
                 <button className="category-pill" style={{ marginLeft: 'auto', background: 'transparent', borderColor: 'var(--text-muted)' }} onClick={() => { localStorage.removeItem('adminToken'); navigate('/admin/login'); }}>Logout</button>
@@ -81,7 +99,7 @@ export default function AdminDashboard() {
 
             {activeTab === 'stats' && stats && (
                 <div className="card" style={{ padding: '2rem 1.5rem' }}>
-                    <h2 style={{ marginBottom: '1.5rem', textAlign: 'center', fontWeight: '800' }}>Today's Overview</h2>
+                    <h2 style={{ marginBottom: '1.5rem', textAlign: 'center', fontWeight: '800' }}>Today's Instant Orders</h2>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
                         <div style={{ background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.3)', padding: '1.5rem', borderRadius: '16px', textAlign: 'center' }}>
                             <div style={{ fontSize: '2.5rem', fontWeight: '800', color: 'var(--success)' }}>₹{stats.revenueToday}</div>
@@ -95,6 +113,71 @@ export default function AdminDashboard() {
                             <div style={{ fontSize: '2rem', fontWeight: '800' }}>{stats.totalOrdersToday}</div>
                             <div style={{ color: 'var(--text-muted)' }}>Total Orders Today</div>
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {activeTab === 'subscriptions' && (
+                <div>
+                    {dailyProduction && (
+                        <div className="card" style={{ marginBottom: '2rem', borderLeft: '4px solid var(--primary)', padding: '1.5rem' }}>
+                            <h2 style={{ marginBottom: '1rem', color: 'var(--primary)' }}>Today's Kitchen Production</h2>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                <div style={{ background: '#f8f9fa', padding: '1rem', borderRadius: '12px' }}>
+                                    <h3 style={{ marginBottom: '0.5rem', fontSize: '1.2rem' }}>Lunch ({dailyProduction.stats.lunchSummary.total})</h3>
+                                    <div style={{ display: 'flex', gap: '1rem' }}>
+                                        <div style={{ color: '#2e7d32', fontWeight: 'bold' }}>Veg: {dailyProduction.stats.lunchSummary.veg}</div>
+                                        <div style={{ color: '#c62828', fontWeight: 'bold' }}>Non-Veg: {dailyProduction.stats.lunchSummary.nonVeg}</div>
+                                    </div>
+                                </div>
+                                <div style={{ background: '#f8f9fa', padding: '1rem', borderRadius: '12px' }}>
+                                    <h3 style={{ marginBottom: '0.5rem', fontSize: '1.2rem' }}>Dinner ({dailyProduction.stats.dinnerSummary.total})</h3>
+                                    <div style={{ display: 'flex', gap: '1rem' }}>
+                                        <div style={{ color: '#2e7d32', fontWeight: 'bold' }}>Veg: {dailyProduction.stats.dinnerSummary.veg}</div>
+                                        <div style={{ color: '#c62828', fontWeight: 'bold' }}>Non-Veg: {dailyProduction.stats.dinnerSummary.nonVeg}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    <h3 style={{ marginBottom: '1rem', paddingLeft: '0.5rem' }}>Active Subscribers ({subscriptions.length})</h3>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                        {subscriptions.map(sub => (
+                            <div key={sub.id} className="card" style={{ padding: '1.25rem', borderLeft: `4px solid ${sub.status === 'Active' ? '#4caf50' : '#ff9800'}` }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                    <div>
+                                        <h4 style={{ margin: 0, fontSize: '1.1rem' }}>{sub.customer?.name || 'Customer'}</h4>
+                                        <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '0.5rem' }}>📞 {sub.customer?.phone}</div>
+
+                                        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '0.5rem' }}>
+                                            <span style={{ background: 'rgba(0,0,0,0.05)', padding: '0.2rem 0.5rem', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 'bold' }}>{sub.planType}</span>
+                                            <span style={{ background: 'rgba(0,0,0,0.05)', padding: '0.2rem 0.5rem', borderRadius: '4px', fontSize: '0.8rem' }}>{sub.mealType}</span>
+                                            <span style={{ background: sub.dietaryPreference === 'Veg' ? 'rgba(76, 175, 80, 0.1)' : 'rgba(244, 67, 54, 0.1)', color: sub.dietaryPreference === 'Veg' ? '#2e7d32' : '#c62828', padding: '0.2rem 0.5rem', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 'bold' }}>{sub.dietaryPreference}</span>
+                                        </div>
+                                        <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                                            Ends: {new Date(sub.endDate).toLocaleDateString()}
+                                        </div>
+                                    </div>
+                                    <div style={{ textAlign: 'right' }}>
+                                        <div style={{ fontWeight: 'bold', fontSize: '1.2rem', color: 'var(--primary)', marginBottom: '0.5rem' }}>₹{sub.totalPrice}</div>
+                                        <button
+                                            className="btn"
+                                            style={{
+                                                padding: '0.4rem 0.8rem', fontSize: '0.85rem',
+                                                background: sub.status === 'Active' ? 'rgba(255, 152, 0, 0.1)' : 'var(--primary)',
+                                                color: sub.status === 'Active' ? '#f57c00' : 'white',
+                                                border: sub.status === 'Active' ? '1px solid #f57c00' : 'none'
+                                            }}
+                                            onClick={() => handleToggleSubscription(sub.id, sub.status)}
+                                        >
+                                            {sub.status === 'Active' ? '⏸ Pause' : '▶ Resume'}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                        {subscriptions.length === 0 && <div className="card" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No active subscriptions yet.</div>}
                     </div>
                 </div>
             )}

@@ -7,6 +7,7 @@ const morgan = require("morgan");
 const authRoutes = require("./modules/auth/auth.routes");
 const menuRoutes = require("./modules/menu/menu.routes");
 const orderRoutes = require("./modules/order/order.routes");
+const subscriptionRoutes = require("./modules/subscription/subscription.routes");
 
 const app = express();
 
@@ -36,6 +37,7 @@ const errorHandler = require("./middleware/error");
 app.use("/auth", authRoutes);
 app.use("/menu", menuRoutes);
 app.use("/orders", orderRoutes);
+app.use("/subscriptions", subscriptionRoutes);
 
 app.get("/health", (req, res) => {
   res.status(200).json({ status: "OK", timestamp: new Date().toISOString() });

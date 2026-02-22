@@ -1,13 +1,20 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { ShoppingCart } from 'lucide-react';
+import { ShoppingCart, CalendarRange } from 'lucide-react';
+import SubscriptionWizard from '../components/SubscriptionWizard';
 
 export default function CustomerView({ cart, addToCart, updateQty }) {
     const [menuItems, setMenuItems] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedCategory, setSelectedCategory] = useState('All');
+    const [isWizardOpen, setIsWizardOpen] = useState(false);
     const navigate = useNavigate();
+
+    const handleWizardSuccess = () => {
+        setIsWizardOpen(false);
+        alert("🎉 Subscription Activated! Our kitchen team will contact you shortly.");
+    };
 
     useEffect(() => {
         axios.get('/menu?available=true')
@@ -34,24 +41,31 @@ export default function CustomerView({ cart, addToCart, updateQty }) {
     return (
         <div>
             <div style={{
-                height: '180px',
-                borderRadius: '20px',
-                marginBottom: '1.5rem',
-                backgroundImage: 'url("https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80")',
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                boxShadow: '0 8px 30px rgba(0,0,0,0.12)',
-                display: 'flex',
-                alignItems: 'flex-end',
-                padding: '1.5rem',
-                color: 'white',
-                position: 'relative',
-                overflow: 'hidden'
+                borderRadius: '24px',
+                marginBottom: '2rem',
+                background: 'linear-gradient(135deg, rgba(255,87,34,0.1) 0%, rgba(255,152,0,0.1) 100%)',
+                padding: '2rem 1.5rem',
+                textAlign: 'center',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.03)'
             }}>
-                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 100%)' }}></div>
-                <h2 style={{ position: 'relative', fontSize: '1.8rem', fontWeight: 800, textShadow: '0 2px 10px rgba(0,0,0,0.5)', lineHeight: 1.2 }}>
-                    Fresh. Home Style.<br />Made with Love.
+                <h2 style={{ fontSize: '2.5rem', fontWeight: 900, marginBottom: '0.5rem', color: 'var(--text-main)', lineHeight: 1.2 }}>
+                    Maa Ki Rasoi
                 </h2>
+                <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem', fontSize: '1.1rem' }}>
+                    Authentic, hygienic, home-style meals delivered daily. Skip the cooking, keep the health.
+                </p>
+                <button
+                    className="btn"
+                    onClick={() => setIsWizardOpen(true)}
+                    style={{ fontSize: '1.1rem', padding: '1rem 2rem', display: 'inline-flex', alignItems: 'center', gap: '0.5rem', boxShadow: '0 8px 24px rgba(255,87,34,0.3)', width: 'auto' }}
+                >
+                    <CalendarRange size={24} /> Subscribe to a Plan
+                </button>
+            </div>
+
+            <div id="instant-menu" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                <h3 style={{ fontSize: '1.4rem', fontWeight: 800, margin: 0 }}>Instant Order / Trial</h3>
+                <span style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Try before subscribing</span>
             </div>
 
             <div style={{ display: 'flex', gap: '0.75rem', overflowX: 'auto', marginBottom: '1.5rem', paddingBottom: '0.5rem' }}>
@@ -110,6 +124,13 @@ export default function CustomerView({ cart, addToCart, updateQty }) {
                         Checkout
                     </button>
                 </div>
+            )}
+
+            {isWizardOpen && (
+                <SubscriptionWizard
+                    onClose={() => setIsWizardOpen(false)}
+                    onSuccess={handleWizardSuccess}
+                />
             )}
         </div>
     );

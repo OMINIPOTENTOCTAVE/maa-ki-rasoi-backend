@@ -34,6 +34,10 @@ model Order {
   totalAmount   Float
   status        String      @default("Pending") // Pending, Confirmed, Preparing, Delivered
   createdAt     DateTime    @default(now())
+  
+  customerId    String?
+  customer      Customer?   @relation(fields: [customerId], references: [id])
+  
   items         OrderItem[]
 }
 
@@ -45,4 +49,41 @@ model OrderItem {
   price      Float
   order      Order    @relation(fields: [orderId], references: [id])
   menuItem   MenuItem @relation(fields: [menuItemId], references: [id])
+}
+
+model Customer {
+  id            String         @id @default(uuid())
+  phone         String         @unique
+  name          String?
+  address       String?
+  createdAt     DateTime       @default(now())
+  subscriptions Subscription[]
+  orders        Order[]        // Link legacy/instant orders to customers
+}
+
+model Subscription {
+  id                String                 @id @default(uuid())
+  customerId        String
+  planType          String                 // "Weekly", "Monthly", "MonthlyFull"
+  mealType          String                 // "Lunch", "Dinner", "Both"
+  dietaryPreference String                 // "Veg", "Non-Veg"
+  startDate         DateTime
+  endDate           DateTime
+  status            String                 @default("Active") // Active, Paused, Cancelled
+  totalPrice        Float
+  createdAt         DateTime               @default(now())
+  
+  customer          Customer               @relation(fields: [customerId], references: [id])
+  deliveries        SubscriptionDelivery[]
+}
+
+model SubscriptionDelivery {
+  id             String       @id @default(uuid())
+  subscriptionId String
+  deliveryDate   DateTime     @db.Date
+  mealType       String       // "Lunch", "Dinner"
+  status         String       @default("Pending") // Pending, Delivered, Cancelled
+  createdAt      DateTime     @default(now())
+  
+  subscription   Subscription @relation(fields: [subscriptionId], references: [id])
 }
