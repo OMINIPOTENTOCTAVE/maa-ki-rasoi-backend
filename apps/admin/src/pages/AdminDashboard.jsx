@@ -268,7 +268,11 @@ export default function AdminDashboard() {
                                         </div>
                                     </div>
                                     <div style={{ textAlign: 'right' }}>
-                                        <div style={{ fontWeight: 'bold', fontSize: '1.2rem', color: 'var(--primary)', marginBottom: '0.5rem' }}>₹{sub.totalPrice}</div>
+                                        <div style={{ fontWeight: 'bold', fontSize: '1.2rem', color: 'var(--primary)', marginBottom: '0.2rem' }}>₹{sub.totalPrice}</div>
+                                        <div style={{ fontSize: '0.75rem', fontWeight: 'bold', marginBottom: '0.5rem', background: sub.paymentStatus === 'Paid' ? '#e8f5e9' : '#ffebee', color: sub.paymentStatus === 'Paid' ? '#2e7d32' : '#c62828', padding: '2px 6px', borderRadius: '4px', display: 'inline-block' }}>
+                                            {sub.paymentMethod === 'ONLINE' ? '💳 ONLINE' : '💵 COD'} • {sub.paymentStatus}
+                                        </div>
+                                        <br />
                                         <button
                                             className="btn"
                                             style={{
@@ -349,7 +353,10 @@ export default function AdminDashboard() {
                                     <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>📞 {o.customerPhone}</div>
                                 </div>
                                 <div style={{ textAlign: 'right' }}>
-                                    <div style={{ fontWeight: '800', fontSize: '1.2rem', color: 'var(--primary)' }}>₹{o.totalAmount}</div>
+                                    <div style={{ fontWeight: '800', fontSize: '1.2rem', color: 'var(--primary)', marginBottom: '0.2rem' }}>₹{o.totalAmount}</div>
+                                    <div style={{ fontSize: '0.75rem', fontWeight: 'bold', marginBottom: '0.2rem', background: o.paymentStatus === 'Paid' ? '#e8f5e9' : '#ffebee', color: o.paymentStatus === 'Paid' ? '#2e7d32' : '#c62828', padding: '2px 6px', borderRadius: '4px', display: 'inline-block' }}>
+                                        {o.paymentMethod === 'ONLINE' ? '💳 ONLINE' : '💵 COD'} • {o.paymentStatus}
+                                    </div>
                                     <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{new Date(o.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
                                 </div>
                             </div>

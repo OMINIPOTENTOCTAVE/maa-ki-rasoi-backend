@@ -1,14 +1,38 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { ArrowLeft } from 'lucide-react';
 
+const loadRazorpayScript = () => {
+    return new Promise((resolve) => {
+        const script = document.createElement('script');
+        script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+        script.onload = () => resolve(true);
+        script.onerror = () => resolve(false);
+        document.body.appendChild(script);
+    });
+};
+
 export default function Checkout({ cart, updateQty, clearCart }) {
     const navigate = useNavigate();
     const [formData, setFormData] = useState({ name: '', phone: '', address: '' });
+
+    useEffect(() => {
+        try {
+            const storedUser = JSON.parse(localStorage.getItem('customer_data') || '{}');
+            setFormData(prev => ({
+                ...prev,
+                name: storedUser.name || '',
+                phone: storedUser.phone || '',
+            }));
+        } catch (e) {
+            console.error(e);
+        }
+    }, []);
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
     const [errorMsg, setErrorMsg] = useState('');
+    const [paymentMethod, setPaymentMethod] = useState('ONLINE');
 
     const cartTotalAmount = cart.reduce((acc, c) => acc + (c.price * c.qty), 0);
 
@@ -32,12 +56,93 @@ export default function Checkout({ cart, updateQty, clearCart }) {
                 customerName: formData.name,
                 customerPhone: formData.phone,
                 address: formData.address,
-                items: cart.map(c => ({ menuItemId: c.id, quantity: c.qty }))
+                items: cart.map(c => ({ menuItemId: c.id, quantity: c.qty })),
+                paymentMethod: paymentMethod
             };
 
-            await axios.post('/orders', payload);
-            setSuccess(true);
-            clearCart();
+            const ordRes = await axios.post('/orders', payload);
+            const orderId = ordRes.data.order.id;
+
+            if (paymentMethod === 'COD') {
+                setSuccess(true);
+                clearCart();
+                setLoading(false);
+                return;
+            }
+
+            // Online Payment Flow
+            const scriptLoaded = await loadRazorpayScript();
+            if (!scriptLoaded) {
+                setErrorMsg("Failed to load Razorpay SDK. Check your internet connection.");
+                setLoading(false);
+                return;
+            }
+
+            // Create Razorpay Order
+            const rzpOrderRes = await axios.post('/payments/create-order', {
+                amount: cartTotalAmount,
+                orderType: 'Instant',
+                referenceId: orderId
+            });
+
+            const { id: razorpayOrderId, isMock } = rzpOrderRes.data.order;
+
+            if (isMock) {
+                // Mock success for MVP
+                const verifyRes = await axios.post('/payments/verify', {
+                    razorpay_order_id: razorpayOrderId,
+                    razorpay_payment_id: "pay_mock_" + Date.now(),
+                    razorpay_signature: "mock_signature",
+                    orderType: 'Instant',
+                    referenceId: orderId
+                });
+
+                if (verifyRes.data.success) {
+                    setSuccess(true);
+                    clearCart();
+                }
+                setLoading(false);
+                return;
+            }
+
+            // Open Razorpay Checkout
+            const options = {
+                key: import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_dummykey',
+                amount: cartTotalAmount * 100,
+                currency: "INR",
+                name: "Maa Ki Rasoi",
+                description: "Instant Order Checkout",
+                order_id: razorpayOrderId,
+                handler: async function (response) {
+                    try {
+                        const verifyRes = await axios.post('/payments/verify', {
+                            razorpay_order_id: response.razorpay_order_id,
+                            razorpay_payment_id: response.razorpay_payment_id,
+                            razorpay_signature: response.razorpay_signature,
+                            orderType: 'Instant',
+                            referenceId: orderId
+                        });
+
+                        if (verifyRes.data.success) {
+                            setSuccess(true);
+                            clearCart();
+                        }
+                    } catch (err) {
+                        setErrorMsg("Payment verification failed.");
+                    }
+                },
+                prefill: {
+                    name: formData.name,
+                    contact: formData.phone,
+                },
+                theme: { color: "#ff5722" }
+            };
+
+            const rzp1 = new window.Razorpay(options);
+            rzp1.on('payment.failed', function (response) {
+                setErrorMsg("Payment Failed: " + response.error.description);
+            });
+            rzp1.open();
         } catch (err) {
             setErrorMsg(err.response?.data?.message || 'Error placing order. Please try again.');
         } finally {
@@ -140,6 +245,28 @@ export default function Checkout({ cart, updateQty, clearCart }) {
                         {errorMsg}
                     </div>
                 )}
+
+                <h3 className="mb-3 mt-4 text-sm font-bold uppercase tracking-wider text-slate-500">Payment Method</h3>
+                <div className="flex flex-col gap-3 mb-6">
+                    <label className="group relative flex cursor-pointer items-center gap-4 rounded-xl border bg-white border-gray-200 p-4 shadow-sm transition-all hover:border-[#ff5722]/50 has-[input:checked]:border-[#ff5722] has-[input:checked]:bg-[#ff5722]/5">
+                        <input
+                            checked={paymentMethod === 'ONLINE'}
+                            onChange={() => setPaymentMethod('ONLINE')}
+                            className="peer h-5 w-5" name="payment_method_instant" type="radio" />
+                        <div className="flex flex-col flex-1 pl-2 text-left">
+                            <p className="text-sm font-bold m-0 leading-none">Pay Online (UPI / Card)</p>
+                        </div>
+                    </label>
+                    <label className="group relative flex cursor-pointer items-center gap-4 rounded-xl border bg-white border-gray-200 p-4 shadow-sm transition-all hover:border-[#ff5722]/50 has-[input:checked]:border-[#ff5722] has-[input:checked]:bg-[#ff5722]/5">
+                        <input
+                            checked={paymentMethod === 'COD'}
+                            onChange={() => setPaymentMethod('COD')}
+                            className="peer h-5 w-5" name="payment_method_instant" type="radio" />
+                        <div className="flex flex-col flex-1 pl-2 text-left">
+                            <p className="text-sm font-bold m-0 leading-none">Cash on Delivery</p>
+                        </div>
+                    </label>
+                </div>
 
                 <button className="btn btn-block" disabled={loading} style={{ padding: '1rem', fontSize: '1.1rem', background: 'linear-gradient(90deg, #ff5722 0%, #ff9800 100%)', boxShadow: '0 4px 15px rgba(255, 87, 34, 0.4)' }}>
                     {loading ? (

@@ -1,19 +1,62 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 export default function Login() {
     const navigate = useNavigate();
     const [phone, setPhone] = useState('');
+    const [name, setName] = useState('');
     const [otpSent, setOtpSent] = useState(false);
     const [otp, setOtp] = useState('');
 
-    const handleLogin = (e) => {
-        e.preventDefault();
-        if (!otpSent) {
+    const [loading, setLoading] = useState(false);
+    const [errorMsg, setErrorMsg] = useState('');
+
+    const handleSendOTP = async () => {
+        if (!phone || phone.length < 10) {
+            setErrorMsg('Please enter a valid phone number');
+            return;
+        }
+        setErrorMsg('');
+        setLoading(true);
+
+        try {
+            await axios.post('/auth/otp/request', { phone });
             setOtpSent(true);
-        } else {
-            // Simulate verification
-            navigate('/');
+            setOtp(''); // Reset OTP field just in case
+        } catch (err) {
+            setErrorMsg(err.response?.data?.message || 'Failed to send OTP. Try again.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleLogin = async (e) => {
+        e.preventDefault();
+
+        if (!otpSent) {
+            return handleSendOTP();
+        }
+
+        setErrorMsg('');
+        setLoading(true);
+
+        try {
+            const res = await axios.post('/auth/otp/verify', { phone, otp, name });
+            if (res.data.success) {
+                localStorage.setItem('customer_token', res.data.token);
+                // Also store basic user info
+                localStorage.setItem('customer_data', JSON.stringify(res.data.customer));
+
+                // Force an axios default header for future requests
+                axios.defaults.headers.common['Authorization'] = `Bearer ${res.data.token}`;
+
+                navigate('/');
+            }
+        } catch (err) {
+            setErrorMsg(err.response?.data?.message || 'Authentication failed. Try again.');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -45,21 +88,75 @@ export default function Login() {
                                 <div className="absolute left-0 top-0 bottom-0 pl-4 flex items-center pointer-events-none">
                                     <span className="text-slate-500 dark:text-slate-400 font-bold border-r border-slate-200 dark:border-neutral-600 pr-3 mr-3">+91</span>
                                 </div>
-                                <input disabled={otpSent} value={phone} onChange={(e) => setPhone(e.target.value)} className="block w-full h-14 pl-[4.5rem] pr-4 rounded-xl border-slate-200 dark:border-neutral-700 bg-slate-50 dark:bg-neutral-900 text-slate-900 dark:text-white placeholder-slate-400 focus:border-brand-saffron focus:ring-0 text-lg font-medium tracking-wide shadow-sm" id="phone" type="tel" placeholder="98765 43210" />
+                                <input disabled={otpSent} value={phone} onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))} className="block w-full h-14 pl-[4.5rem] pr-[110px] rounded-xl border-slate-200 dark:border-neutral-700 bg-slate-50 dark:bg-neutral-900 text-slate-900 dark:text-white placeholder-slate-400 focus:border-brand-saffron focus:ring-0 text-lg font-medium tracking-wide shadow-sm" id="phone" type="tel" placeholder="98765 43210" maxLength={10} />
+
+                                <div className="absolute right-2 top-1/2 -translate-y-1/2 flex gap-1">
+                                    {!otpSent ? (
+                                        <button
+                                            type="button"
+                                            onClick={handleSendOTP}
+                                            disabled={loading || phone.length < 10}
+                                            className="px-4 py-1.5 bg-brand-saffron/10 text-brand-saffron hover:bg-brand-saffron hover:text-white rounded-lg text-sm font-bold transition-colors disabled:opacity-50"
+                                        >
+                                            Send OTP
+                                        </button>
+                                    ) : (
+                                        <button
+                                            type="button"
+                                            onClick={() => { setOtpSent(false); setOtp(''); }}
+                                            className="px-3 py-1.5 text-slate-400 hover:text-brand-saffron rounded-lg text-sm font-bold transition-colors"
+                                        >
+                                            Edit
+                                        </button>
+                                    )}
+                                </div>
                             </div>
                         </div>
 
                         {otpSent && (
-                            <div className="space-y-1.5 animate-in fade-in slide-in-from-bottom-2">
-                                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 ml-1">OTP Code</label>
-                                <input autoFocus value={otp} onChange={(e) => setOtp(e.target.value)} className="block w-full h-14 px-4 rounded-xl border-slate-200 dark:border-neutral-700 bg-slate-50 dark:bg-neutral-900 text-slate-900 dark:text-white focus:border-brand-saffron focus:ring-2 focus:ring-brand-saffron text-center text-2xl tracking-[0.5em] shadow-sm" type="text" maxLength={4} placeholder="••••" />
+                            <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2">
+                                <div className="space-y-1.5">
+                                    <div className="flex justify-between items-end mb-1">
+                                        <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 ml-1">OTP Code</label>
+                                        <button
+                                            type="button"
+                                            onClick={handleSendOTP}
+                                            disabled={loading}
+                                            className="text-xs font-bold text-brand-saffron hover:underline focus:outline-none"
+                                        >
+                                            Resend OTP
+                                        </button>
+                                    </div>
+                                    <input autoFocus value={otp} onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))} className="block w-full h-14 px-4 rounded-xl border-slate-200 dark:border-neutral-700 bg-slate-50 dark:bg-neutral-900 text-slate-900 dark:text-white focus:border-brand-saffron focus:ring-2 focus:ring-brand-saffron text-center text-3xl tracking-[0.5em] shadow-sm font-bold" type="text" maxLength={4} placeholder="••••" />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 ml-1">Your Name</label>
+                                    <input value={name} onChange={(e) => setName(e.target.value)} className="block w-full h-14 px-4 rounded-xl border-slate-200 dark:border-neutral-700 bg-slate-50 dark:bg-neutral-900 text-slate-900 dark:text-white focus:border-brand-saffron focus:ring-2 focus:ring-brand-saffron shadow-sm text-lg" type="text" placeholder="Optional (If new user)" />
+                                </div>
                             </div>
                         )}
 
-                        <button type="submit" className="w-full h-14 bg-brand-saffron hover:bg-[#D97706] text-white font-bold text-lg rounded-xl shadow-lg shadow-brand-saffron/30 flex items-center justify-center transition-transform active:scale-[0.98] group">
-                            <span className="mr-2">{otpSent ? 'Login directly' : 'Get OTP'}</span>
-                            <span className="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
-                        </button>
+                        {errorMsg && (
+                            <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-3 rounded-lg text-sm text-center font-medium animate-in fade-in">
+                                {errorMsg}
+                            </div>
+                        )}
+
+                        {otpSent ? (
+                            <button disabled={loading || otp.length < 4} type="submit" className="w-full h-14 bg-brand-saffron hover:bg-[#D97706] text-white font-bold text-lg rounded-xl shadow-lg shadow-brand-saffron/30 flex items-center justify-center transition-transform active:scale-[0.98] group disabled:opacity-70 disabled:active:scale-100">
+                                <span className="mr-2">
+                                    {loading ? 'Verifying...' : 'Login securely'}
+                                </span>
+                                {!loading && <span className="material-symbols-outlined group-hover:translate-x-1 transition-transform">lock_open</span>}
+                            </button>
+                        ) : (
+                            <button disabled={loading || phone.length < 10} type="submit" className="w-full h-14 bg-brand-saffron hover:bg-[#D97706] text-white font-bold text-lg rounded-xl shadow-lg shadow-brand-saffron/30 flex items-center justify-center transition-transform active:scale-[0.98] group disabled:opacity-70 disabled:active:scale-100">
+                                <span className="mr-2">
+                                    {loading ? 'Processing...' : 'Send OTP'}
+                                </span>
+                                {!loading && <span className="material-symbols-outlined group-hover:translate-x-1 transition-transform">send</span>}
+                            </button>
+                        )}
                     </form>
 
                     <div className="flex-grow"></div>

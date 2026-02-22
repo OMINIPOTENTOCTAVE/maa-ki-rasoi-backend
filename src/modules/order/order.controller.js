@@ -2,7 +2,7 @@ const prisma = require("../../prisma");
 
 const placeOrder = async (req, res) => {
     try {
-        const { customerName, customerPhone, address, items } = req.body;
+        const { customerName, customerPhone, customerId, address, items, paymentMethod } = req.body;
 
         if (!customerName || !customerPhone || !address || !items || !items.length) {
             return res.status(400).json({ success: false, message: "Missing required fields" });
@@ -28,7 +28,9 @@ const placeOrder = async (req, res) => {
             data: {
                 customerName,
                 customerPhone,
+                customerId: customerId || null,
                 address,
+                paymentMethod: paymentMethod || 'COD',
                 totalAmount,
                 status: "Pending",
                 items: {
@@ -49,6 +51,14 @@ const getOrders = async (req, res) => {
         const filters = {};
         if (req.query.status) {
             filters.status = req.query.status;
+        }
+
+        if (req.user && req.user.role === 'customer') {
+            // Customer can only see their own orders
+            filters.OR = [
+                { customerId: req.user.id },
+                { customerPhone: req.user.phone }
+            ];
         }
         const orders = await prisma.order.findMany({
             where: filters,

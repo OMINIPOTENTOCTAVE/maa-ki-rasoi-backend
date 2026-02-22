@@ -36,11 +36,14 @@ app.use("/delivery/auth", apiLimiter);
 
 const errorHandler = require("./middleware/error");
 
+const paymentRoutes = require("./modules/payment/payment.routes");
+
 app.use("/auth", authRoutes);
 app.use("/menu", menuRoutes);
 app.use("/orders", orderRoutes);
 app.use("/subscriptions", subscriptionRoutes);
 app.use("/delivery", deliveryRoutes);
+app.use("/payments", paymentRoutes);
 
 app.get("/health", (req, res) => {
   res.status(200).json({ status: "OK", timestamp: new Date().toISOString() });

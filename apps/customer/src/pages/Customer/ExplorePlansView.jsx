@@ -43,7 +43,7 @@ export default function ExplorePlansView({ onBack, onCheckout }) {
                             <span className="text-sm font-medium text-slate-500 dark:text-slate-400">/ week</span>
                         </div>
                         <div className="h-px w-full bg-gray-100 dark:bg-white/5"></div>
-                        <button onClick={onCheckout} className="mt-2 w-full py-3 rounded-xl bg-slate-900 dark:bg-white/10 text-white font-bold text-sm hover:bg-brand-saffron dark:hover:bg-brand-saffron transition-colors active:scale-95">
+                        <button onClick={() => onCheckout({ planType: 'Weekly', mealType: 'Lunch', dietaryPreference: 'Veg' })} className="mt-2 w-full py-3 rounded-xl bg-slate-900 dark:bg-white/10 text-white font-bold text-sm hover:bg-brand-saffron dark:hover:bg-brand-saffron transition-colors active:scale-95">
                             Subscribe for ₹800
                         </button>
                     </div>
@@ -73,7 +73,7 @@ export default function ExplorePlansView({ onBack, onCheckout }) {
                                 <span className="text-brand-saffron font-bold">Free Delivery</span>
                             </li>
                         </ul>
-                        <button onClick={onCheckout} className="mt-2 w-full py-4 rounded-xl bg-brand-saffron text-slate-900 font-extrabold text-base shadow-lg shadow-brand-saffron/25 hover:-translate-y-0.5 transition-all active:scale-95">
+                        <button onClick={() => onCheckout({ planType: 'Monthly', mealType: 'Lunch', dietaryPreference: 'Veg' })} className="mt-2 w-full py-4 rounded-xl bg-brand-saffron text-slate-900 font-extrabold text-base shadow-lg shadow-brand-saffron/25 hover:-translate-y-0.5 transition-all active:scale-95">
                             Subscribe Now
                         </button>
                     </div>

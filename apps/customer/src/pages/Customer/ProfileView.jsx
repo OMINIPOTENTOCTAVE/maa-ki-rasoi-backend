@@ -2,10 +2,18 @@ import React, { useState, useEffect } from 'react';
 
 export default function ProfileView({ onLogout, onManageSubscription, onSupportClick }) {
     const [isDarkMode, setIsDarkMode] = useState(false);
+    const [customer, setCustomer] = useState(null);
 
     useEffect(() => {
-        // Check initial state
         setIsDarkMode(document.documentElement.classList.contains('dark'));
+        const storedCustomer = localStorage.getItem('customer_data');
+        if (storedCustomer) {
+            try {
+                setCustomer(JSON.parse(storedCustomer));
+            } catch (e) {
+                console.error(e);
+            }
+        }
     }, []);
 
     const toggleDarkMode = () => {
@@ -35,8 +43,8 @@ export default function ProfileView({ onLogout, onManageSubscription, onSupportC
                     </div>
                 </div>
                 <div className="mt-4 text-center">
-                    <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Rohan Sharma</h1>
-                    <p className="text-slate-500 dark:text-slate-400 font-medium text-sm mt-1">+91 98765 43210</p>
+                    <h1 className="text-2xl font-bold text-slate-900 dark:text-white capitalize">{customer?.name || 'Customer'}</h1>
+                    <p className="text-slate-500 dark:text-slate-400 font-medium text-sm mt-1">+91 {customer?.phone || '...'}</p>
                 </div>
             </div>
 

@@ -35,6 +35,11 @@ model Order {
   status        String      @default("Pending") // Pending, Confirmed, Preparing, Delivered
   createdAt     DateTime    @default(now())
   
+  paymentMethod     String    @default("COD") // COD, ONLINE
+  paymentStatus     String    @default("Pending") // Pending, Paid, Failed
+  razorpayOrderId   String?
+  razorpayPaymentId String?
+  
   customerId    String?
   customer      Customer?   @relation(fields: [customerId], references: [id])
   
@@ -75,6 +80,11 @@ model Subscription {
   status            String                 @default("Active") // Active, Paused, Cancelled
   totalPrice        Float
   createdAt         DateTime               @default(now())
+  
+  paymentMethod     String                 @default("COD") // COD, ONLINE
+  paymentStatus     String                 @default("Pending") // Pending, Paid, Failed
+  razorpayOrderId   String?
+  razorpayPaymentId String?
   
   customer          Customer               @relation(fields: [customerId], references: [id])
   deliveries        SubscriptionDelivery[]

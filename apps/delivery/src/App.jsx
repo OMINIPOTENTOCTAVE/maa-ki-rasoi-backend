@@ -128,7 +128,23 @@ function DeliveryDashboard() {
                                 <span className="material-symbols-outlined">call</span>
                             </a>
                         </div>
-                        <button onClick={() => markDelivered(task.id, 'subscription')} className="w-full py-3 mt-2 rounded-xl bg-brand-saffron text-white font-bold text-sm shadow-md flex items-center justify-center gap-2 group active:scale-95 transition-all">
+
+                        {task.subscription.paymentMethod === 'ONLINE' && task.subscription.paymentStatus === 'Paid' ? (
+                            <div className="mt-2 p-3 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 flex items-center gap-2 text-green-700 dark:text-green-400 font-bold">
+                                <span className="material-symbols-outlined text-lg">check_circle</span>
+                                PREPAID - Do Not Collect Cash
+                            </div>
+                        ) : (
+                            <div className="mt-2 p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 flex items-center justify-between text-red-700 dark:text-red-400 font-bold">
+                                <span className="flex items-center gap-2">
+                                    <span className="material-symbols-outlined text-lg">payments</span>
+                                    Collect Cash
+                                </span>
+                                <span className="text-xl tracking-tight">₹{task.subscription.totalPrice}</span>
+                            </div>
+                        )}
+
+                        <button onClick={() => markDelivered(task.id, 'subscription')} className="w-full py-3 mt-1 rounded-xl bg-brand-saffron text-white font-bold text-sm shadow-md flex items-center justify-center gap-2 group active:scale-95 transition-all">
                             Mark Delivered <span className="material-symbols-outlined text-sm group-hover:translate-x-1 transition-transform">check_circle</span>
                         </button>
                     </div>
@@ -152,16 +168,29 @@ function DeliveryDashboard() {
                                     {task.items.map(item => (
                                         <div key={item.id}>• {item.quantity}x {item.menuItem?.name || 'Item'}</div>
                                     ))}
-                                    <div className="mt-1 pt-1 border-t border-slate-200 dark:border-slate-700 font-bold text-brand-saffron">
-                                        Collect: ₹{task.totalAmount}
-                                    </div>
                                 </div>
                             </div>
                             <a href={`tel:${task.customerPhone}`} className="h-10 w-10 flex shrink-0 items-center justify-center rounded-full bg-green-500/10 text-green-600 dark:text-green-400 transition-active active:scale-95">
                                 <span className="material-symbols-outlined">call</span>
                             </a>
                         </div>
-                        <button onClick={() => markDelivered(task.id, 'instant')} className="w-full py-3 mt-2 rounded-xl bg-brand-saffron text-white font-bold text-sm shadow-md flex items-center justify-center gap-2 group active:scale-95 transition-all">
+
+                        {task.paymentMethod === 'ONLINE' && task.paymentStatus === 'Paid' ? (
+                            <div className="mt-2 p-3 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 flex items-center gap-2 text-green-700 dark:text-green-400 font-bold">
+                                <span className="material-symbols-outlined text-lg">check_circle</span>
+                                PREPAID - Do Not Collect Cash
+                            </div>
+                        ) : (
+                            <div className="mt-2 p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 flex items-center justify-between text-red-700 dark:text-red-400 font-bold">
+                                <span className="flex items-center gap-2">
+                                    <span className="material-symbols-outlined text-lg">payments</span>
+                                    Collect Cash
+                                </span>
+                                <span className="text-xl tracking-tight">₹{task.totalAmount}</span>
+                            </div>
+                        )}
+
+                        <button onClick={() => markDelivered(task.id, 'instant')} className="w-full py-3 mt-1 rounded-xl bg-brand-saffron text-white font-bold text-sm shadow-md flex items-center justify-center gap-2 group active:scale-95 transition-all">
                             Mark Delivered <span className="material-symbols-outlined text-sm group-hover:translate-x-1 transition-transform">check_circle</span>
                         </button>
                     </div>

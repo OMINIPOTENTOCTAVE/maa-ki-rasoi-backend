@@ -9,18 +9,29 @@ const addDays = (date, days) => {
 
 const createSubscription = async (req, res) => {
     try {
-        const { customerPhone, customerName, address, planType, mealType, dietaryPreference, startDate } = req.body;
+        const { customerId, customerPhone, customerName, address, planType, mealType, dietaryPreference, startDate } = req.body;
 
-        if (!customerPhone || !planType || !mealType || !dietaryPreference || !startDate) {
+        if (!planType || !mealType || !dietaryPreference || !startDate) {
             return res.status(400).json({ success: false, message: "Missing required fields" });
         }
 
         // 1. Find or create the customer
-        let customer = await prisma.customer.findUnique({ where: { phone: customerPhone } });
+        let customer;
+        if (customerId) {
+            customer = await prisma.customer.findUnique({ where: { id: customerId } });
+        }
+
+        if (!customer && customerPhone) {
+            customer = await prisma.customer.findUnique({ where: { phone: customerPhone } });
+            if (!customer) {
+                customer = await prisma.customer.create({
+                    data: { phone: customerPhone, name: customerName, address: address }
+                });
+            }
+        }
+
         if (!customer) {
-            customer = await prisma.customer.create({
-                data: { phone: customerPhone, name: customerName, address: address }
-            });
+            return res.status(400).json({ success: false, message: "Customer identification required" });
         }
 
         // 2. Calculate subscription duration & pricing
@@ -88,10 +99,26 @@ const createSubscription = async (req, res) => {
 
 const getSubscriptions = async (req, res) => {
     try {
-        const subscriptions = await prisma.subscription.findMany({
-            include: { customer: true },
+        const query = {
+            include: {
+                customer: true,
+                deliveries: {
+                    where: {
+                        deliveryDate: { gte: new Date() }
+                    },
+                    orderBy: { deliveryDate: 'asc' },
+                    take: 1
+                }
+            },
             orderBy: { createdAt: 'desc' }
-        });
+        };
+
+        // If it's a customer, only fetch their subscriptions
+        if (req.user && req.user.role === 'customer') {
+            query.where = { customerId: req.user.id };
+        }
+
+        const subscriptions = await prisma.subscription.findMany(query);
         res.json({ success: true, data: subscriptions });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
