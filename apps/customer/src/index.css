@@ -1,27 +1,27 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --primary: #ff5722;
-  --primary-hover: #e64a19;
-  --bg-gradient: linear-gradient(135deg, #fff7f0 0%, #ffe9d9 100%);
+  --primary: #E76F51;
+  --primary-hover: #D95D3E;
+  --bg-gradient: #FAF9F6;
   --text-main: #2b1c18;
   --text-muted: #8c7670;
   --card-bg: rgba(255, 255, 255, 0.85);
-  --border: rgba(255, 87, 34, 0.15);
+  --border: rgba(231, 111, 81, 0.15);
   --success: #10b981;
-  --warning: #f59e0b;
-  --glass-shadow: 0 8px 32px 0 rgba(255, 87, 34, 0.1);
+  --warning: #F4A261;
+  --glass-shadow: 0 8px 32px 0 rgba(231, 111, 81, 0.1);
 }
 
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  font-family: 'Outfit', system-ui, sans-serif;
+  font-family: 'Inter', system-ui, sans-serif;
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -61,7 +61,7 @@ body {
   font-size: 1.8rem;
   font-weight: 800;
   letter-spacing: -0.5px;
-  background: linear-gradient(90deg, #ff5722 0%, #ff9800 100%);
+  background: linear-gradient(90deg, #E76F51 0%, #F4A261 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
