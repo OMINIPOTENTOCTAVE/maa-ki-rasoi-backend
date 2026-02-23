@@ -48,6 +48,10 @@ const placeOrder = async (req, res) => {
 
 const getOrders = async (req, res) => {
     try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 50;
+        const skip = (page - 1) * limit;
+
         const filters = {};
         if (req.query.status) {
             filters.status = req.query.status;
@@ -60,16 +64,32 @@ const getOrders = async (req, res) => {
                 { customerPhone: req.user.phone }
             ];
         }
-        const orders = await prisma.order.findMany({
-            where: filters,
-            orderBy: { createdAt: 'desc' },
-            include: {
-                items: {
-                    include: { menuItem: true }
+
+        const [orders, totalCount] = await Promise.all([
+            prisma.order.findMany({
+                where: filters,
+                orderBy: { createdAt: 'desc' },
+                skip,
+                take: limit,
+                include: {
+                    items: {
+                        include: { menuItem: true }
+                    }
                 }
+            }),
+            prisma.order.count({ where: filters })
+        ]);
+
+        res.json({
+            success: true,
+            data: orders,
+            pagination: {
+                totalCount,
+                totalPages: Math.ceil(totalCount / limit),
+                currentPage: page,
+                limit
             }
         });
-        res.json({ success: true, data: orders });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }

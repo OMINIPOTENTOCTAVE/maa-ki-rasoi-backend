@@ -2,7 +2,7 @@ const prisma = require("../../prisma");
 
 const getMenuItems = async (req, res) => {
     try {
-        const filters = {};
+        const filters = { isArchived: false };
         if (req.query.category) {
             filters.category = req.query.category;
         }
@@ -63,4 +63,17 @@ const toggleAvailability = async (req, res) => {
     }
 };
 
-module.exports = { getMenuItems, createMenuItem, updateMenuItem, toggleAvailability };
+const deleteMenuItem = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const updated = await prisma.menuItem.update({
+            where: { id },
+            data: { isArchived: true, isAvailable: false }
+        });
+        res.json({ success: true, data: updated });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+module.exports = { getMenuItems, createMenuItem, updateMenuItem, toggleAvailability, deleteMenuItem };

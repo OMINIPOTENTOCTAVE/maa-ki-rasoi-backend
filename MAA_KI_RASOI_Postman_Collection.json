@@ -1,0 +1,435 @@
+{
+    "info": {
+        "name": "MAA KI RASOI - MVP API Automation Tests",
+        "description": "Automated API Test Scripts for MAA KI RASOI backend APIs. Focuses on functional flow, security boundaries, and edge cases.",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "1. Authentication",
+            "item": [
+                {
+                    "name": "Request OTP (Valid)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "pm.test(\"Response has success flag\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.success).to.eql(true);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"phone\": \"9999999999\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{BASE_URL}}/auth/otp/request",
+                            "host": [
+                                "{{BASE_URL}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "otp",
+                                "request"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Verify OTP & Generate Token",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "pm.test(\"Extract JWT Token\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    pm.environment.set(\"JWT_TOKEN\", jsonData.token);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"phone\": \"9999999999\",\n    \"otp\": \"123456\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{BASE_URL}}/auth/otp/verify",
+                            "host": [
+                                "{{BASE_URL}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "otp",
+                                "verify"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "SQL Injection Attempt on Login (Edge Case)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 400 or 401\", function () {",
+                                    "    pm.response.to.have.status(400);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"email\": \"admin' OR '1'='1\",\n    \"password\": \"password\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{BASE_URL}}/auth/login",
+                            "host": [
+                                "{{BASE_URL}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "login"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "2. Subscriptions & Pause",
+            "item": [
+                {
+                    "name": "Create Monthly Subscription (Lunch Only)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Subscription created successfully\", function () {",
+                                    "    pm.response.to.have.status(201);",
+                                    "    var jsonData = pm.response.json();",
+                                    "    pm.environment.set(\"SUBSCRIPTION_ID\", jsonData.subscription.id);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{JWT_TOKEN}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"mealType\": \"LUNCH\",\n    \"durationDays\": 30,\n    \"startDate\": \"2026-03-01T00:00:00.000Z\",\n    \"deliveryAddress\": \"123 Sector 4, Noida\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{BASE_URL}}/subscriptions",
+                            "host": [
+                                "{{BASE_URL}}"
+                            ],
+                            "path": [
+                                "subscriptions"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Pause Subscription (Valid Scenario)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Subscription Paused successfully\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "    pm.expect(pm.response.json().status).to.eql(\"PAUSED\");",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{JWT_TOKEN}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"status\": \"PAUSED\",\n    \"metadata\": {\n        \"pauseStartDate\": \"2026-03-05T00:00:00.000Z\",\n        \"pauseEndDate\": \"2026-03-10T00:00:00.000Z\"\n    }\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{BASE_URL}}/subscriptions/{{SUBSCRIPTION_ID}}/status",
+                            "host": [
+                                "{{BASE_URL}}"
+                            ],
+                            "path": [
+                                "subscriptions",
+                                "{{SUBSCRIPTION_ID}}",
+                                "status"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Pause Subscription (Edge Case - Overlapping Pause)",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{JWT_TOKEN}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"status\": \"PAUSED\",\n    \"metadata\": {\n        \"pauseStartDate\": \"2026-03-08T00:00:00.000Z\",\n        \"pauseEndDate\": \"2026-03-12T00:00:00.000Z\"\n    }\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{BASE_URL}}/subscriptions/{{SUBSCRIPTION_ID}}/status",
+                            "host": [
+                                "{{BASE_URL}}"
+                            ],
+                            "path": [
+                                "subscriptions",
+                                "{{SUBSCRIPTION_ID}}",
+                                "status"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "3. Menu System",
+            "item": [
+                {
+                    "name": "Get Daily Menu",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{BASE_URL}}/menu?date=2026-03-01",
+                            "host": [
+                                "{{BASE_URL}}"
+                            ],
+                            "path": [
+                                "menu"
+                            ],
+                            "query": [
+                                {
+                                    "key": "date",
+                                    "value": "2026-03-01"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Admin: Create Menu Item",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{ADMIN_TOKEN}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"Rajma Chawal Deluxe\",\n    \"description\": \"Home style rajma with basmati rice\",\n    \"type\": \"LUNCH\",\n    \"availableDate\": \"2026-03-01\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{BASE_URL}}/menu",
+                            "host": [
+                                "{{BASE_URL}}"
+                            ],
+                            "path": [
+                                "menu"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Rate Limiting Check (Spam Menu Hits)",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{BASE_URL}}/menu",
+                            "host": [
+                                "{{BASE_URL}}"
+                            ],
+                            "path": [
+                                "menu"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "4. Payments",
+            "item": [
+                {
+                    "name": "Create Razorpay Order",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{JWT_TOKEN}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"amount\": 1500,\n    \"currency\": \"INR\",\n    \"receipt\": \"rcpt_sub_123\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{BASE_URL}}/payments/create-order",
+                            "host": [
+                                "{{BASE_URL}}"
+                            ],
+                            "path": [
+                                "payments",
+                                "create-order"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Verify Double Webhook Attack (Edge Case)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{JWT_TOKEN}}"
+                            },
+                            {
+                                "key": "x-razorpay-signature",
+                                "value": "fake_signature_for_testing"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"razorpay_order_id\": \"order_12345\",\n    \"razorpay_payment_id\": \"pay_12345\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{BASE_URL}}/payments/verify",
+                            "host": [
+                                "{{BASE_URL}}"
+                            ],
+                            "path": [
+                                "payments",
+                                "verify"
+                            ]
+                        }
+                    }
+                }
+            ]
+        }
+    ],
+    "variable": [
+        {
+            "key": "BASE_URL",
+            "value": "http://localhost:3000",
+            "type": "string"
+        },
+        {
+            "key": "JWT_TOKEN",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "ADMIN_TOKEN",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "SUBSCRIPTION_ID",
+            "value": "",
+            "type": "string"
+        }
+    ]
+}

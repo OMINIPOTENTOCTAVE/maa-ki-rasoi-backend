@@ -22,6 +22,7 @@ model MenuItem {
   price       Float
   category    String
   isAvailable Boolean     @default(true)
+  isArchived  Boolean     @default(false)
   createdAt   DateTime    @default(now())
   orderItems  OrderItem[]
 }

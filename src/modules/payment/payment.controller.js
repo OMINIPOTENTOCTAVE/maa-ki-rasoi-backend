@@ -55,6 +55,19 @@ const verifyPayment = async (req, res, next) => {
     try {
         const { razorpay_order_id, razorpay_payment_id, razorpay_signature, orderType, referenceId } = req.body;
 
+        // Fix: Idempotency Check (Double Payment Webhook Processing bug)
+        if (orderType === 'Instant' && referenceId) {
+            const existingOrder = await prisma.order.findUnique({ where: { id: referenceId } });
+            if (existingOrder && existingOrder.paymentStatus === 'Paid') {
+                return res.json({ success: true, message: 'Payment already verified (Idempotent)' });
+            }
+        } else if (orderType === 'Subscription' && referenceId) {
+            const existingSub = await prisma.subscription.findUnique({ where: { id: referenceId } });
+            if (existingSub && existingSub.paymentStatus === 'Paid') {
+                return res.json({ success: true, message: 'Payment already verified (Idempotent)' });
+            }
+        }
+
         const body = razorpay_order_id + "|" + razorpay_payment_id;
 
         const isDummy = (process.env.RAZORPAY_KEY_SECRET || 'dummysecret1234').includes('dummy');

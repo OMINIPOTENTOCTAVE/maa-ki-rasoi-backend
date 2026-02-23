@@ -99,6 +99,10 @@ const createSubscription = async (req, res) => {
 
 const getSubscriptions = async (req, res) => {
     try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 50;
+        const skip = (page - 1) * limit;
+
         const query = {
             include: {
                 customer: true,
@@ -110,7 +114,9 @@ const getSubscriptions = async (req, res) => {
                     take: 1
                 }
             },
-            orderBy: { createdAt: 'desc' }
+            orderBy: { createdAt: 'desc' },
+            skip,
+            take: limit
         };
 
         // If it's a customer, only fetch their subscriptions
@@ -118,8 +124,21 @@ const getSubscriptions = async (req, res) => {
             query.where = { customerId: req.user.id };
         }
 
-        const subscriptions = await prisma.subscription.findMany(query);
-        res.json({ success: true, data: subscriptions });
+        const [subscriptions, totalCount] = await Promise.all([
+            prisma.subscription.findMany(query),
+            prisma.subscription.count({ where: query.where })
+        ]);
+
+        res.json({
+            success: true,
+            data: subscriptions,
+            pagination: {
+                totalCount,
+                totalPages: Math.ceil(totalCount / limit),
+                currentPage: page,
+                limit
+            }
+        });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
@@ -135,12 +154,17 @@ const toggleSubscriptionStatus = async (req, res) => {
             data: { status }
         });
 
-        // If paused or cancelled, cancel all pending future deliveries
+        // Fix: Use exact midnight bound in IST to prevent overlap
+        let effectiveDate = new Date(); // Fallback
+
         if (status === 'Paused' || status === 'Cancelled') {
+            const now = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
+            effectiveDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 0);
+
             await prisma.subscriptionDelivery.updateMany({
                 where: {
                     subscriptionId: id,
-                    deliveryDate: { gte: new Date() },
+                    deliveryDate: { gte: effectiveDate },
                     status: 'Pending'
                 },
                 data: { status }

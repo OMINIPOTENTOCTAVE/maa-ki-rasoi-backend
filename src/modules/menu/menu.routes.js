@@ -10,5 +10,6 @@ router.get("/", menuController.getMenuItems);
 router.post("/", authMiddleware, menuController.createMenuItem);
 router.put("/:id", authMiddleware, menuController.updateMenuItem);
 router.patch("/:id/toggle", authMiddleware, menuController.toggleAvailability);
+router.delete("/:id", authMiddleware, menuController.deleteMenuItem);
 
 module.exports = router;

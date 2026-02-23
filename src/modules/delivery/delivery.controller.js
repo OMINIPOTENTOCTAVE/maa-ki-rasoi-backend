@@ -124,6 +124,13 @@ exports.getPartners = async (req, res, next) => {
 exports.assignTask = async (req, res, next) => {
     try {
         const { partnerId, taskId, type } = req.body;
+
+        // Fix: Missing Delivery Partner Assignment Fallback
+        const partner = await prisma.deliveryPartner.findUnique({ where: { id: partnerId } });
+        if (!partner || partner.status !== 'Active') {
+            return res.status(400).json({ success: false, message: "Cannot assign task. Delivery partner is inactive or not found." });
+        }
+
         if (type === "subscription") {
             const result = await prisma.subscriptionDelivery.update({
                 where: { id: taskId },
