@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import MobileLayout from '../layouts/MobileLayout';
+import MobileLayout from '@/layouts/MobileLayout';
 import HomeView from './Customer/HomeView';
 import ManageView from './Customer/ManageView';
 import ExplorePlansView from './Customer/ExplorePlansView';

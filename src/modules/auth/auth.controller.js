@@ -105,10 +105,27 @@ const verifyOTP = async (req, res) => {
             { expiresIn: "30d" }
         );
 
-        res.json({ success: true, token, customer });
+        // Set HTTP Only Cookie
+        res.cookie('customer_token', token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
+        });
+
+        res.json({ success: true, customer });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
 };
 
-module.exports = { login, createAdmin, requestOTP, verifyOTP };
+const logout = async (req, res) => {
+    res.clearCookie('customer_token', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+    });
+    res.json({ success: true, message: 'Logged out successfully' });
+};
+
+module.exports = { login, createAdmin, requestOTP, verifyOTP, logout };

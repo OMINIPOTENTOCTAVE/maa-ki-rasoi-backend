@@ -3,6 +3,7 @@ const cors = require("cors");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
 const morgan = require("morgan");
+const cookieParser = require("cookie-parser");
 
 const authRoutes = require("./modules/auth/auth.routes");
 const menuRoutes = require("./modules/menu/menu.routes");
@@ -14,8 +15,12 @@ const app = express();
 
 // Security and Hardening
 app.use(helmet());
-app.use(cors({ origin: process.env.CORS_ORIGIN || "*" }));
+app.use(cors({
+  origin: process.env.CORS_ORIGIN || "*",
+  credentials: true
+}));
 app.use(express.json({ limit: "1mb" })); // Prevent large payload attacks
+app.use(cookieParser());
 
 // Production logging
 if (process.env.NODE_ENV === "production") {
