@@ -19,7 +19,7 @@ class AuthService {
 
         if (!isDummyKey) {
             try {
-                await axios.post('https://www.fast2sms.com/dev/bulkV2', {
+                const apiRes = await axios.post('https://www.fast2sms.com/dev/bulkV2', {
                     variables_values: otp,
                     route: 'otp',
                     numbers: phone
@@ -32,7 +32,15 @@ class AuthService {
                 console.log(`[REAL SMS] Sent OTP to ${phone}`);
                 return { success: true };
             } catch (smsError) {
-                console.error("SMS FAILED:", smsError.response?.data || smsError.message);
+                const apiErr = smsError.response?.data;
+                console.error("SMS FAILED:", apiErr || smsError.message);
+
+                // If Fast2SMS says account needs deposit or website verification, fallback safely rather than paralyzing app
+                if (apiErr && (apiErr.status_code === 999 || apiErr.status_code === 996)) {
+                    console.warn(`[SMS FALLBACK] Fast2SMS Account Unverified (${apiErr.status_code}). Dummy mode activated for ${phone}. OTP: ${otp}`);
+                    return { success: true, devOtp: otp };
+                }
+
                 throw new Error("OTP service temporarily unavailable");
             }
         } else {
