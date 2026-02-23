@@ -19,12 +19,14 @@ class AuthService {
 
         if (!isDummyKey) {
             try {
-                await axios.post('https://www.fast2sms.com/dev/bulkV2', null, {
-                    params: {
-                        authorization: process.env.FAST2SMS_API_KEY.replace(/['"]/g, '').trim(),
-                        message: `Your Maa Ki Rasoi OTP is ${otp}. Do not share.`,
-                        route: 'q',
-                        numbers: phone
+                await axios.post('https://www.fast2sms.com/dev/bulkV2', {
+                    variables_values: otp,
+                    route: 'otp',
+                    numbers: phone
+                }, {
+                    headers: {
+                        "authorization": process.env.FAST2SMS_API_KEY.replace(/['"]/g, '').trim(),
+                        "Content-Type": "application/json"
                     }
                 });
                 console.log(`[REAL SMS] Sent OTP to ${phone}`);
