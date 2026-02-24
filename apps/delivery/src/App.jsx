@@ -121,7 +121,7 @@ function DeliveryDashboard() {
                                     {task.subscription.customer?.address}
                                 </p>
                                 <p className="text-xs text-brand-saffron font-medium mt-2 bg-brand-saffron/10 inline-block px-2 py-1 rounded-md">
-                                    Meal Plan: {task.mealType} ({task.subscription.dietaryPreference})
+                                    Meal Plan: {task.mealType} (🌿 Pure Veg)
                                 </p>
                             </div>
                             <a href={`tel:${task.subscription.customer?.phone}`} className="h-10 w-10 flex shrink-0 items-center justify-center rounded-full bg-green-500/10 text-green-600 dark:text-green-400 transition-active active:scale-95">

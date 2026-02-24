@@ -15,7 +15,7 @@ export default function HomeView({ subscriptions = [], onManageClick, onExploreC
                     <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white capitalize">Hello, {greetingName}! 👋</h1>
                     <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
                         {activeSub ? (
-                            <><span className="capitalize">{activeSub.planType}</span> {activeSub.dietaryPreference} Plan • <span className="text-brand-green font-bold">Active</span></>
+                            <><span className="capitalize">{activeSub.planType}</span> Pure Veg Plan • <span className="text-brand-green font-bold">Active</span></>
                         ) : (
                             <span>No active plan</span>
                         )}
@@ -38,8 +38,8 @@ export default function HomeView({ subscriptions = [], onManageClick, onExploreC
 
                 {activeSub && nextDelivery ? (
                     <MealCard
-                        title={`${activeSub.dietaryPreference} Ghar Ka Khana`}
-                        subtitle={activeSub.dietaryPreference === 'Veg' ? "Dal Tadka, Sabzi, Rice, 3 Rotis" : "Chicken Curry, Dal, Rice, 3 Rotis"}
+                        title={`Pure Veg Ghar Ka Khana`}
+                        subtitle="Dal Tadka, Sabzi, Rice, 3 Rotis"
                         image="https://lh3.googleusercontent.com/aida-public/AB6AXuCn5WRfuP-mNB5rtMQEMXgvPQ9qdY68cmNoOkTLqZve4qs9riUQ7db6vKkvUmDKJ8IhZYryISONHkTIuWzqR8WYLgMz7GUCVKX4o7q3jV47b8HBZnjMde1auW2Nj-RBjAasxahXXTSqr_KdFc4BHKEvD2vW4JujWFJpG9RROM7ZFr8PvBBVsbjvnddjGKiigxeEK0px1AQpTZOq4I0HtNDcbC-K2LUtq8ejWebW5QisqTPZDFHMye_NW-_rCnJmFz6nONBShxiyreal"
                         tags={[`Upcoming ${nextDelivery.mealType}`]}
                         onAction={() => alert('Meal Details')}

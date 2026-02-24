@@ -27,7 +27,7 @@ export default function CheckoutView({ onBack, onSuccessComplete, planConfig }) 
     // Compute UI display values from planConfig
     const mealLabel = planConfig?.mealType === 'Both' ? 'Lunch + Dinner' : (planConfig?.mealType || 'Lunch');
     const planLabel = planConfig?.planType === 'MonthlyFull' ? '30-Day' : (planConfig?.planType === 'Weekly' ? '5-Day' : '22-Day');
-    const uiTitle = `${planLabel} ${mealLabel} Plan (${planConfig?.dietaryPreference || 'Veg'})`;
+    const uiTitle = `${planLabel} ${mealLabel} Plan (Pure Veg)`;
     const uiRange = isWeekly ? 'Mon–Fri, 5 working days' : (planConfig?.planType === 'MonthlyFull' ? '30 consecutive days' : 'Mon–Fri, 22 working days');
 
     // Price calculation (mirrors backend logic)

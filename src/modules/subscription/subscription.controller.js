@@ -9,9 +9,9 @@ const addDays = (date, days) => {
 
 const createSubscription = async (req, res) => {
     try {
-        const { customerId, customerPhone, customerName, address, planType, mealType, dietaryPreference, startDate } = req.body;
+        const { customerId, customerPhone, customerName, address, planType, mealType, dietaryPreference = 'Veg', startDate } = req.body;
 
-        if (!planType || !mealType || !dietaryPreference || !startDate) {
+        if (!planType || !mealType || !startDate) {
             return res.status(400).json({ success: false, message: "Missing required fields" });
         }
 

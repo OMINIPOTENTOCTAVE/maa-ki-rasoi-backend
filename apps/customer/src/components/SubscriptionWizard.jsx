@@ -125,18 +125,9 @@ export default function SubscriptionWizard({ onClose, onSuccess }) {
                             ))}
                         </div>
 
-                        <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.75rem' }}>Dietary Preference</label>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', marginBottom: '1.5rem' }}>
-                            {['Veg'].map(d => (
-                                <button
-                                    key={d}
-                                    className={`category-pill ${form.dietaryPreference === d ? 'active' : ''}`}
-                                    onClick={() => setForm({ ...form, dietaryPreference: d })}
-                                    style={{ padding: '0.75rem 0', margin: 0, width: '100%', textAlign: 'center', borderColor: form.dietaryPreference === d ? (d === 'Veg' ? '#4caf50' : '#f44336') : 'var(--border)', background: form.dietaryPreference === d ? (d === 'Veg' ? 'rgba(76, 175, 80, 0.1)' : 'rgba(244, 67, 54, 0.1)') : 'transparent', color: form.dietaryPreference === d ? (d === 'Veg' ? '#2e7d32' : '#c62828') : 'var(--text-main)' }}
-                                >
-                                    {d}
-                                </button>
-                            ))}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1rem', background: 'rgba(76, 175, 80, 0.08)', borderRadius: '12px', border: '1px solid rgba(76, 175, 80, 0.2)', marginBottom: '1.5rem' }}>
+                            <span style={{ fontSize: '1.2rem' }}>🌿</span>
+                            <span style={{ fontWeight: 700, color: '#2e7d32', fontSize: '0.95rem' }}>100% Pure Vegetarian Kitchen</span>
                         </div>
 
                         <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.75rem' }}>Start Date</label>
