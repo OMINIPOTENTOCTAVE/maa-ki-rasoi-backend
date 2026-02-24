@@ -15,8 +15,14 @@ const app = express();
 
 // Security and Hardening
 app.use(helmet());
+
+// CORS: Support multiple frontend origins (comma-separated in CORS_ORIGIN)
+const allowedOrigins = process.env.CORS_ORIGIN
+  ? process.env.CORS_ORIGIN.split(',').map(o => o.trim())
+  : null;
+
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || "*",
+  origin: allowedOrigins || "*",
   credentials: true
 }));
 app.use(express.json({ limit: "1mb" })); // Prevent large payload attacks
