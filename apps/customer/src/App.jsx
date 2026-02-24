@@ -6,36 +6,36 @@ import Checkout from './pages/Checkout';
 import CustomerDashboard from './pages/CustomerDashboard';
 import Login from './pages/Auth/Login';
 
-// A simple wrapper to protect routes
-function ProtectedRoute({ children }) {
-    const token = localStorage.getItem('customer_token');
-
-    // Set axios header automatically if returning from refresh
-    if (token && !axios.defaults.headers.common['Authorization']) {
-        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-    }
-
-    if (!token) {
-        return <Login />;
-    }
-    return children;
-}
-
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 axios.defaults.baseURL = API_URL;
+
+// Auto-set auth header if token exists (e.g. after page refresh)
+const existingToken = localStorage.getItem('customer_token');
+if (existingToken) {
+    axios.defaults.headers.common['Authorization'] = `Bearer ${existingToken}`;
+}
 
 axios.interceptors.response.use(
     (response) => response,
     (error) => {
         if (error.response && error.response.status === 401) {
             localStorage.removeItem('customer_token');
-            if (window.location.pathname !== '/login') {
-                window.location.href = '/login';
-            }
+            localStorage.removeItem('customer_data');
+            delete axios.defaults.headers.common['Authorization'];
+            // Don't redirect — guest browsing is allowed
         }
         return Promise.reject(error);
     }
 );
+
+// Only protect routes that truly need auth (checkout, orders, etc.)
+function ProtectedRoute({ children }) {
+    const token = localStorage.getItem('customer_token');
+    if (!token) {
+        return <Login />;
+    }
+    return children;
+}
 
 function App() {
     const [cart, setCart] = useState([]);
@@ -81,12 +81,12 @@ function App() {
                 </div>
             )}
             <Routes>
+                {/* Home — open to everyone (guests + logged-in) */}
                 <Route path="/" element={
-                    <ProtectedRoute>
-                        <CustomerDashboard cart={cart} addToCart={addToCart} />
-                    </ProtectedRoute>
+                    <CustomerDashboard cart={cart} addToCart={addToCart} />
                 } />
                 <Route path="/login" element={<Login />} />
+                {/* Checkout — requires login */}
                 <Route path="/checkout" element={
                     <ProtectedRoute>
                         <CheckoutPage cart={cart} updateQty={updateQty} clearCart={clearCart} />
@@ -97,11 +97,6 @@ function App() {
     )
 }
 
-/**
- * Wrapper that gives the standalone /checkout route a proper desktop layout.
- * On desktop: centered container with max-width.
- * On mobile: full-screen as before.
- */
 function CheckoutPage({ cart, updateQty, clearCart }) {
     return (
         <div className="min-h-screen bg-brand-cream dark:bg-brand-dark">

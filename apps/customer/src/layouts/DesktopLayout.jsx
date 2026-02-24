@@ -1,13 +1,14 @@
 import React, { lazy, Suspense } from 'react';
 
-const navItems = [
-    { id: 'home', icon: 'home', label: 'Home' },
-    { id: 'menu', icon: 'restaurant_menu', label: 'Menu' },
-    { id: 'orders', icon: 'receipt_long', label: 'Orders' },
-    { id: 'profile', icon: 'person', label: 'Profile' },
+const allNavItems = [
+    { id: 'home', icon: 'home', label: 'Home', guestVisible: true },
+    { id: 'menu', icon: 'restaurant_menu', label: 'Menu', guestVisible: true },
+    { id: 'orders', icon: 'receipt_long', label: 'Orders', guestVisible: false },
+    { id: 'profile', icon: 'person', label: 'Profile', guestVisible: false },
 ];
 
-export default function DesktopLayout({ children, activeTab, onTabChange, rightPanel }) {
+export default function DesktopLayout({ children, activeTab, onTabChange, rightPanel, isLoggedIn }) {
+    const navItems = allNavItems.filter(item => isLoggedIn || item.guestVisible);
     return (
         <div className="flex h-screen w-full bg-brand-cream dark:bg-brand-dark overflow-hidden">
             {/* ── Skip to Content (A11y) ── */}
@@ -69,21 +70,33 @@ export default function DesktopLayout({ children, activeTab, onTabChange, rightP
                     </button>
                 </nav>
 
-                {/* Logout — pinned to bottom */}
+                {/* Auth — pinned to bottom */}
                 <div className="px-3 pb-4 border-t border-gray-100 dark:border-gray-800 pt-3">
-                    <button
-                        onClick={() => {
-                            localStorage.removeItem('customer_token');
-                            localStorage.removeItem('customer_data');
-                            window.location.href = '/login';
-                        }}
-                        aria-label="Log out"
-                        className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-slate-500 dark:text-slate-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 dark:hover:text-red-400 transition-all w-full group outline-none
-                            focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-[#1e1710]"
-                    >
-                        <span className="material-symbols-outlined text-xl transition-transform group-hover:scale-110">logout</span>
-                        Logout
-                    </button>
+                    {isLoggedIn ? (
+                        <button
+                            onClick={() => {
+                                localStorage.removeItem('customer_token');
+                                localStorage.removeItem('customer_data');
+                                window.location.href = '/';
+                            }}
+                            aria-label="Log out"
+                            className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-slate-500 dark:text-slate-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 dark:hover:text-red-400 transition-all w-full group outline-none
+                                focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-[#1e1710]"
+                        >
+                            <span className="material-symbols-outlined text-xl transition-transform group-hover:scale-110">logout</span>
+                            Logout
+                        </button>
+                    ) : (
+                        <button
+                            onClick={() => { window.location.href = '/login'; }}
+                            aria-label="Log in"
+                            className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-white bg-brand-saffron hover:bg-[#D97706] transition-all w-full group outline-none shadow-md
+                                focus-visible:ring-2 focus-visible:ring-brand-saffron focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-[#1e1710]"
+                        >
+                            <span className="material-symbols-outlined text-xl transition-transform group-hover:scale-110">login</span>
+                            Login / Sign Up
+                        </button>
+                    )}
                 </div>
             </aside>
 

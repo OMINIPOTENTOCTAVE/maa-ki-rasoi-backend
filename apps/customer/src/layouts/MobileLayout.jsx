@@ -1,16 +1,18 @@
 import React from 'react';
 
-export default function MobileLayout({ children, activeTab, onTabChange }) {
-    const navItems = [
-        { id: 'home', icon: 'home', label: 'Home' },
-        { id: 'menu', icon: 'restaurant_menu', label: 'Menu' },
-        { id: 'orders', icon: 'receipt_long', label: 'Orders' },
-        { id: 'profile', icon: 'person', label: 'Profile' }
+export default function MobileLayout({ children, activeTab, onTabChange, isLoggedIn }) {
+    const allNavItems = [
+        { id: 'home', icon: 'home', label: 'Home', guestVisible: true },
+        { id: 'menu', icon: 'restaurant_menu', label: 'Menu', guestVisible: true },
+        { id: 'orders', icon: 'receipt_long', label: 'Orders', guestVisible: false },
+        { id: 'profile', icon: 'person', label: 'Profile', guestVisible: false },
     ];
+
+    // Guests see Home + Menu + Login button. Logged-in see all 4 tabs.
+    const navItems = allNavItems.filter(item => isLoggedIn || item.guestVisible);
 
     return (
         <div className="relative flex h-full min-h-screen w-full flex-col overflow-x-hidden max-w-md mx-auto bg-brand-cream dark:bg-brand-dark shadow-xl font-display text-slate-900 pb-[72px]">
-            {/* Dynamic Content Area */}
             {children}
 
             {/* Fixed Bottom Navigation */}
@@ -31,6 +33,19 @@ export default function MobileLayout({ children, activeTab, onTabChange }) {
                             </button>
                         );
                     })}
+
+                    {/* Login tab for guests */}
+                    {!isLoggedIn && (
+                        <button
+                            onClick={() => { window.location.href = '/login'; }}
+                            className="flex flex-1 flex-col items-center justify-end gap-1 pb-2 transition-colors group text-brand-saffron"
+                        >
+                            <div className="flex flex-col items-center bg-brand-saffron/10 px-4 py-0.5 rounded-full">
+                                <span className="material-symbols-outlined text-2xl">login</span>
+                                <span className="text-[10px] sm:text-xs leading-none mt-1 font-bold">Login</span>
+                            </div>
+                        </button>
+                    )}
                 </div>
             </nav>
         </div>

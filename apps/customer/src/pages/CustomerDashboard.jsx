@@ -28,12 +28,17 @@ export default function CustomerDashboard({ cart, addToCart }) {
     const [orders, setOrders] = useState([]);
     const [loadingData, setLoadingData] = useState(true);
     const { isMobile } = useMediaQuery();
+    const isLoggedIn = !!localStorage.getItem('customer_token');
 
     // Modal screens
     const [modalView, setModalView] = useState(null);
     const [checkoutConfig, setCheckoutConfig] = useState(null);
 
     const fetchData = async () => {
+        if (!isLoggedIn) {
+            setLoadingData(false);
+            return;
+        }
         try {
             setLoadingData(true);
             const [subRes, ordRes] = await Promise.all([
@@ -201,7 +206,7 @@ export default function CustomerDashboard({ cart, addToCart }) {
     // ── Layout Selection ──
     if (isMobile) {
         return (
-            <MobileLayout activeTab={activeTab} onTabChange={handleTabChange}>
+            <MobileLayout activeTab={activeTab} onTabChange={handleTabChange} isLoggedIn={isLoggedIn}>
                 {renderContent()}
             </MobileLayout>
         );
@@ -212,7 +217,8 @@ export default function CustomerDashboard({ cart, addToCart }) {
             <DesktopLayout
                 activeTab={activeTab}
                 onTabChange={handleTabChange}
-                rightPanel={<RightPanel subscriptions={subscriptions} />}
+                rightPanel={isLoggedIn ? <RightPanel subscriptions={subscriptions} /> : null}
+                isLoggedIn={isLoggedIn}
             >
                 {renderContent()}
             </DesktopLayout>
