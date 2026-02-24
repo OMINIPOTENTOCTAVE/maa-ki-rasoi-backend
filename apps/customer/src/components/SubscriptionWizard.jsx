@@ -91,7 +91,7 @@ export default function SubscriptionWizard({ onClose, onSuccess }) {
                                     style={{
                                         padding: '1.25rem', borderRadius: '12px', cursor: 'pointer',
                                         border: `2px solid ${form.planType === p.id ? 'var(--primary)' : 'var(--border)'}`,
-                                        background: form.planType === p.id ? 'rgba(255,87,34,0.05)' : 'transparent',
+                                        background: form.planType === p.id ? 'rgba(200,85,10,0.05)' : 'transparent',
                                         transition: 'all 0.2s'
                                     }}
                                 >
@@ -150,7 +150,7 @@ export default function SubscriptionWizard({ onClose, onSuccess }) {
                     <div style={{ animation: 'fadeIn 0.3s' }}>
                         <h3 style={{ marginBottom: '1.5rem' }}>Delivery Details</h3>
 
-                        <div style={{ background: 'rgba(255,87,34,0.05)', border: '1px dashed rgba(255,87,34,0.3)', padding: '1rem', borderRadius: '12px', marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div style={{ background: 'rgba(200,85,10,0.05)', border: '1px dashed rgba(200,85,10,0.3)', padding: '1rem', borderRadius: '12px', marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <div>
                                 <div style={{ fontWeight: 800 }}>{form.planType} • {form.mealType}</div>
                                 <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Starts: {new Date(form.startDate).toLocaleDateString()}</div>

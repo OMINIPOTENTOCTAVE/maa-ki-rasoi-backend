@@ -9,14 +9,21 @@ export default {
         extend: {
             colors: {
                 brand: {
-                    saffron: '#F59E0B',
-                    cream: '#FFFBEB',
-                    dark: '#1C1917',
-                    green: '#10B981',
+                    saffron: '#C8550A',
+                    'saffron-dark': '#A03F05',
+                    'saffron-light': '#E8712A',
+                    cream: '#F9F4EE',
+                    'warm-white': '#FDF9F5',
+                    dark: '#1A1008',
+                    green: '#2E7D4F',
+                    'green-bg': '#EBF5EE',
+                    error: '#C0392B',
+                    warning: '#E67E22',
                 },
             },
             fontFamily: {
-                "display": ["Manrope", "sans-serif"]
+                "heading": ["'Fraunces'", "Georgia", "serif"],
+                "body": ["'DM Sans'", "system-ui", "sans-serif"],
             },
             borderRadius: {
                 'tiffin': '2rem',

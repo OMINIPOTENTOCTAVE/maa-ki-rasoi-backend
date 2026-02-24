@@ -43,7 +43,7 @@ export default function CustomerView({ cart, addToCart, updateQty }) {
             <div style={{
                 borderRadius: '24px',
                 marginBottom: '2rem',
-                background: 'linear-gradient(135deg, rgba(255,87,34,0.1) 0%, rgba(255,152,0,0.1) 100%)',
+                background: 'linear-gradient(135deg, rgba(200,85,10,0.1) 0%, rgba(200,85,10,0.05) 100%)',
                 padding: '2rem 1.5rem',
                 textAlign: 'center',
                 boxShadow: '0 4px 12px rgba(0,0,0,0.03)'
@@ -57,7 +57,7 @@ export default function CustomerView({ cart, addToCart, updateQty }) {
                 <button
                     className="btn"
                     onClick={() => setIsWizardOpen(true)}
-                    style={{ fontSize: '1.1rem', padding: '1rem 2rem', display: 'inline-flex', alignItems: 'center', gap: '0.5rem', boxShadow: '0 8px 24px rgba(255,87,34,0.3)', width: 'auto' }}
+                    style={{ fontSize: '1.1rem', padding: '1rem 2rem', display: 'inline-flex', alignItems: 'center', gap: '0.5rem', boxShadow: '0 8px 24px rgba(200,85,10,0.3)', width: 'auto' }}
                 >
                     <CalendarRange size={24} /> Subscribe to a Plan
                 </button>

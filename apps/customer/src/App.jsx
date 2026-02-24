@@ -76,7 +76,7 @@ function App() {
     return (
         <BrowserRouter>
             {isOffline && (
-                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, background: '#ff9800', color: '#fff', textAlign: 'center', padding: '0.5rem', zIndex: 9999, fontWeight: 'bold' }}>
+                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, background: '#E67E22', color: '#fff', textAlign: 'center', padding: '0.5rem', zIndex: 9999, fontWeight: 'bold' }}>
                     ⚠️ You are currently offline. Viewing cached mode.
                 </div>
             )}
@@ -89,12 +89,27 @@ function App() {
                 <Route path="/login" element={<Login />} />
                 <Route path="/checkout" element={
                     <ProtectedRoute>
-                        <Checkout cart={cart} updateQty={updateQty} clearCart={clearCart} />
+                        <CheckoutPage cart={cart} updateQty={updateQty} clearCart={clearCart} />
                     </ProtectedRoute>
                 } />
             </Routes>
         </BrowserRouter>
     )
+}
+
+/**
+ * Wrapper that gives the standalone /checkout route a proper desktop layout.
+ * On desktop: centered container with max-width.
+ * On mobile: full-screen as before.
+ */
+function CheckoutPage({ cart, updateQty, clearCart }) {
+    return (
+        <div className="min-h-screen bg-brand-cream dark:bg-brand-dark">
+            <div className="max-w-2xl mx-auto">
+                <Checkout cart={cart} updateQty={updateQty} clearCart={clearCart} />
+            </div>
+        </div>
+    );
 }
 
 export default App;

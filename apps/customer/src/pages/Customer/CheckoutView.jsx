@@ -164,7 +164,7 @@ export default function CheckoutView({ onBack, onSuccessComplete, planConfig }) 
                     contact: subscriptionPayload.customerPhone,
                 },
                 theme: {
-                    color: "#f59e0b"
+                    color: "#C8550A"
                 }
             };
 
@@ -183,16 +183,16 @@ export default function CheckoutView({ onBack, onSuccessComplete, planConfig }) 
     }, [isProcessing, paymentMethod, planConfig]);
 
     return (
-        <div className="absolute inset-0 z-50 bg-[#f8f7f5] dark:bg-[#221b10] flex flex-col no-scrollbar overflow-y-auto">
-            <header className="sticky top-0 z-10 flex items-center justify-between bg-white/95 dark:bg-[#221b10]/95 backdrop-blur-md px-4 py-4 transition-colors">
-                <button onClick={onBack} className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors">
+        <div className="relative z-50 bg-[#f8f7f5] dark:bg-[#221b10] flex flex-col no-scrollbar overflow-y-auto h-full">
+            <header className="sticky top-0 z-10 flex items-center justify-between bg-white/95 dark:bg-[#221b10]/95 backdrop-blur-md px-4 md:px-6 py-4 transition-colors">
+                <button onClick={onBack} className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors md:hidden">
                     <span className="material-symbols-outlined text-2xl">arrow_back</span>
                 </button>
-                <h1 className="text-lg font-bold">Checkout</h1>
-                <div className="w-10"></div>
+                <h1 className="text-lg font-bold font-heading">Checkout</h1>
+                <div className="w-10 md:hidden"></div>
             </header>
 
-            <main className="flex flex-col gap-6 p-4 pb-32">
+            <main className="flex flex-col gap-6 p-4 md:p-6 pb-32 md:pb-8 flex-1">
                 <section className="rounded-xl bg-white dark:bg-[#2d2418] shadow-sm p-4 border border-gray-100 dark:border-gray-800">
                     <div className="flex items-start justify-between gap-4">
                         <div className="flex gap-4 flex-1">
@@ -272,7 +272,7 @@ export default function CheckoutView({ onBack, onSuccessComplete, planConfig }) 
                 </section>
             </main>
 
-            <footer className="fixed bottom-0 left-0 right-0 bg-white/80 dark:bg-[#221b10]/80 backdrop-blur-lg border-t border-slate-200 dark:border-white/5 p-4 z-20">
+            <footer className="sticky bottom-0 bg-white/80 dark:bg-[#221b10]/80 backdrop-blur-lg border-t border-slate-200 dark:border-white/5 p-4 z-20">
                 <button
                     onClick={handlePay}
                     disabled={isProcessing}

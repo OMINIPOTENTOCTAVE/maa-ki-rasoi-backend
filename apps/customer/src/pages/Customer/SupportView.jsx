@@ -2,18 +2,18 @@ import React from 'react';
 
 export default function SupportView({ onBack }) {
     return (
-        <div className="flex flex-col h-full w-full bg-brand-cream dark:bg-brand-dark pb-24">
-            <header className="flex items-center justify-between px-4 py-3 sticky top-0 z-10 bg-white/80 dark:bg-[#221b10]/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800">
-                <button onClick={onBack} className="flex items-center justify-center p-2 rounded-full hover:bg-gray-200 dark:hover:bg-[#2d2418] transition-colors">
+        <div className="flex flex-col h-full w-full bg-brand-cream dark:bg-brand-dark pb-24 md:pb-8">
+            <header className="flex items-center justify-between px-4 md:px-6 py-3 sticky top-0 z-10 bg-white/80 dark:bg-[#221b10]/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800">
+                <button onClick={onBack} className="flex items-center justify-center p-2 rounded-full hover:bg-gray-200 dark:hover:bg-[#2d2418] transition-colors md:hidden">
                     <span className="material-symbols-outlined text-slate-900 dark:text-slate-100">arrow_back</span>
                 </button>
-                <h1 className="text-lg font-bold">Help & Support</h1>
-                <div className="w-10"></div>
+                <h1 className="text-lg font-bold font-heading">Help & Support</h1>
+                <div className="w-10 md:hidden"></div>
             </header>
 
-            <main className="flex-1 px-4 py-6 flex flex-col gap-6">
+            <main className="flex-1 px-4 md:px-6 lg:px-8 py-6 flex flex-col gap-6 max-w-3xl mx-auto w-full">
                 <section>
-                    <div className="bg-white dark:bg-[#2d2418] rounded-xl p-5 border border-gray-200 dark:border-gray-800 shadow-sm relative overflow-hidden group">
+                    <div className="bg-white dark:bg-[#2d2418] rounded-xl p-5 border border-gray-200 dark:border-gray-800 shadow-sm relative overflow-hidden group hover:shadow-md transition-shadow">
                         <div className="absolute top-0 left-0 w-1 h-full bg-brand-saffron"></div>
                         <div className="flex justify-between items-start mb-2">
                             <div className="flex items-center gap-2">
@@ -37,8 +37,8 @@ export default function SupportView({ onBack }) {
 
                 <section>
                     <h2 className="text-slate-900 dark:text-white font-bold text-xl mb-4">What do you need help with?</h2>
-                    <div className="grid grid-cols-2 gap-3">
-                        <button className="bg-white dark:bg-[#2d2418] border border-gray-200 dark:border-gray-800 hover:border-brand-saffron/50 p-4 rounded-xl flex flex-col items-start gap-3 transition-all text-left shadow-sm group">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <button className="bg-white dark:bg-[#2d2418] border border-gray-200 dark:border-gray-800 hover:border-brand-saffron/50 p-4 rounded-xl flex flex-col items-start gap-3 transition-all text-left shadow-sm group hover:shadow-md">
                             <div className="bg-gray-100 dark:bg-[#221b10] p-2 rounded-lg group-hover:bg-brand-saffron/20 transition-colors">
                                 <span className="material-symbols-outlined text-brand-saffron">moped</span>
                             </div>
@@ -47,13 +47,31 @@ export default function SupportView({ onBack }) {
                                 <p className="text-xs text-gray-500 dark:text-gray-400">Late or missing tiffin</p>
                             </div>
                         </button>
-                        <button className="bg-white dark:bg-[#2d2418] border border-gray-200 dark:border-gray-800 hover:border-brand-saffron/50 p-4 rounded-xl flex flex-col items-start gap-3 transition-all text-left shadow-sm group">
+                        <button className="bg-white dark:bg-[#2d2418] border border-gray-200 dark:border-gray-800 hover:border-brand-saffron/50 p-4 rounded-xl flex flex-col items-start gap-3 transition-all text-left shadow-sm group hover:shadow-md">
                             <div className="bg-gray-100 dark:bg-[#221b10] p-2 rounded-lg group-hover:bg-brand-saffron/20 transition-colors">
                                 <span className="material-symbols-outlined text-brand-saffron">restaurant_menu</span>
                             </div>
                             <div>
                                 <h3 className="font-bold text-slate-900 dark:text-white">Food Quality</h3>
                                 <p className="text-xs text-gray-500 dark:text-gray-400">Taste, hygiene, portion</p>
+                            </div>
+                        </button>
+                        <button className="bg-white dark:bg-[#2d2418] border border-gray-200 dark:border-gray-800 hover:border-brand-saffron/50 p-4 rounded-xl flex flex-col items-start gap-3 transition-all text-left shadow-sm group hover:shadow-md">
+                            <div className="bg-gray-100 dark:bg-[#221b10] p-2 rounded-lg group-hover:bg-brand-saffron/20 transition-colors">
+                                <span className="material-symbols-outlined text-brand-saffron">payments</span>
+                            </div>
+                            <div>
+                                <h3 className="font-bold text-slate-900 dark:text-white">Billing</h3>
+                                <p className="text-xs text-gray-500 dark:text-gray-400">Payment & refunds</p>
+                            </div>
+                        </button>
+                        <button className="bg-white dark:bg-[#2d2418] border border-gray-200 dark:border-gray-800 hover:border-brand-saffron/50 p-4 rounded-xl flex flex-col items-start gap-3 transition-all text-left shadow-sm group hover:shadow-md">
+                            <div className="bg-gray-100 dark:bg-[#221b10] p-2 rounded-lg group-hover:bg-brand-saffron/20 transition-colors">
+                                <span className="material-symbols-outlined text-brand-saffron">settings</span>
+                            </div>
+                            <div>
+                                <h3 className="font-bold text-slate-900 dark:text-white">Account</h3>
+                                <p className="text-xs text-gray-500 dark:text-gray-400">Settings & preferences</p>
                             </div>
                         </button>
                     </div>

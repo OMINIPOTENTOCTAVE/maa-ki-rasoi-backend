@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import useMediaQuery from '@/hooks/useMediaQuery';
 import MobileLayout from '@/layouts/MobileLayout';
+import DesktopLayout from '@/layouts/DesktopLayout';
+import RightPanel from '@/components/RightPanel';
+import DesktopModal from '@/components/DesktopModal';
 import HomeView from './Customer/HomeView';
 import ManageView from './Customer/ManageView';
 import ExplorePlansView from './Customer/ExplorePlansView';
@@ -15,9 +19,10 @@ export default function CustomerDashboard({ cart, addToCart }) {
     const [subscriptions, setSubscriptions] = useState([]);
     const [orders, setOrders] = useState([]);
     const [loadingData, setLoadingData] = useState(true);
+    const { isMobile } = useMediaQuery();
 
     // Modal screens
-    const [modalView, setModalView] = useState(null); // 'explore', 'checkout', 'support'
+    const [modalView, setModalView] = useState(null);
     const [checkoutConfig, setCheckoutConfig] = useState(null);
 
     const fetchData = async () => {
@@ -43,27 +48,46 @@ export default function CustomerDashboard({ cart, addToCart }) {
     const handleBack = () => {
         setModalView(null);
         setCheckoutConfig(null);
-        fetchData(); // Refresh basically when a modal closes
+        fetchData();
     };
 
-    // Render full-screen modals covering the layout
-    if (modalView === 'explore') {
-        return <ExplorePlansView onBack={handleBack} onCheckout={(config) => {
-            setCheckoutConfig(config);
-            setModalView('checkout');
-        }} />;
-    }
-    if (modalView === 'checkout') {
-        return <CheckoutView planConfig={checkoutConfig} onBack={handleBack} onSuccessComplete={() => {
-            setModalView('manage');
-            fetchData();
-        }} />;
-    }
-    if (modalView === 'support') {
-        return <SupportView onBack={handleBack} />;
-    }
-    if (modalView === 'manage') {
-        return <ManageView onBack={handleBack} subscriptions={subscriptions} onUpdate={fetchData} />;
+    const handleSupportClick = () => {
+        if (isMobile) {
+            setModalView('support');
+        } else {
+            setActiveTab('support');
+        }
+    };
+
+    const handleTabChange = (tab) => {
+        if (tab === 'support') {
+            handleSupportClick();
+            return;
+        }
+        setModalView(null);
+        setActiveTab(tab);
+    };
+
+    // ── Mobile: full-screen modals (original behavior) ──
+    if (isMobile) {
+        if (modalView === 'explore') {
+            return <ExplorePlansView onBack={handleBack} onCheckout={(config) => {
+                setCheckoutConfig(config);
+                setModalView('checkout');
+            }} />;
+        }
+        if (modalView === 'checkout') {
+            return <CheckoutView planConfig={checkoutConfig} onBack={handleBack} onSuccessComplete={() => {
+                setModalView('manage');
+                fetchData();
+            }} />;
+        }
+        if (modalView === 'support') {
+            return <SupportView onBack={handleBack} />;
+        }
+        if (modalView === 'manage') {
+            return <ManageView onBack={handleBack} subscriptions={subscriptions} onUpdate={fetchData} />;
+        }
     }
 
     if (loadingData) {
@@ -74,43 +98,117 @@ export default function CustomerDashboard({ cart, addToCart }) {
         );
     }
 
+    // ── Render the active view content ──
+    const renderContent = () => {
+        switch (activeTab) {
+            case 'home':
+                return (
+                    <HomeView
+                        subscriptions={subscriptions}
+                        onManageClick={() => setModalView('manage')}
+                        onExploreClick={() => setModalView('explore')}
+                    />
+                );
+            case 'menu':
+                return (
+                    <MenuView
+                        onBack={() => setActiveTab('home')}
+                        cart={cart}
+                        addToCart={addToCart}
+                    />
+                );
+            case 'orders':
+                return (
+                    <OrdersView
+                        orders={orders}
+                        subscriptions={subscriptions}
+                        onBack={() => setActiveTab('home')}
+                        onExtendPlan={() => setModalView('explore')}
+                        onReviewMeal={() => alert('Opening review prompt...')}
+                        onRepeatMeal={() => setModalView('checkout')}
+                    />
+                );
+            case 'profile':
+                return (
+                    <ProfileView
+                        onLogout={() => {
+                            localStorage.removeItem('customer_token');
+                            localStorage.removeItem('customer_data');
+                            window.location.href = '/login';
+                        }}
+                        onManageSubscription={() => setModalView('manage')}
+                        onSupportClick={handleSupportClick}
+                    />
+                );
+            case 'support':
+                return <SupportView onBack={() => setActiveTab('home')} />;
+            default:
+                return null;
+        }
+    };
+
+    // ── Desktop: modal overlay titles ──
+    const modalTitles = {
+        explore: 'Explore Plans',
+        checkout: 'Complete Checkout',
+        support: 'Help & Support',
+        manage: 'Manage Subscription',
+    };
+
+    // ── Desktop: render modal content as overlay dialog ──
+    const renderDesktopModal = () => {
+        if (!modalView) return null;
+
+        let content;
+        switch (modalView) {
+            case 'explore':
+                content = <ExplorePlansView onBack={handleBack} onCheckout={(config) => {
+                    setCheckoutConfig(config);
+                    setModalView('checkout');
+                }} />;
+                break;
+            case 'checkout':
+                content = <CheckoutView planConfig={checkoutConfig} onBack={handleBack} onSuccessComplete={() => {
+                    setModalView('manage');
+                    fetchData();
+                }} />;
+                break;
+            case 'support':
+                content = <SupportView onBack={handleBack} />;
+                break;
+            case 'manage':
+                content = <ManageView onBack={handleBack} subscriptions={subscriptions} onUpdate={fetchData} />;
+                break;
+            default:
+                return null;
+        }
+
+        return (
+            <DesktopModal title={modalTitles[modalView]} onClose={handleBack}>
+                {content}
+            </DesktopModal>
+        );
+    };
+
+    // ── Layout Selection ──
+    if (isMobile) {
+        return (
+            <MobileLayout activeTab={activeTab} onTabChange={handleTabChange}>
+                {renderContent()}
+            </MobileLayout>
+        );
+    }
+
     return (
-        <MobileLayout activeTab={activeTab} onTabChange={setActiveTab}>
-            {activeTab === 'home' &&
-                <HomeView
-                    subscriptions={subscriptions}
-                    onManageClick={() => setModalView('manage')}
-                    onExploreClick={() => setModalView('explore')}
-                />
-            }
-            {activeTab === 'menu' &&
-                <MenuView
-                    onBack={() => setActiveTab('home')}
-                    cart={cart}
-                    addToCart={addToCart}
-                />
-            }
-            {activeTab === 'orders' &&
-                <OrdersView
-                    orders={orders}
-                    subscriptions={subscriptions}
-                    onBack={() => setActiveTab('home')}
-                    onExtendPlan={() => setModalView('explore')}
-                    onReviewMeal={() => alert('Opening review prompt...')}
-                    onRepeatMeal={() => setModalView('checkout')}
-                />
-            }
-            {activeTab === 'profile' &&
-                <ProfileView
-                    onLogout={() => {
-                        localStorage.removeItem('customer_token');
-                        localStorage.removeItem('customer_data');
-                        window.location.href = '/login';
-                    }}
-                    onManageSubscription={() => setModalView('manage')}
-                    onSupportClick={() => setModalView('support')}
-                />
-            }
-        </MobileLayout>
+        <>
+            <DesktopLayout
+                activeTab={activeTab}
+                onTabChange={handleTabChange}
+                rightPanel={<RightPanel subscriptions={subscriptions} />}
+            >
+                {renderContent()}
+            </DesktopLayout>
+            {renderDesktopModal()}
+        </>
     );
 }

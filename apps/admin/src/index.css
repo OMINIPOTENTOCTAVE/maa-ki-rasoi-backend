@@ -1,34 +1,37 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --primary: #ff5722;
-  --primary-hover: #e64a19;
-  --bg-gradient: linear-gradient(135deg, #fff7f0 0%, #ffe9d9 100%);
-  --text-main: #2b1c18;
-  --text-muted: #8c7670;
+  --primary: #C8550A;
+  --primary-hover: #A03F05;
+  --primary-light: #E8712A;
+  --bg-gradient: #F9F4EE;
+  --text-main: #1A1008;
+  --text-body: #3D2B1A;
+  --text-muted: #8A6E58;
   --card-bg: rgba(255, 255, 255, 0.85);
-  --border: rgba(255, 87, 34, 0.15);
-  --success: #10b981;
-  --warning: #f59e0b;
-  --glass-shadow: 0 8px 32px 0 rgba(255, 87, 34, 0.1);
+  --border: rgba(200, 85, 10, 0.15);
+  --success: #2E7D4F;
+  --warning: #E67E22;
+  --error: #C0392B;
+  --glass-shadow: 0 8px 32px 0 rgba(200, 85, 10, 0.1);
 }
 
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  font-family: 'Outfit', system-ui, sans-serif;
+  font-family: 'DM Sans', system-ui, sans-serif;
   -webkit-tap-highlight-color: transparent;
 }
 
 body {
   background: var(--bg-gradient);
   background-attachment: fixed;
-  color: var(--text-main);
+  color: var(--text-body);
   -webkit-font-smoothing: antialiased;
   min-height: 100vh;
 }
@@ -61,7 +64,7 @@ body {
   font-size: 1.8rem;
   font-weight: 800;
   letter-spacing: -0.5px;
-  background: linear-gradient(90deg, #ff5722 0%, #ff9800 100%);
+  background: linear-gradient(90deg, #C8550A 0%, #E8712A 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -72,7 +75,6 @@ body {
   flex: 1;
   padding: 1.5rem 1rem;
   padding-bottom: 100px;
-  /* Space for sticky cart */
   animation: fadeIn 0.4s ease-out;
 }
 
@@ -103,13 +105,13 @@ body {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  box-shadow: 0 4px 15px rgba(255, 87, 34, 0.3);
+  box-shadow: 0 4px 15px rgba(200, 85, 10, 0.3);
 }
 
 .btn:hover {
   background-color: var(--primary-hover);
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(255, 87, 34, 0.4);
+  box-shadow: 0 6px 20px rgba(200, 85, 10, 0.4);
 }
 
 .btn:active {
@@ -117,13 +119,13 @@ body {
 }
 
 .btn-secondary {
-  background-color: rgba(255, 87, 34, 0.1);
+  background-color: rgba(200, 85, 10, 0.1);
   color: var(--primary);
   box-shadow: none;
 }
 
 .btn-secondary:hover {
-  background-color: rgba(255, 87, 34, 0.15);
+  background-color: rgba(200, 85, 10, 0.15);
   box-shadow: none;
 }
 
@@ -152,7 +154,7 @@ body {
 
 .card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 12px 40px 0 rgba(255, 87, 34, 0.15);
+  box-shadow: 0 12px 40px 0 rgba(200, 85, 10, 0.15);
 }
 
 .input-field {
@@ -171,7 +173,7 @@ body {
   outline: none;
   border-color: var(--primary);
   background: white;
-  box-shadow: 0 0 0 3px rgba(255, 87, 34, 0.1);
+  box-shadow: 0 0 0 3px rgba(200, 85, 10, 0.1);
 }
 
 .menu-list {
@@ -205,7 +207,7 @@ body {
   transform: translateX(-50%);
   width: calc(100% - 2rem);
   max-width: 560px;
-  background: rgba(43, 28, 24, 0.95);
+  background: rgba(26, 16, 8, 0.95);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   padding: 1rem 1.5rem;
@@ -237,21 +239,20 @@ body {
 }
 
 .sticky-cart .btn {
-  background: #ff9800;
-  /* Contrast against dark bg */
+  background: #E8712A;
   color: #fff;
-  box-shadow: 0 4px 15px rgba(255, 152, 0, 0.3);
+  box-shadow: 0 4px 15px rgba(200, 85, 10, 0.3);
 }
 
 .sticky-cart .btn:hover {
-  background: #f57c00;
+  background: #C8550A;
 }
 
 /* Category Pills */
 .category-pill {
   padding: 0.5rem 1.2rem;
   border-radius: 24px;
-  border: 1px solid rgba(255, 87, 34, 0.2);
+  border: 1px solid rgba(200, 85, 10, 0.2);
   background: rgba(255, 255, 255, 0.6);
   color: var(--text-main);
   cursor: pointer;
@@ -271,7 +272,7 @@ body {
   background: var(--primary);
   color: white;
   border-color: var(--primary);
-  box-shadow: 0 4px 12px rgba(255, 87, 34, 0.3);
+  box-shadow: 0 4px 12px rgba(200, 85, 10, 0.3);
 }
 
 /* Quantity controls in card */
@@ -279,7 +280,7 @@ body {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  background: rgba(255, 87, 34, 0.05);
+  background: rgba(200, 85, 10, 0.05);
   border-radius: 24px;
   padding: 0.25rem 0.5rem;
 }
@@ -287,7 +288,7 @@ body {
 .qty-btn {
   background: white;
   color: var(--primary);
-  border: 1px solid rgba(255, 87, 34, 0.2);
+  border: 1px solid rgba(200, 85, 10, 0.2);
   width: 34px;
   height: 34px;
   display: flex;
@@ -336,18 +337,18 @@ body {
 }
 
 .status-Pending {
-  background: #fff3cd;
-  color: #856404;
+  background: #FEF3E8;
+  color: #E67E22;
 }
 
 .status-Confirmed {
-  background: #cce5ff;
-  color: #004085;
+  background: #EBF5EE;
+  color: #2E7D4F;
 }
 
 .status-Preparing {
-  background: #d4edda;
-  color: #155724;
+  background: #EBF5EE;
+  color: #2E7D4F;
 }
 
 .status-Delivered {

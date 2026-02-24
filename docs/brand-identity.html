@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Maa Ki Rasoi — Brand Identity System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet">
+<style>
+/* =============================================
+   CSS VARIABLES — BRAND TOKENS
+   ============================================= */
+:root {
+  --brand-saffron: #C8550A;
+  --brand-saffron-dark: #A03F05;
+  --brand-saffron-light: #E8712A;
+  --bg-cream: #F9F4EE;
+  --bg-warm-white: #FDF9F5;
+  --bg-card: #FFFFFF;
+  --border-subtle: #EDE4D8;
+  --accent-green: #2E7D4F;
+  --accent-green-bg: #EBF5EE;
+  --error: #C0392B;
+  --error-bg: #FDECEA;
+  --success: #2E7D4F;
+  --success-bg: #EBF5EE;
+  --warning: #E67E22;
+  --warning-bg: #FEF3E8;
+  --text-dark: #1A1008;
+  --text-body: #3D2B1A;
+  --text-muted: #8A6E58;
+  --text-placeholder: #B8A090;
+  --text-inverse: #FDF9F5;
+  --font-heading: 'Fraunces', Georgia, serif;
+  --font-body: 'DM Sans', system-ui, sans-serif;
+  --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px;
+  --space-5: 20px; --space-6: 24px; --space-8: 32px; --space-10: 40px;
+  --space-12: 48px; --space-16: 64px; --space-20: 80px; --space-24: 96px;
+  --radius-sm: 4px; --radius-md: 8px; --radius-lg: 16px; --radius-xl: 24px; --radius-pill: 999px;
+  --shadow-card: 0 1px 4px rgba(26,16,8,0.07), 0 4px 16px rgba(26,16,8,0.05);
+  --shadow-lifted: 0 2px 8px rgba(26,16,8,0.10), 0 8px 24px rgba(26,16,8,0.07);
+  --line-sm: 1.5px; --line-md: 2px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { font-family: var(--font-body); background: var(--bg-cream); color: var(--text-body); font-size: 16px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+.page-wrap { max-width: 1100px; margin: 0 auto; padding: 0 var(--space-6); }
+section { padding: var(--space-20) 0; border-bottom: 1px solid var(--border-subtle); }
+section:last-child { border-bottom: none; }
+.section-label { font-family: var(--font-body); font-size: 11px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--brand-saffron); margin-bottom: var(--space-4); }
+.section-title { font-family: var(--font-heading); font-size: clamp(28px, 4vw, 40px); font-weight: 700; color: var(--text-dark); line-height: 1.15; margin-bottom: var(--space-3); }
+.section-desc { color: var(--text-muted); max-width: 580px; font-size: 15px; line-height: 1.7; margin-bottom: var(--space-10); }
+.brand-cover { background: var(--text-dark); padding: var(--space-20) 0; position: relative; overflow: hidden; }
+.brand-cover::before { content: ''; position: absolute; top: -60px; right: -60px; width: 420px; height: 420px; border-radius: 50%; background: radial-gradient(circle, rgba(200,85,10,0.18) 0%, transparent 70%); pointer-events: none; }
+.brand-cover::after { content: ''; position: absolute; bottom: -80px; left: 40px; width: 280px; height: 280px; border-radius: 50%; background: radial-gradient(circle, rgba(200,85,10,0.10) 0%, transparent 70%); pointer-events: none; }
+.cover-inner { max-width: 1100px; margin: 0 auto; padding: 0 var(--space-6); position: relative; z-index: 1; }
+.cover-eyebrow { font-family: var(--font-body); font-size: 11px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--brand-saffron-light); margin-bottom: var(--space-5); }
+.cover-title { font-family: var(--font-heading); font-size: clamp(48px, 8vw, 88px); font-weight: 700; color: var(--text-inverse); line-height: 1.0; margin-bottom: var(--space-6); }
+.cover-title em { font-style: italic; color: var(--brand-saffron-light); }
+.cover-subtitle { font-family: var(--font-body); font-size: 16px; color: rgba(253,249,245,0.6); max-width: 500px; line-height: 1.7; margin-bottom: var(--space-12); }
+.cover-meta { display: flex; gap: var(--space-8); flex-wrap: wrap; }
+.cover-meta-item { display: flex; flex-direction: column; gap: 2px; }
+.cover-meta-item .label { font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(253,249,245,0.4); font-weight: 500; }
+.cover-meta-item .value { font-size: 14px; font-weight: 500; color: rgba(253,249,245,0.8); }
+.logo-showcase { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-6); margin-bottom: var(--space-10); }
+@media (max-width: 700px) { .logo-showcase { grid-template-columns: 1fr; } }
+.logo-card { border-radius: var(--radius-lg); padding: var(--space-10); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--space-6); min-height: 220px; }
+.logo-card.light { background: var(--bg-warm-white); border: 1px solid var(--border-subtle); }
+.logo-card.dark { background: var(--text-dark); }
+.logo-card.saffron { background: var(--brand-saffron); }
+.logo-card .card-label { font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 600; align-self: flex-start; opacity: 0.4; }
+.logo-card.dark .card-label, .logo-card.saffron .card-label { color: white; }
+.logomark-size-block { display: flex; flex-direction: column; align-items: center; gap: var(--space-2); }
+.logomark-size-block .size-label { font-size: 10px; color: var(--text-muted); letter-spacing: 0.08em; }
+.color-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: var(--space-4); margin-bottom: var(--space-10); }
+.color-chip { border-radius: var(--radius-md); overflow: hidden; border: 1px solid rgba(26,16,8,0.08); box-shadow: var(--shadow-card); }
+.color-swatch { height: 100px; width: 100%; }
+.color-info { background: white; padding: var(--space-3) var(--space-4); }
+.color-name { font-weight: 600; font-size: 13px; color: var(--text-dark); margin-bottom: 2px; }
+.color-hex { font-size: 12px; color: var(--text-muted); font-family: 'Courier New', monospace; letter-spacing: 0.04em; }
+.color-usage { font-size: 11px; color: var(--text-placeholder); margin-top: 4px; line-height: 1.4; }
+.type-specimen { margin-bottom: var(--space-10); }
+.type-block { padding: var(--space-8) 0; border-bottom: 1px solid var(--border-subtle); }
+.type-block:last-child { border-bottom: none; }
+.type-meta { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: var(--space-4); flex-wrap: wrap; gap: var(--space-2); }
+.type-role { font-size: 11px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--brand-saffron); }
+.type-spec { font-size: 12px; color: var(--text-muted); font-family: 'Courier New', monospace; }
+.type-display { font-family: var(--font-heading); font-size: clamp(48px, 7vw, 72px); font-weight: 700; line-height: 1.05; color: var(--text-dark); letter-spacing: -0.01em; }
+.type-h1 { font-family: var(--font-heading); font-size: clamp(32px, 5vw, 48px); font-weight: 700; color: var(--text-dark); line-height: 1.15; }
+.type-h2 { font-family: var(--font-heading); font-size: clamp(22px, 3vw, 32px); font-weight: 600; color: var(--text-dark); line-height: 1.2; }
+.type-h3 { font-family: var(--font-heading); font-size: 20px; font-weight: 600; color: var(--text-dark); line-height: 1.3; }
+.type-body { font-family: var(--font-body); font-size: 16px; color: var(--text-body); line-height: 1.7; max-width: 600px; }
+.type-small { font-family: var(--font-body); font-size: 14px; color: var(--text-muted); line-height: 1.6; }
+.type-label-style { font-family: var(--font-body); font-size: 11px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--brand-saffron); }
+.icon-grid { display: flex; flex-wrap: wrap; gap: var(--space-4); margin-bottom: var(--space-8); }
+.icon-block { display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-5) var(--space-4); background: white; border: 1px solid var(--border-subtle); border-radius: var(--radius-md); min-width: 90px; box-shadow: var(--shadow-card); }
+.icon-block svg { color: var(--text-dark); }
+.icon-name { font-size: 10px; text-align: center; color: var(--text-muted); letter-spacing: 0.06em; font-weight: 500; }
+.component-group { margin-bottom: var(--space-12); }
+.component-label { font-size: 11px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-muted); margin-bottom: var(--space-4); }
+.btn { display: inline-flex; align-items: center; gap: var(--space-2); font-family: var(--font-body); font-weight: 600; font-size: 14px; border: none; cursor: pointer; border-radius: var(--radius-md); padding: 12px 20px; text-decoration: none; transition: all 0.18s ease; line-height: 1; letter-spacing: 0.01em; }
+.btn-primary { background: var(--brand-saffron); color: white; }
+.btn-primary:hover { background: var(--brand-saffron-dark); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(200,85,10,0.3); }
+.btn-secondary { background: transparent; color: var(--brand-saffron); border: var(--line-md) solid var(--brand-saffron); }
+.btn-secondary:hover { background: rgba(200,85,10,0.05); transform: translateY(-1px); }
+.btn-ghost { background: transparent; color: var(--text-body); border: var(--line-md) solid var(--border-subtle); }
+.btn-ghost:hover { background: var(--bg-cream); }
+.btn-sm { font-size: 12px; padding: 8px 14px; border-radius: var(--radius-sm); }
+.btn-lg { font-size: 16px; padding: 16px 28px; border-radius: var(--radius-md); }
+.btn-pill { border-radius: var(--radius-pill); }
+.btn-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; margin-bottom: var(--space-6); }
+.input-group { display: flex; flex-direction: column; gap: var(--space-2); max-width: 360px; margin-bottom: var(--space-5); }
+.input-label { font-size: 13px; font-weight: 500; color: var(--text-dark); }
+.input-field { font-family: var(--font-body); font-size: 15px; color: var(--text-dark); background: white; border: var(--line-md) solid var(--border-subtle); border-radius: var(--radius-md); padding: 12px var(--space-4); outline: none; transition: border-color 0.15s; width: 100%; }
+.input-field::placeholder { color: var(--text-placeholder); }
+.input-field:focus { border-color: var(--brand-saffron); box-shadow: 0 0 0 3px rgba(200,85,10,0.12); }
+.input-hint { font-size: 12px; color: var(--text-muted); }
+.input-error { border-color: var(--error) !important; }
+.input-error-msg { font-size: 12px; color: var(--error); }
+.card { background: white; border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: var(--space-6); box-shadow: var(--shadow-card); }
+.card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: var(--space-4); }
+.plan-tag { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; padding: 4px 10px; border-radius: var(--radius-pill); background: rgba(200,85,10,0.10); color: var(--brand-saffron); }
+.plan-tag.active { background: var(--accent-green-bg); color: var(--accent-green); }
+.card-title { font-family: var(--font-heading); font-size: 18px; font-weight: 600; color: var(--text-dark); margin-bottom: 2px; }
+.card-sub { font-size: 13px; color: var(--text-muted); }
+.card-price { font-family: var(--font-heading); font-size: 28px; font-weight: 700; color: var(--text-dark); margin: var(--space-4) 0; line-height: 1; }
+.card-price span { font-size: 14px; font-weight: 400; color: var(--text-muted); font-family: var(--font-body); }
+.card-feature { display: flex; align-items: center; gap: var(--space-2); font-size: 13px; color: var(--text-body); margin-bottom: 6px; }
+.card-feature svg { color: var(--accent-green); flex-shrink: 0; }
+.badge { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 500; padding: 4px 10px; border-radius: var(--radius-pill); }
+.badge-success { background: var(--success-bg); color: var(--success); }
+.badge-error { background: var(--error-bg); color: var(--error); }
+.badge-warning { background: var(--warning-bg); color: var(--warning); }
+.badge-neutral { background: var(--border-subtle); color: var(--text-muted); }
+.badge-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; display: inline-block; }
+.toast { display: flex; align-items: flex-start; gap: var(--space-3); padding: var(--space-4) var(--space-5); border-radius: var(--radius-md); border-left: 3px solid; background: white; box-shadow: var(--shadow-lifted); max-width: 380px; margin-bottom: var(--space-3); }
+.toast-success { border-color: var(--success); }
+.toast-error { border-color: var(--error); }
+.toast-info { border-color: var(--brand-saffron); }
+.toast-content .toast-title { font-size: 14px; font-weight: 600; color: var(--text-dark); }
+.toast-content .toast-body { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+.toast-icon { margin-top: 1px; flex-shrink: 0; }
+.phone-frame { width: 310px; background: var(--text-dark); border-radius: 40px; padding: 10px; box-shadow: 0 24px 80px rgba(26,16,8,0.3), 0 4px 16px rgba(26,16,8,0.2); flex-shrink: 0; }
+.phone-screen { background: var(--bg-cream); border-radius: 32px; overflow: hidden; height: 600px; position: relative; }
+.phone-statusbar { background: white; padding: 12px 20px 8px; display: flex; justify-content: space-between; align-items: center; }
+.phone-time { font-size: 12px; font-weight: 600; color: var(--text-dark); }
+.phone-icons { display: flex; gap: 4px; align-items: center; }
+.app-header { background: white; padding: 14px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-subtle); }
+.app-header-logo { font-family: var(--font-heading); font-size: 18px; font-weight: 700; color: var(--text-dark); }
+.app-header-logo em { color: var(--brand-saffron); font-style: italic; }
+.app-body { padding: 16px; overflow-y: auto; height: calc(100% - 120px); }
+.app-greeting { font-size: 12px; color: var(--text-muted); margin-bottom: 2px; }
+.app-name-row { font-family: var(--font-heading); font-size: 20px; font-weight: 700; color: var(--text-dark); margin-bottom: 14px; }
+.app-meal-banner { background: var(--brand-saffron); border-radius: 14px; padding: 16px; color: white; margin-bottom: 14px; position: relative; overflow: hidden; }
+.app-meal-banner::after { content: ''; position: absolute; right: -20px; top: -20px; width: 100px; height: 100px; background: rgba(255,255,255,0.08); border-radius: 50%; }
+.app-meal-banner .meal-label { font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.8; margin-bottom: 4px; }
+.app-meal-banner .meal-name { font-family: var(--font-heading); font-size: 17px; font-weight: 600; margin-bottom: 6px; line-height: 1.2; }
+.app-meal-banner .meal-eta { font-size: 12px; opacity: 0.85; display: flex; align-items: center; gap: 4px; }
+.app-mini-card { background: white; border: 1px solid var(--border-subtle); border-radius: 10px; padding: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+.app-mini-label { font-size: 11px; color: var(--text-muted); margin-bottom: 2px; }
+.app-mini-value { font-size: 14px; font-weight: 600; color: var(--text-dark); }
+.app-nav { position: absolute; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid var(--border-subtle); padding: 10px 16px 14px; display: flex; justify-content: space-around; align-items: center; }
+.nav-item { display: flex; flex-direction: column; align-items: center; gap: 3px; color: var(--text-muted); }
+.nav-item.active { color: var(--brand-saffron); }
+.nav-item .nav-label { font-size: 9px; font-weight: 500; letter-spacing: 0.04em; }
+.tiffin-mockup { display: flex; gap: var(--space-6); flex-wrap: wrap; align-items: flex-start; }
+.tiffin-box { width: 200px; height: 260px; background: var(--brand-saffron); border-radius: 12px 12px 8px 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; box-shadow: 0 8px 32px rgba(200,85,10,0.3), inset 0 1px 0 rgba(255,255,255,0.2); position: relative; overflow: hidden; }
+.tiffin-box::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: rgba(255,255,255,0.3); }
+.tiffin-box .tiffin-logo { font-family: var(--font-heading); font-size: 20px; font-weight: 700; color: white; text-align: center; line-height: 1.15; }
+.tiffin-box .tiffin-logo em { font-style: italic; display: block; font-size: 14px; opacity: 0.8; font-weight: 400; }
+.tiffin-label-strip { background: var(--text-dark); padding: 14px 20px; border-radius: 8px; max-width: 220px; }
+.tiffin-label-strip .label-name { font-size: 12px; font-weight: 600; color: white; margin-bottom: 4px; }
+.tiffin-label-strip .label-meal { font-family: var(--font-heading); font-size: 16px; font-weight: 600; color: var(--brand-saffron-light); margin-bottom: 8px; }
+.tiffin-label-strip .label-date { font-size: 11px; color: rgba(255,255,255,0.5); }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-8); align-items: start; }
+.three-col { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-6); }
+@media (max-width: 768px) { .two-col, .three-col { grid-template-columns: 1fr; } }
+.spacing-row { display: flex; flex-wrap: wrap; gap: var(--space-4); align-items: flex-end; margin-bottom: var(--space-6); }
+.space-block { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.space-swatch { background: var(--brand-saffron); border-radius: 2px; opacity: 0.7; width: 8px; }
+.space-label { font-size: 10px; color: var(--text-muted); text-align: center; }
+.radius-row { display: flex; flex-wrap: wrap; gap: var(--space-5); align-items: center; margin-bottom: var(--space-6); }
+.radius-block { display: flex; flex-direction: column; align-items: center; gap: var(--space-3); }
+.radius-swatch { width: 64px; height: 64px; background: var(--text-dark); }
+.radius-label { font-size: 10px; color: var(--text-muted); font-family: monospace; }
+.illustration-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: var(--space-4); margin-bottom: var(--space-8); }
+.illus-card { background: white; border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: var(--space-5); display: flex; flex-direction: column; align-items: center; gap: var(--space-3); box-shadow: var(--shadow-card); }
+.illus-scene { width: 100px; height: 100px; display: flex; align-items: center; justify-content: center; }
+.illus-name { font-size: 12px; color: var(--text-muted); text-align: center; font-weight: 500; }
+</style>
+</head>
+<body>
+
+<!-- COVER -->
+<div class="brand-cover">
+  <div class="cover-inner">
+    <p class="cover-eyebrow">Brand Identity System · Version 1.0</p>
+    <h1 class="cover-title">Maa Ki<br><em>Rasoi</em></h1>
+    <p class="cover-subtitle">Lean, operator-first brand system for India's most trusted daily tiffin subscription platform.</p>
+    <div class="cover-meta">
+      <div class="cover-meta-item"><span class="label">Market</span><span class="value">Delhi NCR → Pan-India</span></div>
+      <div class="cover-meta-item"><span class="label">Stage</span><span class="value">Seed / MVP</span></div>
+      <div class="cover-meta-item"><span class="label">Platform</span><span class="value">PWA + WhatsApp</span></div>
+      <div class="cover-meta-item"><span class="label">Year</span><span class="value">2025</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="page-wrap">
+
+<!-- BRAND POSITIONING -->
+<section>
+  <p class="section-label">01 — Foundation</p>
+  <h2 class="section-title">Brand Philosophy</h2>
+  <p class="section-desc">Every design decision flows from a single truth: Maa Ki Rasoi is not a tech product with food. It is a trust relationship with technology as the delivery mechanism.</p>
+  <div class="three-col">
+    <div class="card">
+      <div style="font-size:28px;margin-bottom:var(--space-4)">🔒</div>
+      <div class="card-title" style="font-size:16px;margin-bottom:6px">Operational Reliability</div>
+      <p class="card-sub" style="font-size:13px;line-height:1.6">The brand promise is on-time delivery, every day. Design must reinforce discipline and system — not spontaneity.</p>
+    </div>
+    <div class="card">
+      <div style="font-size:28px;margin-bottom:var(--space-4)">🤝</div>
+      <div class="card-title" style="font-size:16px;margin-bottom:6px">Earned Trust</div>
+      <p class="card-sub" style="font-size:13px;line-height:1.6">Trust is not claimed through logos. It is communicated through hygiene signals, transparent information, and calm confidence.</p>
+    </div>
+    <div class="card">
+      <div style="font-size:28px;margin-bottom:var(--space-4)">🏠</div>
+      <div class="card-title" style="font-size:16px;margin-bottom:6px">Maa Ka Pyaar</div>
+      <p class="card-sub" style="font-size:13px;line-height:1.6">Warmth is not decorative. It is structural — in the name, the meal, the ritual of daily delivery. Design channels this without sentimentality.</p>
+    </div>
+  </div>
+</section>
+
+<!-- LOGO -->
+<section>
+  <p class="section-label">02 — Logo System</p>
+  <h2 class="section-title">Logo & Logomark</h2>
+  <p class="section-desc">The logomark abstracts a tiffin box — three stacked circles — reduced to their essential geometry.</p>
+  <div class="logo-showcase">
+    <div class="logo-card light">
+      <span class="card-label">Primary — Light background</span>
+      <svg width="280" height="64" viewBox="0 0 280 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="32" cy="18" rx="20" ry="7" fill="#C8550A"/>
+        <ellipse cx="32" cy="31" rx="22" ry="7.5" fill="#C8550A" opacity="0.75"/>
+        <ellipse cx="32" cy="44" rx="24" ry="8" fill="#C8550A" opacity="0.50"/>
+        <rect x="29" y="8" width="6" height="6" rx="3" fill="#C8550A"/>
+        <text x="62" y="26" font-family="Georgia, serif" font-size="22" font-weight="700" fill="#1A1008" letter-spacing="-0.3">Maa Ki</text>
+        <text x="62" y="50" font-family="Georgia, serif" font-size="22" font-weight="700" fill="#C8550A" font-style="italic" letter-spacing="-0.3">Rasoi</text>
+      </svg>
+    </div>
+    <div class="logo-card dark">
+      <span class="card-label">Reversed — Dark background</span>
+      <svg width="280" height="64" viewBox="0 0 280 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="32" cy="18" rx="20" ry="7" fill="#E8712A"/>
+        <ellipse cx="32" cy="31" rx="22" ry="7.5" fill="#E8712A" opacity="0.75"/>
+        <ellipse cx="32" cy="44" rx="24" ry="8" fill="#E8712A" opacity="0.50"/>
+        <rect x="29" y="8" width="6" height="6" rx="3" fill="#E8712A"/>
+        <text x="62" y="26" font-family="Georgia, serif" font-size="22" font-weight="700" fill="#FDF9F5" letter-spacing="-0.3">Maa Ki</text>
+        <text x="62" y="50" font-family="Georgia, serif" font-size="22" font-weight="700" fill="#E8712A" font-style="italic" letter-spacing="-0.3">Rasoi</text>
+      </svg>
+    </div>
+    <div class="logo-card saffron">
+      <span class="card-label">Brand — Saffron background</span>
+      <svg width="280" height="64" viewBox="0 0 280 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="32" cy="18" rx="20" ry="7" fill="white"/>
+        <ellipse cx="32" cy="31" rx="22" ry="7.5" fill="white" opacity="0.75"/>
+        <ellipse cx="32" cy="44" rx="24" ry="8" fill="white" opacity="0.50"/>
+        <rect x="29" y="8" width="6" height="6" rx="3" fill="white"/>
+        <text x="62" y="26" font-family="Georgia, serif" font-size="22" font-weight="700" fill="white" letter-spacing="-0.3">Maa Ki</text>
+        <text x="62" y="50" font-family="Georgia, serif" font-size="22" font-weight="700" fill="white" font-style="italic" letter-spacing="-0.3">Rasoi</text>
+      </svg>
+    </div>
+    <div class="logo-card light">
+      <span class="card-label">Logomark only — All sizes</span>
+      <div style="display:flex;gap:20px;align-items:center;flex-wrap:wrap;justify-content:center">
+        <div class="logomark-size-block">
+          <svg width="64" height="64" viewBox="0 0 64 64" fill="none"><ellipse cx="32" cy="20" rx="20" ry="7" fill="#C8550A"/><ellipse cx="32" cy="33" rx="22" ry="7.5" fill="#C8550A" opacity="0.72"/><ellipse cx="32" cy="46" rx="24" ry="8" fill="#C8550A" opacity="0.46"/><rect x="29" y="10" width="6" height="7" rx="3" fill="#C8550A"/></svg>
+          <span class="size-label">64px</span>
+        </div>
+        <div class="logomark-size-block">
+          <svg width="40" height="40" viewBox="0 0 64 64" fill="none"><ellipse cx="32" cy="20" rx="20" ry="7" fill="#C8550A"/><ellipse cx="32" cy="33" rx="22" ry="7.5" fill="#C8550A" opacity="0.72"/><ellipse cx="32" cy="46" rx="24" ry="8" fill="#C8550A" opacity="0.46"/><rect x="29" y="10" width="6" height="7" rx="3" fill="#C8550A"/></svg>
+          <span class="size-label">40px</span>
+        </div>
+        <div class="logomark-size-block">
+          <svg width="24" height="24" viewBox="0 0 64 64" fill="none"><ellipse cx="32" cy="20" rx="20" ry="7" fill="#C8550A"/><ellipse cx="32" cy="33" rx="22" ry="7.5" fill="#C8550A" opacity="0.72"/><ellipse cx="32" cy="46" rx="24" ry="8" fill="#C8550A" opacity="0.46"/><rect x="29" y="10" width="6" height="7" rx="3" fill="#C8550A"/></svg>
+          <span class="size-label">24px</span>
+        </div>
+        <div class="logomark-size-block">
+          <svg width="16" height="16" viewBox="0 0 64 64" fill="none"><ellipse cx="32" cy="20" rx="20" ry="7" fill="#C8550A"/><ellipse cx="32" cy="33" rx="22" ry="7.5" fill="#C8550A" opacity="0.72"/><ellipse cx="32" cy="46" rx="24" ry="8" fill="#C8550A" opacity="0.46"/><rect x="29" y="10" width="6" height="7" rx="3" fill="#C8550A"/></svg>
+          <span class="size-label">16px</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- COLOUR -->
+<section>
+  <p class="section-label">04 — Colour System</p>
+  <h2 class="section-title">Brand Palette</h2>
+  <p class="section-desc">One strong primary. A warm neutral base. Functional semantic colours kept quiet.</p>
+  <div class="color-grid">
+    <div class="color-chip"><div class="color-swatch" style="background:#C8550A"></div><div class="color-info"><div class="color-name">Tawa Saffron</div><div class="color-hex">#C8550A</div><div class="color-usage">Primary brand · CTAs · Logomark</div></div></div>
+    <div class="color-chip"><div class="color-swatch" style="background:#A03F05"></div><div class="color-info"><div class="color-name">Saffron Dark</div><div class="color-hex">#A03F05</div><div class="color-usage">Button hover · Pressed states</div></div></div>
+    <div class="color-chip"><div class="color-swatch" style="background:#E8712A"></div><div class="color-info"><div class="color-name">Saffron Light</div><div class="color-hex">#E8712A</div><div class="color-usage">Reversed logos · Highlights on dark bg</div></div></div>
+    <div class="color-chip"><div class="color-swatch" style="background:#F9F4EE"></div><div class="color-info"><div class="color-name">Maida Cream</div><div class="color-hex">#F9F4EE</div><div class="color-usage">Page background · App shell</div></div></div>
+    <div class="color-chip"><div class="color-swatch" style="background:#EDE4D8"></div><div class="color-info"><div class="color-name">Atta Border</div><div class="color-hex">#EDE4D8</div><div class="color-usage">Card borders · Dividers</div></div></div>
+    <div class="color-chip"><div class="color-swatch" style="background:#1A1008"></div><div class="color-info"><div class="color-name">Karahi Black</div><div class="color-hex">#1A1008</div><div class="color-usage">Dark backgrounds · Primary text</div></div></div>
+    <div class="color-chip"><div class="color-swatch" style="background:#3D2B1A"></div><div class="color-info"><div class="color-name">Imli Brown</div><div class="color-hex">#3D2B1A</div><div class="color-usage">Body text · Reading copy</div></div></div>
+    <div class="color-chip"><div class="color-swatch" style="background:#8A6E58"></div><div class="color-info"><div class="color-name">Mitti Muted</div><div class="color-hex">#8A6E58</div><div class="color-usage">Secondary text · Labels</div></div></div>
+    <div class="color-chip"><div class="color-swatch" style="background:#2E7D4F"></div><div class="color-info"><div class="color-name">Tulsi Green</div><div class="color-hex">#2E7D4F</div><div class="color-usage">Success states · Active subscription</div></div></div>
+    <div class="color-chip"><div class="color-swatch" style="background:#C0392B"></div><div class="color-info"><div class="color-name">Mirchi Red</div><div class="color-hex">#C0392B</div><div class="color-usage">Error states · Alerts</div></div></div>
+  </div>
+</section>
+
+<!-- COMPONENTS DEMO -->
+<section>
+  <p class="section-label">06 — UI Components</p>
+  <h2 class="section-title">Component Library</h2>
+  <div class="component-group">
+    <p class="component-label">Buttons</p>
+    <div class="btn-row">
+      <button class="btn btn-primary btn-lg">Subscribe Now</button>
+      <button class="btn btn-primary">Start Free Trial</button>
+      <button class="btn btn-primary btn-sm">Apply</button>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-secondary btn-lg">View Plans</button>
+      <button class="btn btn-secondary">Change Preference</button>
+      <button class="btn btn-secondary btn-sm">Edit</button>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-ghost btn-lg">Cancel</button>
+      <button class="btn btn-ghost">See Menu</button>
+      <button class="btn btn-ghost btn-sm">Skip</button>
+    </div>
+  </div>
+  <div class="component-group">
+    <p class="component-label">Status Badges</p>
+    <div style="display:flex;flex-wrap:wrap;gap:var(--space-3)">
+      <span class="badge badge-success"><span class="badge-dot"></span>Active Subscription</span>
+      <span class="badge badge-error"><span class="badge-dot"></span>Delivery Failed</span>
+      <span class="badge badge-warning"><span class="badge-dot"></span>Renewal Due</span>
+      <span class="badge badge-neutral"><span class="badge-dot"></span>Paused</span>
+    </div>
+  </div>
+  <div class="component-group">
+    <p class="component-label">Toast Notifications</p>
+    <div class="toast toast-success">
+      <div class="toast-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2E7D4F" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+      <div class="toast-content"><div class="toast-title">Lunch delivered ✓</div><div class="toast-body">Dal Tadka + Chawal delivered at 12:48 PM</div></div>
+    </div>
+    <div class="toast toast-error">
+      <div class="toast-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C0392B" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+      <div class="toast-content"><div class="toast-title">Payment failed</div><div class="toast-body">UPI auto-renew failed. Retry or add a new method.</div></div>
+    </div>
+    <div class="toast toast-info">
+      <div class="toast-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C8550A" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+      <div class="toast-content"><div class="toast-title">Tomorrow: Rajma Chawal</div><div class="toast-body">Friday special. Delivery 12:00-1:30 PM.</div></div>
+    </div>
+  </div>
+</section>
+
+</div>
+</body>
+</html>

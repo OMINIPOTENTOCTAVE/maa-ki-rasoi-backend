@@ -1,9 +1,12 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import useMediaQuery from '../hooks/useMediaQuery';
+import AdminDesktopLayout from '../layouts/AdminDesktopLayout';
 
 export default function AdminDashboard() {
-    const [activeTab, setActiveTab] = useState('subscriptions'); // subscriptions, orders, menu, stats, team
+    const [activeTab, setActiveTab] = useState('subscriptions');
+    const { isMobile } = useMediaQuery();
     const [orders, setOrders] = useState([]);
     const [menuItems, setMenuItems] = useState([]);
     const [stats, setStats] = useState(null);
@@ -114,16 +117,27 @@ export default function AdminDashboard() {
         }
     };
 
-    return (
-        <div style={{ padding: '0.5rem' }}>
-            <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.5rem', overflowX: 'auto', paddingBottom: '0.5rem' }}>
-                <button className={`category-pill ${activeTab === 'subscriptions' ? 'active' : ''}`} onClick={() => setActiveTab('subscriptions')}>Subscriptions</button>
-                <button className={`category-pill ${activeTab === 'orders' ? 'active' : ''}`} onClick={() => setActiveTab('orders')}>Instant Orders ({orders.length})</button>
-                <button className={`category-pill ${activeTab === 'team' ? 'active' : ''}`} onClick={() => setActiveTab('team')}>Delivery Team</button>
-                <button className={`category-pill ${activeTab === 'stats' ? 'active' : ''}`} onClick={() => setActiveTab('stats')}>Stats</button>
-                <button className={`category-pill ${activeTab === 'menu' ? 'active' : ''}`} onClick={() => setActiveTab('menu')}>Menu</button>
-                <button className="category-pill" style={{ marginLeft: 'auto', background: 'transparent', borderColor: 'var(--text-muted)' }} onClick={() => { localStorage.removeItem('adminToken'); navigate('/admin/login'); }}>Logout</button>
-            </div>
+    const handleLogout = () => {
+        localStorage.removeItem('adminToken');
+        navigate('/admin/login');
+    };
+
+    const content = (
+        <div style={{ padding: isMobile ? '0.5rem' : '0' }}>
+            {/* Inline tab bar — mobile only */}
+            {isMobile && (
+                <>
+                    <header className="top-nav"><h1>Maa Ki Rasoi - Kitchen</h1></header>
+                    <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.5rem', overflowX: 'auto', paddingBottom: '0.5rem', padding: '0.5rem' }}>
+                        <button className={`category-pill ${activeTab === 'subscriptions' ? 'active' : ''}`} onClick={() => setActiveTab('subscriptions')}>Subscriptions</button>
+                        <button className={`category-pill ${activeTab === 'orders' ? 'active' : ''}`} onClick={() => setActiveTab('orders')}>Orders ({orders.length})</button>
+                        <button className={`category-pill ${activeTab === 'team' ? 'active' : ''}`} onClick={() => setActiveTab('team')}>Team</button>
+                        <button className={`category-pill ${activeTab === 'stats' ? 'active' : ''}`} onClick={() => setActiveTab('stats')}>Stats</button>
+                        <button className={`category-pill ${activeTab === 'menu' ? 'active' : ''}`} onClick={() => setActiveTab('menu')}>Menu</button>
+                        <button className="category-pill" style={{ marginLeft: 'auto', background: 'transparent', borderColor: 'var(--text-muted)' }} onClick={handleLogout}>Logout</button>
+                    </div>
+                </>
+            )}
 
             {activeTab === 'stats' && stats && (
                 <div className="card" style={{ padding: '2rem 1.5rem' }}>
@@ -222,13 +236,13 @@ export default function AdminDashboard() {
                                     <h3 style={{ marginBottom: '1rem' }}>Assign Setup (Today's Scheduled Deliveries)</h3>
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', maxHeight: '300px', overflowY: 'auto', paddingRight: '0.5rem' }}>
                                         {dailyProduction.data.map(delivery => (
-                                            <div key={delivery.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(0,0,0,0.02)', padding: '0.75rem 1rem', borderRadius: '8px', borderLeft: `3px solid ${delivery.mealType === 'Lunch' ? '#10b981' : '#f59e0b'}` }}>
+                                            <div key={delivery.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(0,0,0,0.02)', padding: '0.75rem 1rem', borderRadius: '8px', borderLeft: `3px solid ${delivery.mealType === 'Lunch' ? '#2E7D4F' : '#E67E22'}` }}>
                                                 <div>
                                                     <div style={{ fontWeight: 'bold' }}>{delivery.subscription.customer?.name} ({delivery.mealType})</div>
                                                     <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{delivery.subscription.customer?.address}</div>
                                                 </div>
                                                 <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                                                    <span style={{ fontSize: '0.8rem', fontWeight: 'bold', color: delivery.status === 'Pending' ? '#f59e0b' : '#10b981' }}>{delivery.status}</span>
+                                                    <span style={{ fontSize: '0.8rem', fontWeight: 'bold', color: delivery.status === 'Pending' ? '#E67E22' : '#2E7D4F' }}>{delivery.status}</span>
                                                     <select
                                                         value={delivery.deliveryPartnerId || ''}
                                                         onChange={(e) => handleAssignDriver(delivery.id, e.target.value, 'subscription')}
@@ -250,7 +264,7 @@ export default function AdminDashboard() {
                     <h3 style={{ marginBottom: '1rem', paddingLeft: '0.5rem' }}>All Active Subscribers ({subscriptions.length})</h3>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                         {subscriptions.map(sub => (
-                            <div key={sub.id} className="card" style={{ padding: '1.25rem', borderLeft: `4px solid ${sub.status === 'Active' ? '#4caf50' : '#ff9800'}` }}>
+                            <div key={sub.id} className="card" style={{ padding: '1.25rem', borderLeft: `4px solid ${sub.status === 'Active' ? '#2E7D4F' : '#E67E22'}` }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                                     <div>
                                         <h4 style={{ margin: 0, fontSize: '1.1rem' }}>{sub.customer?.name || 'Customer'}</h4>
@@ -259,7 +273,7 @@ export default function AdminDashboard() {
                                         <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '0.5rem' }}>
                                             <span style={{ background: 'rgba(0,0,0,0.05)', padding: '0.2rem 0.5rem', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 'bold' }}>{sub.planType}</span>
                                             <span style={{ background: 'rgba(0,0,0,0.05)', padding: '0.2rem 0.5rem', borderRadius: '4px', fontSize: '0.8rem' }}>{sub.mealType}</span>
-                                            <span style={{ background: 'rgba(76, 175, 80, 0.1)', color: '#2e7d32', padding: '0.2rem 0.5rem', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 'bold' }}>🟢 Pure Veg</span>
+                                            <span style={{ background: 'rgba(46, 125, 79, 0.1)', color: '#2E7D4F', padding: '0.2rem 0.5rem', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 'bold' }}>🟢 Pure Veg</span>
                                         </div>
                                         <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
                                             Ends: {new Date(sub.endDate).toLocaleDateString()}
@@ -276,8 +290,8 @@ export default function AdminDashboard() {
                                             style={{
                                                 padding: '0.4rem 0.8rem', fontSize: '0.85rem',
                                                 background: sub.status === 'Active' ? 'rgba(255, 152, 0, 0.1)' : 'var(--primary)',
-                                                color: sub.status === 'Active' ? '#f57c00' : 'white',
-                                                border: sub.status === 'Active' ? '1px solid #f57c00' : 'none'
+                                                color: sub.status === 'Active' ? '#C8550A' : 'white',
+                                                border: sub.status === 'Active' ? '1px solid #C8550A' : 'none'
                                             }}
                                             onClick={() => handleToggleSubscription(sub.id, sub.status)}
                                         >
@@ -308,7 +322,7 @@ export default function AdminDashboard() {
                     <div style={{ overflowX: 'auto', background: 'rgba(255,255,255,0.8)', borderRadius: '16px', border: '1px solid var(--border)', boxShadow: 'var(--glass-shadow)' }}>
                         <table className="admin-table">
                             <thead>
-                                <tr style={{ background: 'rgba(255,87,34,0.05)' }}>
+                                <tr style={{ background: 'rgba(200,85,10,0.05)' }}>
                                     <th>Item Details</th>
                                     <th>Price</th>
                                     <th>Status</th>
@@ -345,7 +359,7 @@ export default function AdminDashboard() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                     {orders.map(o => (
                         <div key={o.id} className="card" style={{ padding: '0', overflow: 'hidden' }}>
-                            <div style={{ padding: '1.25rem', borderBottom: '1px solid rgba(0,0,0,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,87,34,0.03)' }}>
+                            <div style={{ padding: '1.25rem', borderBottom: '1px solid rgba(0,0,0,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(200,85,10,0.03)' }}>
                                 <div>
                                     <strong style={{ fontSize: '1.1rem' }}>{o.customerName}</strong>
                                     <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>📞 {o.customerPhone}</div>
@@ -407,5 +421,15 @@ export default function AdminDashboard() {
                 </div>
             )}
         </div>
+    );
+
+    if (isMobile) {
+        return <div className="app-container"><main className="main-content">{content}</main></div>;
+    }
+
+    return (
+        <AdminDesktopLayout activeTab={activeTab} onTabChange={setActiveTab} onLogout={handleLogout}>
+            {content}
+        </AdminDesktopLayout>
     );
 }

@@ -18,8 +18,8 @@ export default defineConfig({
                 name: 'Maa Ki Rasoi',
                 short_name: 'Maa Ki Rasoi',
                 description: 'Your daily dose of home-cooked care.',
-                theme_color: '#F59E0B',
-                background_color: '#FEF3C7',
+                theme_color: '#C8550A',
+                background_color: '#F9F4EE',
                 display: 'standalone',
                 orientation: 'portrait',
                 icons: [

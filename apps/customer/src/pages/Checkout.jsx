@@ -135,7 +135,7 @@ export default function Checkout({ cart, updateQty, clearCart }) {
                     name: formData.name,
                     contact: formData.phone,
                 },
-                theme: { color: "#ff5722" }
+                theme: { color: "#C8550A" }
             };
 
             const rzp1 = new window.Razorpay(options);
@@ -166,7 +166,7 @@ export default function Checkout({ cart, updateQty, clearCart }) {
     return (
         <div style={{ animation: 'fadeIn 0.4s ease-out' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem', background: 'var(--card-bg)', backdropFilter: 'blur(8px)', padding: '1rem', borderRadius: '16px', boxShadow: 'var(--glass-shadow)' }}>
-                <button onClick={() => navigate('/')} style={{ background: 'rgba(255,87,34,0.1)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '40px', height: '40px', borderRadius: '50%', transition: 'all 0.2s' }}>
+                <button onClick={() => navigate('/')} style={{ background: 'rgba(200,85,10,0.1)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '40px', height: '40px', borderRadius: '50%', transition: 'all 0.2s' }}>
                     <ArrowLeft size={20} color="var(--primary)" />
                 </button>
                 <h2 style={{ margin: 0, fontWeight: 800 }}>Complete Your Order</h2>
@@ -180,13 +180,13 @@ export default function Checkout({ cart, updateQty, clearCart }) {
                     <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.85rem', alignItems: 'center' }}>
                         <div>
                             <span style={{ fontWeight: 600 }}>{item.name}</span>
-                            <span style={{ color: 'var(--primary)', marginLeft: '0.5rem', fontWeight: 700, background: 'rgba(255,87,34,0.1)', padding: '0.1rem 0.4rem', borderRadius: '12px', fontSize: '0.8rem' }}>x{item.qty}</span>
+                            <span style={{ color: 'var(--primary)', marginLeft: '0.5rem', fontWeight: 700, background: 'rgba(200,85,10,0.1)', padding: '0.1rem 0.4rem', borderRadius: '12px', fontSize: '0.8rem' }}>x{item.qty}</span>
                         </div>
                         <span style={{ fontWeight: 600 }}>₹{item.price * item.qty}</span>
                     </div>
                 ))}
 
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '1.25rem', paddingTop: '1.25rem', borderTop: '2px dashed rgba(255,87,34,0.2)', fontWeight: '800', fontSize: '1.2rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '1.25rem', paddingTop: '1.25rem', borderTop: '2px dashed rgba(200,85,10,0.2)', fontWeight: '800', fontSize: '1.2rem' }}>
                     <span>Total Amount</span>
                     <span style={{ color: 'var(--primary)' }}>₹{cartTotalAmount}</span>
                 </div>
@@ -236,19 +236,19 @@ export default function Checkout({ cart, updateQty, clearCart }) {
                     ></textarea>
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem', padding: '0.85rem', background: 'rgba(255,152,0,0.1)', borderRadius: '8px', border: '1px dashed rgba(255,152,0,0.3)', color: 'var(--text-main)', fontSize: '0.9rem', fontWeight: 600 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem', padding: '0.85rem', background: 'rgba(200,85,10,0.1)', borderRadius: '8px', border: '1px dashed rgba(200,85,10,0.3)', color: 'var(--text-main)', fontSize: '0.9rem', fontWeight: 600 }}>
                     <span style={{ fontSize: '1.2rem' }}>💵</span> Please keep exact change ready for Cash on Delivery.
                 </div>
 
                 {errorMsg && (
-                    <div style={{ color: 'white', background: '#dc3545', padding: '0.75rem', borderRadius: '8px', marginBottom: '1rem', textAlign: 'center', fontSize: '0.9rem', fontWeight: 600 }}>
+                    <div style={{ color: 'white', background: '#C0392B', padding: '0.75rem', borderRadius: '8px', marginBottom: '1rem', textAlign: 'center', fontSize: '0.9rem', fontWeight: 600 }}>
                         {errorMsg}
                     </div>
                 )}
 
                 <h3 className="mb-3 mt-4 text-sm font-bold uppercase tracking-wider text-slate-500">Payment Method</h3>
                 <div className="flex flex-col gap-3 mb-6">
-                    <label className="group relative flex cursor-pointer items-center gap-4 rounded-xl border bg-white border-gray-200 p-4 shadow-sm transition-all hover:border-[#ff5722]/50 has-[input:checked]:border-[#ff5722] has-[input:checked]:bg-[#ff5722]/5">
+                    <label className="group relative flex cursor-pointer items-center gap-4 rounded-xl border bg-white border-gray-200 p-4 shadow-sm transition-all hover:border-brand-saffron/50 has-[input:checked]:border-brand-saffron has-[input:checked]:bg-brand-saffron/5">
                         <input
                             checked={paymentMethod === 'ONLINE'}
                             onChange={() => setPaymentMethod('ONLINE')}
@@ -257,7 +257,7 @@ export default function Checkout({ cart, updateQty, clearCart }) {
                             <p className="text-sm font-bold m-0 leading-none">Pay Online (UPI / Card)</p>
                         </div>
                     </label>
-                    <label className="group relative flex cursor-pointer items-center gap-4 rounded-xl border bg-white border-gray-200 p-4 shadow-sm transition-all hover:border-[#ff5722]/50 has-[input:checked]:border-[#ff5722] has-[input:checked]:bg-[#ff5722]/5">
+                    <label className="group relative flex cursor-pointer items-center gap-4 rounded-xl border bg-white border-gray-200 p-4 shadow-sm transition-all hover:border-brand-saffron/50 has-[input:checked]:border-brand-saffron has-[input:checked]:bg-brand-saffron/5">
                         <input
                             checked={paymentMethod === 'COD'}
                             onChange={() => setPaymentMethod('COD')}
@@ -268,7 +268,7 @@ export default function Checkout({ cart, updateQty, clearCart }) {
                     </label>
                 </div>
 
-                <button className="btn btn-block" disabled={loading} style={{ padding: '1rem', fontSize: '1.1rem', background: 'linear-gradient(90deg, #ff5722 0%, #ff9800 100%)', boxShadow: '0 4px 15px rgba(255, 87, 34, 0.4)' }}>
+                <button className="btn btn-block" disabled={loading} style={{ padding: '1rem', fontSize: '1.1rem', background: 'linear-gradient(90deg, #C8550A 0%, #E8712A 100%)', boxShadow: '0 4px 15px rgba(200, 85, 10, 0.4)' }}>
                     {loading ? (
                         <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><span className="spinner">↻</span> Processing Order...</span>
                     ) : (

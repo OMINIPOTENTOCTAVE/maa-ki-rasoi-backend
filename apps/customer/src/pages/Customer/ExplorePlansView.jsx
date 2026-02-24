@@ -2,22 +2,22 @@ import React, { useState } from 'react';
 
 export default function ExplorePlansView({ onBack, onCheckout }) {
     return (
-        <div className="flex flex-col h-full w-full bg-brand-cream dark:bg-brand-dark overflow-y-auto pb-24 no-scrollbar">
-            <header className="sticky top-0 z-20 bg-white/80 dark:bg-[#221b10]/80 backdrop-blur-md border-b border-gray-200 dark:border-white/5 px-4 py-3">
+        <div className="flex flex-col h-full w-full bg-brand-cream dark:bg-brand-dark overflow-y-auto pb-24 md:pb-8 no-scrollbar">
+            <header className="sticky top-0 z-20 bg-white/80 dark:bg-[#221b10]/80 backdrop-blur-md border-b border-gray-200 dark:border-white/5 px-4 md:px-6 py-3">
                 <div className="flex items-center justify-between">
-                    <button onClick={onBack} className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors">
+                    <button onClick={onBack} className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors md:hidden">
                         <span className="material-symbols-outlined text-slate-900 dark:text-slate-100">arrow_back</span>
                     </button>
-                    <h1 className="text-lg font-bold text-slate-900 dark:text-slate-100">Choose Your Plan</h1>
+                    <h1 className="text-lg md:text-xl font-bold text-slate-900 dark:text-slate-100 font-heading">Choose Your Plan</h1>
                     <button className="text-brand-saffron text-sm font-bold hover:text-brand-saffron/80 transition-colors">
                         Help
                     </button>
                 </div>
             </header>
 
-            <main className="flex flex-col gap-6 p-4">
+            <main className="flex flex-col gap-6 p-4 md:p-6 lg:p-8">
                 <div className="flex flex-col gap-2 mt-2">
-                    <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white leading-tight">
+                    <h2 className="text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-white leading-tight">
                         Unlock Daily <br />
                         <span className="text-brand-saffron">Home-Cooked Meals</span>
                     </h2>
@@ -26,7 +26,8 @@ export default function ExplorePlansView({ onBack, onCheckout }) {
                     </p>
                 </div>
 
-                <div className="flex flex-col gap-5">
+                {/* Plans — side-by-side on desktop, stacked on mobile */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     {/* Weekly Trial */}
                     <div className="group relative flex flex-col gap-4 rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-[#2d2418] p-5 shadow-sm hover:shadow-md transition-all duration-300">
                         <div className="flex justify-between items-start">
@@ -49,7 +50,7 @@ export default function ExplorePlansView({ onBack, onCheckout }) {
                     </div>
 
                     {/* Monthly Standard (Highlighted) */}
-                    <div className="relative flex flex-col gap-4 rounded-2xl border-2 border-brand-saffron bg-white dark:bg-[#2d2418] p-6 shadow-xl shadow-brand-saffron/10 scale-[1.02] z-10">
+                    <div className="relative flex flex-col gap-4 rounded-2xl border-2 border-brand-saffron bg-white dark:bg-[#2d2418] p-6 shadow-xl shadow-brand-saffron/10 md:scale-100 scale-[1.02] z-10">
                         <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-brand-saffron text-slate-900 px-4 py-1 rounded-full text-xs font-extrabold tracking-wide uppercase shadow-sm">
                             Best Value
                         </div>
