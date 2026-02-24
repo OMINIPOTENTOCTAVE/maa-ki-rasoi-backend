@@ -154,12 +154,21 @@ const toggleSubscriptionStatus = async (req, res) => {
             data: { status }
         });
 
-        // Fix: Use exact midnight bound in IST to prevent overlap
-        let effectiveDate = new Date(); // Fallback
-
+        // Fix: Proper IST boundary using UTC+5:30 offset (no toLocaleString)
+        // This ensures pause/cancel takes effect for today's remaining + all future deliveries
         if (status === 'Paused' || status === 'Cancelled') {
-            const now = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
-            effectiveDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 0);
+            const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000; // +5:30 in ms
+            const nowUTC = Date.now();
+            const nowIST = new Date(nowUTC + IST_OFFSET_MS);
+
+            // Start of current IST day in UTC — any pending delivery from today onward gets cancelled
+            const startOfTodayIST = new Date(Date.UTC(
+                nowIST.getUTCFullYear(),
+                nowIST.getUTCMonth(),
+                nowIST.getUTCDate()
+            ));
+            // Convert back to UTC by subtracting IST offset
+            const effectiveDate = new Date(startOfTodayIST.getTime() - IST_OFFSET_MS);
 
             await prisma.subscriptionDelivery.updateMany({
                 where: {
@@ -171,12 +180,23 @@ const toggleSubscriptionStatus = async (req, res) => {
             });
         }
 
-        // If reactivated, we would ideally regenerate deliveries, but for MVP we just mark them Pending
+        // If reactivated, restore paused deliveries from today onward
         if (status === 'Active') {
+            const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000;
+            const nowUTC = Date.now();
+            const nowIST = new Date(nowUTC + IST_OFFSET_MS);
+
+            const startOfTodayIST = new Date(Date.UTC(
+                nowIST.getUTCFullYear(),
+                nowIST.getUTCMonth(),
+                nowIST.getUTCDate()
+            ));
+            const effectiveDate = new Date(startOfTodayIST.getTime() - IST_OFFSET_MS);
+
             await prisma.subscriptionDelivery.updateMany({
                 where: {
                     subscriptionId: id,
-                    deliveryDate: { gte: new Date() },
+                    deliveryDate: { gte: effectiveDate },
                     status: 'Paused'
                 },
                 data: { status: 'Pending' }
