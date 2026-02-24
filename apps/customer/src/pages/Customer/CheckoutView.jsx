@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import axios from 'axios';
 
 // Razorpay Script Loader
@@ -22,6 +22,20 @@ export default function CheckoutView({ onBack, onSuccessComplete, planConfig }) 
     const [showSuccess, setShowSuccess] = useState(false);
     const [enableAutoPay, setEnableAutoPay] = useState(false);
     const [paymentMethod, setPaymentMethod] = useState('ONLINE');
+    const payDebounceRef = useRef(false);
+
+    // Compute UI display values from planConfig
+    const mealLabel = planConfig?.mealType === 'Both' ? 'Lunch + Dinner' : (planConfig?.mealType || 'Lunch');
+    const planLabel = planConfig?.planType === 'MonthlyFull' ? '30-Day' : (planConfig?.planType === 'Weekly' ? '5-Day' : '22-Day');
+    const uiTitle = `${planLabel} ${mealLabel} Plan (${planConfig?.dietaryPreference || 'Veg'})`;
+    const uiRange = isWeekly ? 'Mon–Fri, 5 working days' : (planConfig?.planType === 'MonthlyFull' ? '30 consecutive days' : 'Mon–Fri, 22 working days');
+
+    // Price calculation (mirrors backend logic)
+    const durationDays = planConfig?.planType === 'Weekly' ? 5 : (planConfig?.planType === 'MonthlyFull' ? 30 : 22);
+    const perMealPrice = planConfig?.planType === 'MonthlyFull' ? 100 : (planConfig?.planType === 'Monthly' ? 110 : 120);
+    const mealsPerDay = planConfig?.mealType === 'Both' ? 2 : 1;
+    const comboDiscount = planConfig?.mealType === 'Both' ? 0.85 : 1;
+    const uiPrice = (durationDays * mealsPerDay * perMealPrice) * comboDiscount;
 
     const handleClearOtp = () => {
         setOtp('');
@@ -63,7 +77,10 @@ export default function CheckoutView({ onBack, onSuccessComplete, planConfig }) 
         }
     };
 
-    const handlePay = async () => {
+    const handlePay = useCallback(async () => {
+        // Debounce: prevent double-tap before isProcessing state takes effect
+        if (payDebounceRef.current || isProcessing) return;
+        payDebounceRef.current = true;
         setIsProcessing(true);
         const subscriptionPayload = getSubscriptionPayload();
 
@@ -161,8 +178,9 @@ export default function CheckoutView({ onBack, onSuccessComplete, planConfig }) 
             alert("An error occurred during checkout.");
         } finally {
             setIsProcessing(false);
+            payDebounceRef.current = false;
         }
-    };
+    }, [isProcessing, paymentMethod, planConfig]);
 
     return (
         <div className="absolute inset-0 z-50 bg-[#f8f7f5] dark:bg-[#221b10] flex flex-col no-scrollbar overflow-y-auto">
