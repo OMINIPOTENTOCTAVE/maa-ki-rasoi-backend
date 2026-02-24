@@ -75,7 +75,7 @@ model Subscription {
   customerId        String
   planType          String                 // "Weekly", "Monthly", "MonthlyFull"
   mealType          String                 // "Lunch", "Dinner", "Both"
-  dietaryPreference String                 // "Veg", "Non-Veg"
+  dietaryPreference String                 // "Veg" (Veg-only kitchen)
   startDate         DateTime
   endDate           DateTime
   status            String                 @default("Active") // Active, Paused, Cancelled

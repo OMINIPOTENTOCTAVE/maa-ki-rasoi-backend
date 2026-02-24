@@ -127,7 +127,7 @@ export default function SubscriptionWizard({ onClose, onSuccess }) {
 
                         <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.75rem' }}>Dietary Preference</label>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', marginBottom: '1.5rem' }}>
-                            {['Veg', 'Non-Veg'].map(d => (
+                            {['Veg'].map(d => (
                                 <button
                                     key={d}
                                     className={`category-pill ${form.dietaryPreference === d ? 'active' : ''}`}

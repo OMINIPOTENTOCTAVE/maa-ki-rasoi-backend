@@ -235,18 +235,17 @@ const getDailyProduction = async (req, res) => {
 
         // Aggregate counts for the Kitchen Dashboard
         const stats = {
-            lunchSummary: { veg: 0, nonVeg: 0, total: 0 },
-            dinnerSummary: { veg: 0, nonVeg: 0, total: 0 }
+            lunchSummary: { veg: 0, total: 0 },
+            dinnerSummary: { veg: 0, total: 0 }
         };
 
         deliveries.forEach(d => {
-            const pref = d.subscription.dietaryPreference;
             if (d.mealType === 'Lunch') {
                 stats.lunchSummary.total++;
-                pref === 'Veg' ? stats.lunchSummary.veg++ : stats.lunchSummary.nonVeg++;
+                stats.lunchSummary.veg++;
             } else {
                 stats.dinnerSummary.total++;
-                pref === 'Veg' ? stats.dinnerSummary.veg++ : stats.dinnerSummary.nonVeg++;
+                stats.dinnerSummary.veg++;
             }
         });
 

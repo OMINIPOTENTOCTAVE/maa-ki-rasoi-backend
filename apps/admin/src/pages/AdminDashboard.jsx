@@ -203,15 +203,13 @@ export default function AdminDashboard() {
                                         <div style={{ background: '#f8f9fa', padding: '1rem', borderRadius: '12px' }}>
                                             <h3 style={{ marginBottom: '0.5rem', fontSize: '1.2rem' }}>Lunch ({dailyProduction.stats.lunchSummary.total})</h3>
                                             <div style={{ display: 'flex', gap: '1rem' }}>
-                                                <div style={{ color: '#2e7d32', fontWeight: 'bold' }}>Veg: {dailyProduction.stats.lunchSummary.veg}</div>
-                                                <div style={{ color: '#c62828', fontWeight: 'bold' }}>Non-Veg: {dailyProduction.stats.lunchSummary.nonVeg}</div>
+                                                <div style={{ color: '#2e7d32', fontWeight: 'bold' }}>🟢 Veg: {dailyProduction.stats.lunchSummary.total}</div>
                                             </div>
                                         </div>
                                         <div style={{ background: '#f8f9fa', padding: '1rem', borderRadius: '12px' }}>
                                             <h3 style={{ marginBottom: '0.5rem', fontSize: '1.2rem' }}>Dinner ({dailyProduction.stats.dinnerSummary.total})</h3>
                                             <div style={{ display: 'flex', gap: '1rem' }}>
-                                                <div style={{ color: '#2e7d32', fontWeight: 'bold' }}>Veg: {dailyProduction.stats.dinnerSummary.veg}</div>
-                                                <div style={{ color: '#c62828', fontWeight: 'bold' }}>Non-Veg: {dailyProduction.stats.dinnerSummary.nonVeg}</div>
+                                                <div style={{ color: '#2e7d32', fontWeight: 'bold' }}>🟢 Veg: {dailyProduction.stats.dinnerSummary.total}</div>
                                             </div>
                                         </div>
                                     </div>
@@ -261,7 +259,7 @@ export default function AdminDashboard() {
                                         <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '0.5rem' }}>
                                             <span style={{ background: 'rgba(0,0,0,0.05)', padding: '0.2rem 0.5rem', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 'bold' }}>{sub.planType}</span>
                                             <span style={{ background: 'rgba(0,0,0,0.05)', padding: '0.2rem 0.5rem', borderRadius: '4px', fontSize: '0.8rem' }}>{sub.mealType}</span>
-                                            <span style={{ background: sub.dietaryPreference === 'Veg' ? 'rgba(76, 175, 80, 0.1)' : 'rgba(244, 67, 54, 0.1)', color: sub.dietaryPreference === 'Veg' ? '#2e7d32' : '#c62828', padding: '0.2rem 0.5rem', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 'bold' }}>{sub.dietaryPreference}</span>
+                                            <span style={{ background: 'rgba(76, 175, 80, 0.1)', color: '#2e7d32', padding: '0.2rem 0.5rem', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 'bold' }}>🟢 Pure Veg</span>
                                         </div>
                                         <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
                                             Ends: {new Date(sub.endDate).toLocaleDateString()}
