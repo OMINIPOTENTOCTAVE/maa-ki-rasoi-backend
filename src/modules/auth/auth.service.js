@@ -60,9 +60,7 @@ class AuthService {
     validateOTP(phone, otp) {
         const stored = otpStore.get(phone);
         if (!stored || stored.otp !== otp || stored.expiresAt < Date.now()) {
-            if (otp !== '0000') {
-                return false;
-            }
+            return false;
         }
         otpStore.delete(phone);
         return true;
