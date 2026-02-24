@@ -1,83 +1,120 @@
-# Maa Ki Rasoi - MVP
+# 🍛 Maa Ki Rasoi
 
-A production-ready MVP for a home-style meal ordering platform strictly aligned with a 7-day launch goal. It features a lean Supabase + Express + React stack. 
+A home-style meal ordering platform — daily tiffin subscriptions, instant orders, and delivery management. Pure Veg. ₹100/meal.
 
-## Features
-- **Frontend**: React (Vite), Mobile-first simple UI.
-- **Backend**: Node.js, Express, Prisma ORM, PostgreSQL (via Supabase).
-- **Customers**: Browse menu, Add to cart, Place Order (Cash on Delivery). No login required.
-- **Admin**: View and update order statuses, manage menu items, check today's revenue. Password protected via JWT.
+## Architecture
 
-## Setup Instructions for Local Development
+```
+maakirasoi/
+├── src/                  # Backend API (Express + Prisma)
+│   ├── modules/          # Route handlers (auth, menu, orders, subscriptions, delivery)
+│   ├── middleware/        # Auth middleware, rate limiting
+│   └── server.js         # Entry point
+├── prisma/               # Database schema & migrations
+├── apps/
+│   ├── customer/         # Customer PWA (Vite + React + Tailwind)
+│   ├── admin/            # Admin dashboard (Vite + React)
+│   └── delivery/         # Delivery partner app (Vite + React + Tailwind)
+├── render.yaml           # Render deployment config
+└── .github/workflows/    # CI pipeline
+```
 
-1. Clone or clone the repository to your local machine.
-2. Set up a Supabase project and get the `DATABASE_URL` and `DIRECT_URL`.
-3. Inside the root directory (Backend):
-   ```bash
-   cp .env.example .env
-   # Edit .env and enter your PostgreSQL URLs and a random JWT_SECRET.
-   npm install
-   npx prisma generate
-   npx prisma db push
-   
-   # Start the backend server
-   npm run dev
-   ```
+## Tech Stack
 
-4. Inside the `frontend` directory:
-   ```bash
-   cd frontend
-   cp .env.example .env
-   # Edit VITE_API_URL to point to http://localhost:5000 during local dev
-   npm install
-   npm run dev
-   ```
-   
-5. Initial Admin setup:
-   - Use Postman or CURL to make a `POST` request to `http://localhost:5000/auth/setup` with JSON:
-     ```json
-     {
-       "username": "admin",
-       "password": "yourpassword"
-     }
-     ```
-   - *Note: Only one admin user can be created via this route for security purposes. Any future admins must be manually added to the DB.*
+| Layer | Technology |
+|-------|-----------|
+| Backend | Node.js, Express 5, Prisma ORM |
+| Database | PostgreSQL (Supabase) |
+| Frontend | React 18, Vite, Tailwind CSS |
+| Auth | JWT + OTP via Fast2SMS |
+| Payments | Razorpay |
+| Hosting | Render (API), Vercel/Render (Apps) |
 
-## Deployment Steps
+## Local Development
 
-This project is built to be deployed seamlessly on modern PaaS providers.
+### Prerequisites
+- Node.js 20+
+- PostgreSQL database (or [Supabase](https://supabase.com) free tier)
 
-### 1. Database (Supabase)
-- Go to [Supabase](https://supabase.com). Create a new Project.
-- From Project Settings -> Database, copy the connection string.
-  - Transaction Pooler (Port 6543) will be your `DATABASE_URL`.
-  - Session Pooler (Port 5432) will be your `DIRECT_URL`.
-- Keep these ready. You don't need to manually create tables; Prisma will do it during the backend deployment.
+### 1. Backend Setup
+```bash
+git clone https://github.com/OMINIPOTENTOCTAVE/maa-ki-rasoi-backend.git
+cd maa-ki-rasoi-backend
 
-### 2. Backend (Render / Railway)
-- Push the repository to GitHub.
-- Go to [Render](https://render.com) and create a "New Web Service".
-- Connect the GitHub repository.
-- Root Directory: Leave empty or `/`
-- Build Command: `npm install && npx prisma generate && npx prisma db push`
-- Start Command: `npm start`
-- Environment Variables:
-  - `DATABASE_URL` (From Supabase Transaction Pooler)
-  - `DIRECT_URL` (From Supabase Session Pooler)
-  - `JWT_SECRET` (Generate a secure random string)
-  - `PORT` = `5000`
-  - `NODE_ENV` = `production`
-  - `CORS_ORIGIN` = `https://your-frontend.vercel.app` (Once Vercel is deployed)
-- Deploy your backend and note down the Render URL (e.g., `https://maakirasoi-api.onrender.com`).
+cp .env.example .env
+# Edit .env with your database URLs, JWT secret, and API keys
 
-### 3. Frontend (Vercel)
-- Go to [Vercel](https://vercel.com) and create a New Project.
-- Import the same GitHub repository.
-- Under Framework Preset, select **Vite** (or React).
-- Edit the Root Directory to `frontend`.
-- In the Environment Variables section, add:
-  - `VITE_API_URL` = (Your Backend Render URL from Step 2)
-- Click Deploy.
-- Vercel will automatically read the `vercel.json` provided so React Router works correctly.
+npm install
+npx prisma generate
+npx prisma db push
 
-Congratulations! Your MVP is live and ready to take orders. 🚀
+npm run dev          # Starts on http://localhost:5000
+```
+
+### 2. Frontend Apps
+```bash
+# Customer App
+cd apps/customer
+npm install
+npm run dev          # http://localhost:5173
+
+# Admin App (separate terminal)
+cd apps/admin
+npm install
+npm run dev          # http://localhost:5174
+
+# Delivery App (separate terminal)
+cd apps/delivery
+npm install
+npm run dev          # http://localhost:5175
+```
+
+### 3. Initial Admin Setup
+```bash
+curl -X POST http://localhost:5000/auth/setup \
+  -H "Content-Type: application/json" \
+  -d '{"username": "admin", "password": "yourpassword"}'
+```
+
+## Environment Variables
+
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `DATABASE_URL` | PostgreSQL connection string (transaction pooler) | ✅ |
+| `DIRECT_URL` | PostgreSQL direct connection (for migrations) | ✅ |
+| `JWT_SECRET` | Secret key for JWT tokens | ✅ |
+| `PORT` | Server port (default: 5000) | ❌ |
+| `NODE_ENV` | `development` or `production` | ❌ |
+| `FAST2SMS_API_KEY` | Fast2SMS API key for OTP | ✅ (production) |
+| `RAZORPAY_KEY_ID` | Razorpay key ID | ✅ (production) |
+| `RAZORPAY_KEY_SECRET` | Razorpay secret | ✅ (production) |
+| `CORS_ORIGIN` | Allowed frontend origin | ❌ |
+
+## Deployment
+
+See [DEPLOYMENT.md](DEPLOYMENT.md) for full deployment instructions.
+
+**Quick summary:**
+- **Database**: Supabase (free tier PostgreSQL)
+- **Backend**: Render Web Service (`render.yaml` included)
+- **Frontend**: Vercel or Render Static Sites
+
+## API Endpoints
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `POST` | `/auth/otp/request` | Send OTP to phone |
+| `POST` | `/auth/otp/verify` | Verify OTP & login |
+| `POST` | `/auth/login` | Admin login |
+| `GET` | `/menu` | Get today's menu |
+| `GET` | `/subscriptions` | Get user subscriptions |
+| `POST` | `/subscriptions` | Create subscription |
+| `GET` | `/orders` | Get orders |
+| `POST` | `/orders` | Place instant order |
+| `GET` | `/delivery/tasks` | Get delivery tasks |
+
+See [Postman Collection](MAA_KI_RASOI_Postman_Collection.json) for full API documentation.
+
+## License
+
+ISC

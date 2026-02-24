@@ -1,3 +1,31 @@
+# Dependencies
 node_modules
+
+# Environment
 .env
+.env.local
+.env.*.local
+
+# Prisma generated
 /src/generated/prisma
+
+# Build outputs
+apps/*/dist
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Coverage
+coverage
