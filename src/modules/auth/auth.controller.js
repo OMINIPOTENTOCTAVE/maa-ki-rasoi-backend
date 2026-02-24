@@ -113,7 +113,7 @@ const verifyOTP = async (req, res) => {
             maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
         });
 
-        res.json({ success: true, customer });
+        res.json({ success: true, token, customer });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
