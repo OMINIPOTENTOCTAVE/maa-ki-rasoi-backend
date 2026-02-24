@@ -1,10 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import axios from 'axios';
 import useMediaQuery from '@/hooks/useMediaQuery';
 import MobileLayout from '@/layouts/MobileLayout';
-import DesktopLayout from '@/layouts/DesktopLayout';
-import RightPanel from '@/components/RightPanel';
-import DesktopModal from '@/components/DesktopModal';
+
+// Desktop-only: lazy-loaded so mobile users skip this code
+const DesktopLayout = lazy(() => import('@/layouts/DesktopLayout'));
+const RightPanel = lazy(() => import('@/components/RightPanel'));
+const DesktopModal = lazy(() => import('@/components/DesktopModal'));
+
+const LazyFallback = () => (
+    <div className="flex items-center justify-center h-screen bg-brand-cream dark:bg-brand-dark">
+        <span className="material-symbols-outlined animate-spin text-brand-saffron text-3xl">progress_activity</span>
+    </div>
+);
 import HomeView from './Customer/HomeView';
 import ManageView from './Customer/ManageView';
 import ExplorePlansView from './Customer/ExplorePlansView';
@@ -200,7 +208,7 @@ export default function CustomerDashboard({ cart, addToCart }) {
     }
 
     return (
-        <>
+        <Suspense fallback={<LazyFallback />}>
             <DesktopLayout
                 activeTab={activeTab}
                 onTabChange={handleTabChange}
@@ -209,6 +217,6 @@ export default function CustomerDashboard({ cart, addToCart }) {
                 {renderContent()}
             </DesktopLayout>
             {renderDesktopModal()}
-        </>
+        </Suspense>
     );
 }

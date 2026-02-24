@@ -190,8 +190,10 @@ function DeliveryDashboard() {
     if (!isMobile) {
         return (
             <div className="flex h-screen w-full bg-brand-cream dark:bg-brand-dark overflow-hidden">
+                {/* Skip to Content */}
+                <a href="#delivery-main" className="sr-only focus:not-sr-only focus:absolute focus:z-[200] focus:top-4 focus:left-4 focus:bg-brand-saffron focus:text-white focus:px-4 focus:py-2 focus:rounded-lg focus:font-bold focus:shadow-lg">Skip to content</a>
                 {/* Sidebar */}
-                <aside className="w-[250px] shrink-0 bg-white dark:bg-[#1e1710] border-r border-gray-200 dark:border-gray-800 h-screen flex flex-col">
+                <aside className="w-[250px] shrink-0 bg-white dark:bg-[#1e1710] border-r border-gray-200 dark:border-gray-800 h-screen flex flex-col" role="navigation" aria-label="Delivery navigation">
                     <div className="px-6 pt-6 pb-4 border-b border-gray-100 dark:border-gray-800">
                         <h1 className="font-heading text-xl font-bold text-brand-saffron leading-tight">
                             Maa Ki<br /><span className="italic opacity-80">Rasoi</span>
@@ -199,7 +201,7 @@ function DeliveryDashboard() {
                         <p className="text-[10px] uppercase tracking-widest text-slate-400 mt-1 font-medium">Delivery Partner</p>
                     </div>
 
-                    <nav className="flex-1 flex flex-col gap-1 px-3 py-4">
+                    <nav className="flex-1 flex flex-col gap-1 px-3 py-4" aria-label="Delivery route">
                         <div className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold bg-brand-saffron/10 text-brand-saffron">
                             <span className="material-symbols-outlined text-xl">route</span>
                             Today's Route
@@ -210,11 +212,11 @@ function DeliveryDashboard() {
                     {/* Stats */}
                     <div className="px-4 pb-4 space-y-2">
                         <div className="flex items-center justify-between px-3 py-2 bg-brand-saffron/5 rounded-lg">
-                            <span className="text-xs font-medium text-slate-500">Meal Plans</span>
+                            <span className="text-xs font-medium text-slate-500 dark:text-slate-400">Meal Plans</span>
                             <span className="text-sm font-bold text-brand-saffron">{pendingSubs.length} pending</span>
                         </div>
                         <div className="flex items-center justify-between px-3 py-2 bg-blue-50 dark:bg-blue-900/10 rounded-lg">
-                            <span className="text-xs font-medium text-slate-500">Instant Orders</span>
+                            <span className="text-xs font-medium text-slate-500 dark:text-slate-400">Instant Orders</span>
                             <span className="text-sm font-bold text-blue-500">{pendingInstant.length} pending</span>
                         </div>
                     </div>
