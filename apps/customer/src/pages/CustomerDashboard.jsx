@@ -153,10 +153,11 @@ export default function CustomerDashboard({ cart, addToCart }) {
                         onLogout={() => {
                             localStorage.removeItem('customer_token');
                             localStorage.removeItem('customer_data');
-                            window.location.href = '/login';
+                            window.location.href = '/';
                         }}
                         onManageSubscription={() => setModalView('manage')}
                         onSupportClick={handleSupportClick}
+                        subscriptions={subscriptions}
                     />
                 );
             case 'support':

@@ -9,7 +9,7 @@ export default function ExplorePlansView({ onBack, onCheckout }) {
                         <span className="material-symbols-outlined text-slate-900 dark:text-slate-100">arrow_back</span>
                     </button>
                     <h1 className="text-lg md:text-xl font-bold text-slate-900 dark:text-slate-100 font-heading">Choose Your Plan</h1>
-                    <button className="text-brand-saffron text-sm font-bold hover:text-brand-saffron/80 transition-colors">
+                    <button onClick={() => window.open('https://wa.me/917428020104?text=Hi, I need help choosing a plan', '_blank')} className="text-brand-saffron text-sm font-bold hover:text-brand-saffron/80 transition-colors">
                         Help
                     </button>
                 </div>

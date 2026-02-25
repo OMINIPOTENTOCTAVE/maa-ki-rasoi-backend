@@ -1,12 +1,26 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import useMediaQuery from '@/hooks/useMediaQuery';
+
+function getWeekDates() {
+    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const today = new Date();
+    const dates = [];
+    for (let i = 0; i < 6; i++) {
+        const d = new Date(today);
+        d.setDate(today.getDate() + i);
+        dates.push({ day: days[d.getDay()], date: d.getDate(), full: d.toISOString().split('T')[0] });
+    }
+    return dates;
+}
 
 export default function MenuView({ onBack, cart, addToCart }) {
     const navigate = useNavigate();
     const [menuItems, setMenuItems] = useState([]);
     const { isMobile } = useMediaQuery();
+    const [selectedDate, setSelectedDate] = useState(0);
+    const weekDates = useMemo(() => getWeekDates(), []);
 
     useEffect(() => {
         const fetchMenu = async () => {
@@ -25,7 +39,7 @@ export default function MenuView({ onBack, cart, addToCart }) {
     return (
         <div className="flex flex-col h-full w-full bg-brand-cream dark:bg-brand-dark pb-24 md:pb-8">
             <header className="sticky top-0 z-50 bg-white/95 dark:bg-[#2d2418]/95 backdrop-blur-md border-b border-gray-100 dark:border-gray-800 transition-colors duration-200">
-                <div className="flex items-center justify-between px-4 md:px-6 py-3">
+                <div className="flex items-center justify-between px-4 md:px-6 py-2.5">
                     {isMobile && (
                         <button onClick={onBack} className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-slate-800 dark:text-slate-200">
                             <span className="material-symbols-outlined">arrow_back</span>
@@ -41,40 +55,42 @@ export default function MenuView({ onBack, cart, addToCart }) {
                         )}
                     </button>
                 </div>
-                <div className="px-4 md:px-6 pb-0 pt-2">
-                    <div className="flex space-x-4 overflow-x-auto no-scrollbar pb-3 snap-x">
-                        <button className="snap-start flex flex-col items-center justify-center min-w-[4.5rem] py-3 rounded-2xl bg-brand-saffron text-white shadow-lg shadow-brand-saffron/30 transition-transform active:scale-95 hover:shadow-xl">
-                            <span className="text-xs font-medium opacity-90 uppercase tracking-wide">Mon</span>
-                            <span className="text-xl font-bold">12</span>
-                        </button>
-                        {[13, 14, 15, 16, 17].map((date, idx) => (
-                            <button key={idx} className="snap-start flex flex-col items-center justify-center min-w-[4.5rem] py-3 rounded-2xl bg-white dark:bg-[#2d2418] border border-gray-200 dark:border-gray-700 text-slate-500 dark:text-slate-400 hover:border-brand-saffron/50 transition-colors active:scale-95">
-                                <span className="text-xs font-medium uppercase tracking-wide">{['Tue', 'Wed', 'Thu', 'Fri', 'Sat'][idx]}</span>
-                                <span className="text-xl font-bold text-slate-800 dark:text-slate-200">{date}</span>
+                <div className="px-4 md:px-6 pb-0 pt-1">
+                    <div className="flex space-x-3 overflow-x-auto no-scrollbar pb-2.5 snap-x">
+                        {weekDates.map((d, idx) => (
+                            <button
+                                key={idx}
+                                onClick={() => setSelectedDate(idx)}
+                                className={`snap-start flex flex-col items-center justify-center min-w-[4rem] py-2.5 rounded-xl transition-all active:scale-95 ${selectedDate === idx
+                                        ? 'bg-brand-saffron text-white shadow-md shadow-brand-saffron/30'
+                                        : 'bg-white dark:bg-[#2d2418] border border-gray-200 dark:border-gray-700 text-slate-500 dark:text-slate-400 hover:border-brand-saffron/50'
+                                    }`}
+                            >
+                                <span className="text-[10px] font-medium uppercase tracking-wide">{d.day}</span>
+                                <span className={`text-lg font-bold ${selectedDate === idx ? '' : 'text-slate-800 dark:text-slate-200'}`}>{d.date}</span>
                             </button>
                         ))}
                     </div>
                 </div>
             </header>
 
-            {/* ── Menu Items: 3-col grid on desktop, single column on mobile ── */}
-            <main className="flex flex-col gap-6 p-4 md:p-6 lg:p-8 mt-2">
+            <main className="flex flex-col gap-4 p-4 md:p-6 lg:p-8 mt-1">
                 {menuItems.length === 0 ? (
-                    <div className="text-center p-8 text-slate-500">Loading today's exquisite selection...</div>
+                    <div className="text-center p-6 text-slate-500 text-sm">Loading today's menu...</div>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                         {menuItems.map(item => (
-                            <div key={item.id} className="group bg-white dark:bg-[#2d2418] rounded-2xl shadow-sm overflow-hidden transition-all hover:shadow-lg hover:-translate-y-0.5 border border-gray-100 dark:border-gray-800">
-                                <div className="p-5">
-                                    <div className="flex items-center justify-between mb-2">
+                            <div key={item.id} className="group bg-white dark:bg-[#2d2418] rounded-xl shadow-sm overflow-hidden transition-all hover:shadow-md border border-gray-100 dark:border-gray-800">
+                                <div className="p-4">
+                                    <div className="flex items-center justify-between mb-1.5">
                                         <span className="text-xs font-bold uppercase tracking-wider text-slate-400">{item.category}</span>
                                         <span className="text-lg font-bold text-brand-saffron">₹{item.price}</span>
                                     </div>
-                                    <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 leading-tight mb-2">{item.name}</h3>
-                                    <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed mb-4">
+                                    <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 leading-tight mb-1.5">{item.name}</h3>
+                                    <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed mb-3">
                                         {item.description}
                                     </p>
-                                    <button onClick={() => addToCart(item)} className="w-full mt-2 py-3 border border-brand-saffron/20 rounded-xl bg-brand-saffron/10 text-brand-saffron font-bold text-sm shadow-sm flex items-center justify-center gap-2 active:scale-95 hover:bg-brand-saffron hover:text-white transition-all">
+                                    <button onClick={() => addToCart(item)} className="w-full py-2.5 border border-brand-saffron/20 rounded-lg bg-brand-saffron/10 text-brand-saffron font-bold text-sm flex items-center justify-center gap-2 active:scale-95 hover:bg-brand-saffron hover:text-white transition-all">
                                         <span className="material-symbols-outlined text-lg">add_shopping_cart</span>
                                         Add to Order
                                     </button>
@@ -83,7 +99,6 @@ export default function MenuView({ onBack, cart, addToCart }) {
                         ))}
                     </div>
                 )}
-                <div className="h-8"></div>
             </main>
         </div>
     );

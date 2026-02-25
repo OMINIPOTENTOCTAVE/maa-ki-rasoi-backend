@@ -16,7 +16,7 @@ export default function OrdersView({ orders = [], subscriptions = [], onBack, on
                     )}
                     <h1 className="text-xl md:text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100 font-heading">Your Meal History</h1>
                 </div>
-                <button className="relative p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-800 text-brand-saffron">
+                <button onClick={() => alert('Filter options coming soon!')} className="relative p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-800 text-brand-saffron">
                     <span className="material-symbols-outlined">filter_list</span>
                 </button>
             </header>
