@@ -98,22 +98,60 @@ const verifyOTP = async (req, res) => {
             });
         }
 
-        // Generate Customer JWT
-        const token = jwt.sign(
+        // Generate Short-lived Access Token (15 minutes)
+        const accessToken = jwt.sign(
             { id: customer.id, phone: customer.phone, role: 'customer' },
+            process.env.JWT_SECRET,
+            { expiresIn: "15m" }
+        );
+
+        // Generate Long-lived Refresh Token (30 days)
+        const refreshToken = jwt.sign(
+            { id: customer.id, version: customer.tokenVersion || 0 }, // Optional: adding versioning handles mass revocation
             process.env.JWT_SECRET,
             { expiresIn: "30d" }
         );
 
-        // Set HTTP Only Cookie
-        res.cookie('customer_token', token, {
+        // Set HTTP Only Cookie for Refresh Token
+        res.cookie('customer_refresh_token', refreshToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'lax',
             maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
         });
 
-        res.json({ success: true, token, customer });
+        res.json({ success: true, token: accessToken, customer });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+const refreshToken = async (req, res) => {
+    try {
+        const token = req.cookies.customer_refresh_token;
+        if (!token) {
+            return res.status(401).json({ success: false, message: "No refresh token provided" });
+        }
+
+        try {
+            const decoded = jwt.verify(token, process.env.JWT_SECRET);
+            const customer = await prisma.customer.findUnique({ where: { id: decoded.id } });
+
+            if (!customer) {
+                return res.status(401).json({ success: false, message: "Customer not found" });
+            }
+
+            // Issue new access token
+            const accessToken = jwt.sign(
+                { id: customer.id, phone: customer.phone, role: 'customer' },
+                process.env.JWT_SECRET,
+                { expiresIn: "15m" }
+            );
+
+            res.json({ success: true, token: accessToken });
+        } catch (jwtError) {
+            return res.status(401).json({ success: false, message: "Invalid refresh token" });
+        }
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
@@ -128,4 +166,4 @@ const logout = async (req, res) => {
     res.json({ success: true, message: 'Logged out successfully' });
 };
 
-module.exports = { login, createAdmin, requestOTP, verifyOTP, logout };
+module.exports = { login, createAdmin, requestOTP, verifyOTP, refreshToken, logout };

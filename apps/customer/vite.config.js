@@ -34,7 +34,26 @@ export default defineConfig({
                         type: 'image/png'
                     }
                 ]
-            }
+            },
+            workbox: {
+                // Ignore API calls for caching so we don't accidentally cache dynamic JSON
+                navigateFallback: '/index.html',
+                navigateFallbackDenylist: [/^\/api/, /^\/auth/],
+                runtimeCaching: [
+                    {
+                        // Cache JS/CSS/HTML bundles proactively
+                        urlPattern: /^https:\/\/.*\.(js|css|html|png|svg|jpg)$/,
+                        handler: 'CacheFirst',
+                        options: {
+                            cacheName: 'static-assets-cache',
+                            expiration: {
+                                maxEntries: 50,
+                                maxAgeSeconds: 30 * 24 * 60 * 60, // 30 Days
+                            },
+                        },
+                    },
+                ],
+            },
         })
     ],
     build: {
