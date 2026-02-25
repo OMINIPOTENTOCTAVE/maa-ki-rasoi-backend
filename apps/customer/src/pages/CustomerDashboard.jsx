@@ -14,6 +14,7 @@ const LazyFallback = () => (
     </div>
 );
 import HomeView from './Customer/HomeView';
+import GuestHomeView from './Customer/GuestHomeView';
 import ManageView from './Customer/ManageView';
 import ExplorePlansView from './Customer/ExplorePlansView';
 import MenuView from './Customer/MenuView';
@@ -115,11 +116,16 @@ export default function CustomerDashboard({ cart, addToCart }) {
     const renderContent = () => {
         switch (activeTab) {
             case 'home':
-                return (
+                return isLoggedIn ? (
                     <HomeView
                         subscriptions={subscriptions}
                         onManageClick={() => setModalView('manage')}
                         onExploreClick={() => setModalView('explore')}
+                    />
+                ) : (
+                    <GuestHomeView
+                        onExploreClick={() => setModalView('explore')}
+                        onMenuClick={() => setActiveTab('menu')}
                     />
                 );
             case 'menu':
