@@ -2,6 +2,12 @@
 
 A home-style meal ordering platform — daily tiffin subscriptions, instant orders, and delivery management. Pure Veg. ₹100/meal.
 
+## 📱 Download Apps (APKs)
+
+- [⬇️ Download Customer App](https://github.com/OMINIPOTENTOCTAVE/maa-ki-rasoi-backend/raw/main/apks/MaaKiRasoi-Customer.apk)
+- [⬇️ Download Delivery Partner App](https://github.com/OMINIPOTENTOCTAVE/maa-ki-rasoi-backend/raw/main/apks/MaaKiRasoi-Delivery.apk)
+- [⬇️ Download Admin App](https://github.com/OMINIPOTENTOCTAVE/maa-ki-rasoi-backend/raw/main/apks/MaaKiRasoi-Admin.apk)
+
 ## Architecture
 
 ```
