@@ -4,6 +4,23 @@
 @tailwind components;
 @tailwind utilities;
 
+/* GLOBAL RESET */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100%;
+  overflow-x: hidden;
+}
+
 :root {
   /* Colors - Maa Ki Rasoi Palette */
   --brand-cream: #FAF9F6;
@@ -40,7 +57,7 @@
   --shadow-premium: 0 20px 25px -5px rgba(200, 85, 10, 0.1), 0 10px 10px -5px rgba(200, 85, 10, 0.04);
 
   /* Layout */
-  --container-max: 1200px;
+  --container-max: 1280px;
   --sidebar-width: 280px;
   --header-height: 72px;
   --bottom-nav-height: 80px;
@@ -62,20 +79,12 @@
   --shadow-premium: 0 20px 25px -5px rgba(0, 0, 0, 0.4);
 }
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-  -webkit-tap-highlight-color: transparent;
-}
-
 body {
   font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
   background-color: var(--bg-main);
   color: var(--text-body);
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
-  overflow-x: hidden;
 }
 
 /* Base Typography System */
@@ -112,25 +121,6 @@ h3 {
 
   h2 {
     font-size: 2rem;
-  }
-}
-
-/* Global Layout Container */
-.page-wrapper {
-  width: 100%;
-  max-width: 100%;
-  padding-left: var(--spacing-md);
-  padding-right: var(--spacing-md);
-  margin-left: auto;
-  margin-right: auto;
-  box-sizing: border-box;
-}
-
-@media (min-width: 1025px) {
-  .page-wrapper {
-    max-width: var(--container-max);
-    padding-left: var(--spacing-xl);
-    padding-right: var(--spacing-xl);
   }
 }
 
@@ -182,12 +172,10 @@ h3 {
   pointer-events: none;
 }
 
-
 .card {
   border: 1px solid var(--brand-white);
   border-radius: var(--radius-lg);
   padding: var(--spacing-lg);
-  margin-bottom: var(--spacing-md);
   background: var(--brand-white);
   box-shadow: var(--shadow-sm);
   transition: all 0.3s ease;

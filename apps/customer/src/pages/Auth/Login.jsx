@@ -57,8 +57,8 @@ export default function Login() {
     };
 
     return (
-        <div className="flex items-center justify-center min-h-[calc(100vh-var(--header-height)-var(--bottom-nav-height)-4rem)] animate-slide-up">
-            <div className="card w-full max-w-lg p-8 md:p-12">
+        <div className="flex items-center justify-center min-h-[calc(100vh-var(--header-height)-var(--bottom-nav-height)-8rem)] animate-slide-up">
+            <div className="card w-full max-w-md p-8 md:p-12">
                 {/* Header with Back Button */}
                 <div className="flex items-center justify-between mb-8">
                     <button

@@ -27,7 +27,7 @@ const AppLayout = ({ children }) => {
     };
 
     return (
-        <div className="min-h-screen bg-brand-cream dark:bg-brand-dark flex flex-col md:flex-row">
+        <div className="min-h-screen bg-brand-cream dark:bg-brand-dark flex flex-col md:flex-row overflow-x-hidden">
             {/* Desktop Sidebar */}
             {isDesktop && (
                 <aside className="sidebar fixed left-0 top-0 h-screen bg-brand-white border-r border-gray-100 flex flex-col p-8 z-50">
@@ -43,8 +43,8 @@ const AppLayout = ({ children }) => {
                                 key={item.id}
                                 onClick={() => handleNav(item.path)}
                                 className={`flex items-center gap-4 p-4 rounded-xl transition-all ${location.pathname === item.path
-                                        ? 'bg-brand-orange text-white shadow-lg'
-                                        : 'text-brand-brown-muted hover:bg-brand-beige'
+                                    ? 'bg-brand-orange text-white shadow-lg'
+                                    : 'text-brand-brown-muted hover:bg-brand-beige'
                                     }`}
                             >
                                 <span className="material-symbols-outlined">{item.icon}</span>
@@ -77,11 +77,11 @@ const AppLayout = ({ children }) => {
             )}
 
             {/* Main Content Area */}
-            <main className={`flex-1 transition-all ${isDesktop ? 'ml-[280px]' : 'pb-[80px]'}`}>
+            <main className={`flex-1 transition-all flex flex-col ${isDesktop ? 'ml-[280px]' : 'pb-[80px]'}`}>
                 {/* Mobile Header */}
-                {!isDesktop && (
+                {!isDesktop && location.pathname !== '/login' && (
                     <header className="header px-4 flex justify-between items-center shadow-sm">
-                        <h1 className="text-xl font-bold text-brand-orange mb-0">Maa Ki Rasoi</h1>
+                        <h1 className="text-xl font-bold text-brand-orange mb-0 font-heading">Maa Ki Rasoi</h1>
                         {!isLoggedIn && (
                             <Link to="/login" className="text-brand-orange font-semibold flex items-center gap-1">
                                 <span className="material-symbols-outlined text-xl">login</span>
@@ -91,13 +91,13 @@ const AppLayout = ({ children }) => {
                     </header>
                 )}
 
-                <div className="page-wrapper py-6 animate-fade-in">
+                <div className="w-full max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1">
                     {children}
                 </div>
             </main>
 
             {/* Mobile Bottom Navigation */}
-            {!isDesktop && (
+            {!isDesktop && location.pathname !== '/login' && (
                 <nav className="bottom-nav">
                     {visibleItems.map(item => (
                         <button

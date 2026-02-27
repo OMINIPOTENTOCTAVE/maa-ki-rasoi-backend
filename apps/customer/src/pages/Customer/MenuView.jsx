@@ -50,7 +50,7 @@ export default function MenuView({ cart, addToCart }) {
 
     if (menuItems.length === 0) {
         return (
-            <div className="flex flex-col items-center justify-center py-20 px-6 text-center animate-fade-in">
+            <div className="flex flex-col items-center justify-center py-20 text-center animate-fade-in">
                 <div className="w-24 h-24 rounded-full bg-brand-beige flex items-center justify-center text-brand-orange mb-6">
                     <span className="material-symbols-outlined text-5xl">restaurant_menu</span>
                 </div>

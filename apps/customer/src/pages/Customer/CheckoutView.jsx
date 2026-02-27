@@ -181,7 +181,7 @@ export default function CheckoutView({ onBack, onSuccessComplete, planConfig }) 
     }
 
     return (
-        <div className="max-w-4xl mx-auto animate-fade-in pb-32">
+        <div className="animate-fade-in pb-32">
             <div className="flex items-center gap-4 mb-8">
                 <button onClick={onBack} className="p-2 rounded-full hover:bg-brand-beige text-brand-orange">
                     <span className="material-symbols-outlined">arrow_back</span>
