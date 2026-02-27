@@ -1,5 +1,6 @@
 import React, { useState, useRef, useCallback } from 'react';
 import axios from 'axios';
+import { PLANS, GST_RATE, DIETARY_PREFERENCE } from '../../config/pricing';
 
 // Razorpay Script Loader
 const loadRazorpayScript = () => {
@@ -20,8 +21,8 @@ export default function CheckoutView({ onBack, onSuccessComplete, planConfig }) 
     const [otpLoading, setOtpLoading] = useState(false);
     const [otpError, setOtpError] = useState('');
     const [showSuccess, setShowSuccess] = useState(false);
-    const [enableAutoPay, setEnableAutoPay] = useState(false);
     const [paymentMethod, setPaymentMethod] = useState('ONLINE');
+    const [address, setAddress] = useState('');
     const payDebounceRef = useRef(false);
 
     // Compute UI display values from planConfig
@@ -30,12 +31,16 @@ export default function CheckoutView({ onBack, onSuccessComplete, planConfig }) 
     const uiTitle = `${planLabel} ${mealLabel} Plan (Pure Veg)`;
     const uiRange = isWeekly ? 'Mon–Fri, 5 working days' : (planConfig?.planType === 'MonthlyFull' ? '30 consecutive days' : 'Mon–Fri, 22 working days');
 
-    // Price calculation (mirrors backend logic)
-    const durationDays = planConfig?.planType === 'Weekly' ? 5 : (planConfig?.planType === 'MonthlyFull' ? 30 : 22);
-    const perMealPrice = planConfig?.planType === 'MonthlyFull' ? 100 : (planConfig?.planType === 'Monthly' ? 110 : 120);
-    const mealsPerDay = planConfig?.mealType === 'Both' ? 2 : 1;
-    const comboDiscount = planConfig?.mealType === 'Both' ? 0.85 : 1;
-    const uiPrice = (durationDays * mealsPerDay * perMealPrice) * comboDiscount;
+    // Use the totalPrice passed from ExplorePlansView if available, otherwise compute
+    const uiPrice = planConfig?.totalPrice || (() => {
+        const plan = PLANS[planConfig?.planType] || PLANS.Monthly;
+        const mealsPerDay = planConfig?.mealType === 'Both' ? 2 : 1;
+        const comboDiscount = planConfig?.mealType === 'Both' ? 0.85 : 1;
+        return Math.round(plan.totalPrice * mealsPerDay * comboDiscount);
+    })();
+
+    const gstAmount = Math.round(uiPrice * GST_RATE);
+    const totalPayable = uiPrice + gstAmount;
 
     const handleClearOtp = () => {
         setOtp('');
@@ -47,10 +52,10 @@ export default function CheckoutView({ onBack, onSuccessComplete, planConfig }) 
             customerName: storedUser.name || "Customer",
             customerPhone: storedUser.phone || "9999999999",
             customerId: storedUser.id,
-            address: "Hostel 3, Room 402",
+            address: address || storedUser.address || "Address not provided",
             planType: planConfig?.planType || "Monthly",
             mealType: planConfig?.mealType || "Lunch",
-            dietaryPreference: planConfig?.dietaryPreference || "Veg",
+            dietaryPreference: DIETARY_PREFERENCE,
             startDate: new Date().toISOString()
         };
     };
@@ -67,7 +72,7 @@ export default function CheckoutView({ onBack, onSuccessComplete, planConfig }) 
                 setShowOtpModal(false);
                 await axios.post('/subscriptions', payload);
                 setShowSuccess(true);
-                setTimeout(() => onSuccessComplete(), 2000);
+                // Don't auto-close — let the user control it
             }
         } catch (err) {
             setOtpError(err.response?.data?.message || 'Invalid OTP. Please try again.');
@@ -127,7 +132,7 @@ export default function CheckoutView({ onBack, onSuccessComplete, planConfig }) 
 
                 if (verifyRes.data.success) {
                     setShowSuccess(true);
-                    setTimeout(() => onSuccessComplete(), 2000);
+                    // Don't auto-close — let the user control it
                 }
                 setIsProcessing(false);
                 return;
@@ -153,7 +158,6 @@ export default function CheckoutView({ onBack, onSuccessComplete, planConfig }) 
 
                         if (verifyRes.data.success) {
                             setShowSuccess(true);
-                            setTimeout(() => onSuccessComplete(), 2000);
                         }
                     } catch (err) {
                         alert("Payment verification failed. If money was deducted, contact support.");
@@ -202,7 +206,7 @@ export default function CheckoutView({ onBack, onSuccessComplete, planConfig }) 
                             <div className="flex flex-col gap-1">
                                 <h2 className="text-base font-bold leading-tight">{uiTitle}</h2>
                                 <p className="text-xs text-slate-500 dark:text-slate-400">{uiRange}</p>
-                                <p className="text-xs text-brand-saffron font-medium mt-1">Starts Tomorrow, 12:30 PM</p>
+                                <p className="text-xs text-brand-saffron font-medium mt-1">Starts from tomorrow</p>
                             </div>
                         </div>
                     </div>
@@ -213,7 +217,7 @@ export default function CheckoutView({ onBack, onSuccessComplete, planConfig }) 
                         <span>Item Total</span><span>₹{uiPrice.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between text-sm text-slate-600 dark:text-slate-400">
-                        <span>GST (5%)</span><span>₹{(uiPrice * 0.05).toFixed(2)}</span>
+                        <span>GST (5%)</span><span>₹{gstAmount.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between text-sm text-slate-600 dark:text-slate-400">
                         <span>Delivery Charges</span><span className="text-brand-green font-medium">Free</span>
@@ -221,26 +225,26 @@ export default function CheckoutView({ onBack, onSuccessComplete, planConfig }) 
                     <div className="my-1 h-px w-full bg-slate-200 dark:bg-white/10"></div>
                     <div className="flex justify-between items-end">
                         <span className="text-base font-bold">Total Payable</span>
-                        <span className="text-xl font-extrabold tracking-tight text-brand-saffron">₹{uiPrice + (uiPrice * 0.05)}</span>
+                        <span className="text-xl font-extrabold tracking-tight text-brand-saffron">₹{totalPayable.toFixed(2)}</span>
                     </div>
                 </section>
 
-                <section className="rounded-xl bg-brand-saffron/10 border border-brand-saffron/20 p-4">
-                    <div className="flex items-center justify-between">
-                        <div className="flex gap-3 items-center">
-                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-saffron/20 text-brand-saffron">
-                                <span className="material-symbols-outlined">autorenew</span>
-                            </div>
-                            <div className="flex flex-col">
-                                <h3 className="text-sm font-bold">Enable Auto-Pay</h3>
-                                <p className="text-xs text-slate-600 dark:text-slate-400">Save ₹50 on next renewal</p>
-                            </div>
-                        </div>
-                        <label className="relative inline-flex cursor-pointer items-center">
-                            <input type="checkbox" className="peer sr-only" checked={enableAutoPay} onChange={() => setEnableAutoPay(!enableAutoPay)} />
-                            <div className="peer h-6 w-11 rounded-full bg-slate-300 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-brand-saffron peer-checked:after:translate-x-full peer-checked:after:border-white dark:bg-slate-700"></div>
-                        </label>
-                    </div>
+                {/* ── Delivery Address ── */}
+                <section className="rounded-xl bg-white dark:bg-[#2d2418] shadow-sm p-4 border border-gray-100 dark:border-gray-800">
+                    <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-3 flex items-center gap-2">
+                        <span className="material-symbols-outlined text-brand-saffron text-lg">location_on</span>
+                        Delivery Address
+                    </h3>
+                    <textarea
+                        value={address}
+                        onChange={(e) => setAddress(e.target.value)}
+                        placeholder="House/Flat No., Building Name, Street, Landmark, City"
+                        rows={3}
+                        className="w-full rounded-xl border border-slate-200 dark:border-neutral-700 bg-slate-50 dark:bg-neutral-900 text-slate-900 dark:text-white px-4 py-3 focus:border-brand-saffron focus:ring-2 focus:ring-brand-saffron text-sm resize-none shadow-sm"
+                    />
+                    {!address && (
+                        <p className="text-xs text-red-400 mt-2 font-medium">* Please enter your delivery address</p>
+                    )}
                 </section>
 
                 <section>

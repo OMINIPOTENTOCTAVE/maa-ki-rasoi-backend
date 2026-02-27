@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { PLANS, SUPPORT_WHATSAPP } from '../../config/pricing';
 
 export default function GuestHomeView({ onExploreClick, onMenuClick }) {
     const [menuItems, setMenuItems] = useState([]);
@@ -23,7 +24,7 @@ export default function GuestHomeView({ onExploreClick, onMenuClick }) {
                         Ghar Ka Khana,<br />Har Din. 🍛
                     </h1>
                     <p className="text-white/80 text-sm md:text-base leading-relaxed mb-5">
-                        Fresh, wholesome meals made with love — delivered to your doorstep daily. Starting at just <span className="font-bold text-white">₹100/meal</span>.
+                        Fresh, wholesome meals made with love — delivered to your doorstep daily. Starting at just <span className="font-bold text-white">₹{PLANS.Monthly.perMealPrice}/meal</span>.
                     </p>
                     <div className="flex flex-wrap gap-3">
                         <button
@@ -101,16 +102,16 @@ export default function GuestHomeView({ onExploreClick, onMenuClick }) {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-2xl">
                     {/* Weekly */}
                     <div className="bg-white dark:bg-neutral-800 rounded-xl border border-gray-100 dark:border-gray-700 p-5 shadow-sm hover:shadow-md transition-all">
-                        <h3 className="font-bold text-slate-900 dark:text-white mb-0.5">Weekly Plan</h3>
-                        <p className="text-xs text-slate-500 dark:text-slate-400 mb-3">Try us — 7 days of daily meals</p>
+                        <h3 className="font-bold text-slate-900 dark:text-white mb-0.5">{PLANS.Weekly.title}</h3>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mb-3">{PLANS.Weekly.description}</p>
                         <div className="flex items-baseline gap-1 mb-3">
-                            <span className="text-3xl font-black text-brand-saffron">₹699</span>
+                            <span className="text-3xl font-black text-brand-saffron">₹{PLANS.Weekly.totalPrice.toLocaleString('en-IN')}</span>
                             <span className="text-xs text-slate-400">/week</span>
                         </div>
                         <ul className="space-y-1.5 mb-4 text-xs text-slate-600 dark:text-slate-300">
-                            <li className="flex items-center gap-1.5"><span className="material-symbols-outlined text-brand-green text-sm">check_circle</span> 7 meals included</li>
-                            <li className="flex items-center gap-1.5"><span className="material-symbols-outlined text-brand-green text-sm">check_circle</span> Daily doorstep delivery</li>
-                            <li className="flex items-center gap-1.5"><span className="material-symbols-outlined text-brand-green text-sm">check_circle</span> Pure veg home-style food</li>
+                            {PLANS.Weekly.features.map((feat, i) => (
+                                <li key={i} className="flex items-center gap-1.5"><span className="material-symbols-outlined text-brand-green text-sm">check_circle</span> {feat}</li>
+                            ))}
                         </ul>
                         <button onClick={onExploreClick} className="w-full py-2.5 bg-brand-saffron/10 text-brand-saffron font-bold text-sm rounded-lg border border-brand-saffron/20 hover:bg-brand-saffron hover:text-white transition-all active:scale-95">
                             Get Started
@@ -120,16 +121,16 @@ export default function GuestHomeView({ onExploreClick, onMenuClick }) {
                     {/* Monthly — Popular */}
                     <div className="bg-brand-saffron rounded-xl p-5 shadow-lg shadow-brand-saffron/20 text-white relative overflow-hidden">
                         <div className="absolute top-2 right-2 bg-white/20 backdrop-blur-sm text-[10px] font-bold px-2 py-0.5 rounded-full">⭐ Best Value</div>
-                        <h3 className="font-bold mb-0.5">Monthly Plan</h3>
-                        <p className="text-xs text-white/70 mb-3">Maximum savings — 30 days</p>
+                        <h3 className="font-bold mb-0.5">{PLANS.Monthly.title}</h3>
+                        <p className="text-xs text-white/70 mb-3">{PLANS.Monthly.description}</p>
                         <div className="flex items-baseline gap-1 mb-3">
-                            <span className="text-3xl font-black">₹2,499</span>
+                            <span className="text-3xl font-black">₹{PLANS.Monthly.totalPrice.toLocaleString('en-IN')}</span>
                             <span className="text-xs text-white/60">/month</span>
                         </div>
                         <ul className="space-y-1.5 mb-4 text-xs text-white/90">
-                            <li className="flex items-center gap-1.5"><span className="material-symbols-outlined text-white text-sm">check_circle</span> 30 meals included</li>
-                            <li className="flex items-center gap-1.5"><span className="material-symbols-outlined text-white text-sm">check_circle</span> Save ₹300 vs weekly</li>
-                            <li className="flex items-center gap-1.5"><span className="material-symbols-outlined text-white text-sm">check_circle</span> Priority delivery slot</li>
+                            {PLANS.Monthly.features.map((feat, i) => (
+                                <li key={i} className="flex items-center gap-1.5"><span className="material-symbols-outlined text-white text-sm">check_circle</span> {feat}</li>
+                            ))}
                         </ul>
                         <button onClick={onExploreClick} className="w-full py-2.5 bg-white text-brand-saffron font-bold text-sm rounded-lg hover:bg-white/90 transition-all active:scale-95 shadow-md">
                             Get Started
@@ -146,7 +147,7 @@ export default function GuestHomeView({ onExploreClick, onMenuClick }) {
                             { icon: '🌿', label: '100% Pure Veg', sub: 'No compromise' },
                             { icon: '👩‍🍳', label: 'Home Cooked', sub: 'Fresh daily' },
                             { icon: '🚚', label: 'Free Delivery', sub: 'To your door' },
-                            { icon: '💰', label: '₹100/meal', sub: 'Affordable' },
+                            { icon: '💰', label: `₹${PLANS.Monthly.perMealPrice}/meal`, sub: 'Affordable' },
                         ].map((badge, i) => (
                             <div key={i}>
                                 <div className="text-2xl mb-1">{badge.icon}</div>

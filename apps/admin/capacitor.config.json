@@ -1,5 +1,8 @@
 {
-  "appId": "com.maakirasoi.app",
-  "appName": "Maa Ki Rasoi",
-  "webDir": "dist"
+  "appId": "com.maakirasoi.admin",
+  "appName": "MKR Admin",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https"
+  }
 }
