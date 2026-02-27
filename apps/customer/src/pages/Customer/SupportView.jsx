@@ -1,82 +1,189 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
 export default function SupportView({ onBack }) {
     const isLoggedIn = !!localStorage.getItem('customer_token');
+    const [complaints, setComplaints] = useState([]);
+    const [showForm, setShowForm] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [formData, setFormData] = useState({ category: 'Delivery', description: '' });
 
-    const handleCategoryClick = (category) => {
-        window.open(`https://wa.me/917428020104?text=Hi, I need help with: ${category}`, '_blank');
+    useEffect(() => {
+        if (isLoggedIn) fetchComplaints();
+    }, [isLoggedIn]);
+
+    const fetchComplaints = async () => {
+        try {
+            const res = await axios.get('/complaints');
+            setComplaints(res.data.data);
+        } catch (err) {
+            console.error(err);
+        }
     };
 
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        try {
+            await axios.post('/complaints', formData);
+            setShowForm(false);
+            setFormData({ category: 'Delivery', description: '' });
+            fetchComplaints();
+        } catch (err) {
+            alert('Failed to submit complaint');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleCategoryClick = (category) => {
+        setFormData({ ...formData, category });
+        setShowForm(true);
+    };
+
+    const openTickets = complaints.filter(c => c.status !== 'Resolved');
+
     return (
-        <div className="flex flex-col h-full w-full bg-brand-cream dark:bg-brand-dark pb-24 md:pb-8">
-            <header className="flex items-center justify-between px-4 md:px-6 py-3 sticky top-0 z-10 bg-white/80 dark:bg-[#221b10]/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800">
-                <button onClick={onBack} className="flex items-center justify-center p-2 rounded-full hover:bg-gray-200 dark:hover:bg-[#2d2418] transition-colors md:hidden">
-                    <span className="material-symbols-outlined text-slate-900 dark:text-slate-100">arrow_back</span>
+        <div className="space-y-8 animate-fade-in pb-12">
+            <div className="flex items-center gap-4">
+                <button onClick={onBack} className="p-2 rounded-full hover:bg-brand-beige text-brand-orange">
+                    <span className="material-symbols-outlined">arrow_back</span>
                 </button>
-                <h1 className="text-lg font-bold font-heading">Help & Support</h1>
-                <div className="w-10 md:hidden"></div>
-            </header>
+                <div>
+                    <h1 className="text-3xl font-bold mb-1">Help & Support</h1>
+                    <p className="text-text-muted">We're here to ensure your meal experience is perfect.</p>
+                </div>
+            </div>
 
-            <main className="flex-1 px-4 md:px-6 lg:px-8 py-4 flex flex-col gap-4 max-w-3xl mx-auto w-full">
-                {/* Only show tickets if logged in */}
-                {isLoggedIn && (
-                    <section>
-                        <div className="bg-white dark:bg-[#2d2418] rounded-xl p-4 border border-gray-200 dark:border-gray-800 shadow-sm relative overflow-hidden group hover:shadow-md transition-shadow">
-                            <div className="absolute top-0 left-0 w-1 h-full bg-brand-saffron"></div>
-                            <div className="flex justify-between items-start mb-1">
-                                <div className="flex items-center gap-2">
-                                    <span className="bg-brand-green/20 text-brand-green text-xs font-bold px-2 py-0.5 rounded-md">No Issues</span>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
+
+                {/* Main Content Side */}
+                <div className="md:col-span-2 space-y-8">
+
+                    {!showForm ? (
+                        <>
+                            <section>
+                                <h3 className="text-lg font-bold mb-6">What do you need help with?</h3>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    {[
+                                        { icon: 'moped', label: 'Delivery', desc: 'Late, missing, or cold food' },
+                                        { icon: 'restaurant_menu', label: 'Quality', desc: 'Taste, hygiene, or quantity' },
+                                        { icon: 'payments', label: 'Billing', desc: 'Subscription payment/refunds' },
+                                        { icon: 'settings', label: 'Account', desc: 'Login or profile issues' },
+                                    ].map((cat) => (
+                                        <button
+                                            key={cat.label}
+                                            onClick={() => handleCategoryClick(cat.label)}
+                                            className="card !p-6 flex items-center gap-4 text-left hover:border-brand-orange/40 hover:scale-[1.02] transition-all group"
+                                        >
+                                            <div className="w-12 h-12 rounded-xl bg-brand-beige flex items-center justify-center text-brand-orange group-hover:bg-brand-orange group-hover:text-white transition-colors">
+                                                <span className="material-symbols-outlined">{cat.icon}</span>
+                                            </div>
+                                            <div>
+                                                <h4 className="font-bold text-text-main">{cat.label}</h4>
+                                                <p className="text-xs text-text-muted">{cat.desc}</p>
+                                            </div>
+                                        </button>
+                                    ))}
                                 </div>
-                                <span className="material-symbols-outlined text-brand-green text-lg">check_circle</span>
-                            </div>
-                            <h3 className="text-slate-900 dark:text-white font-bold mb-0.5">All good! No open tickets.</h3>
-                            <p className="text-gray-500 dark:text-gray-400 text-sm">If you face any issue, reach out below.</p>
-                        </div>
-                    </section>
-                )}
+                            </section>
 
-                <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-gray-500">search</span>
-                    <input className="w-full bg-white dark:bg-[#2d2418] border border-gray-200 dark:border-gray-800 text-slate-900 dark:text-white rounded-lg py-2.5 pl-12 pr-4 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-brand-saffron/50 transition-all shadow-sm text-sm" placeholder="Search for help..." type="text" />
+                            {/* WhatsApp Banner */}
+                            <section className="card !bg-[#25D366]/5 border-[#25D366]/20 !p-8 flex flex-col sm:flex-row items-center justify-between gap-6">
+                                <div className="text-center sm:text-left">
+                                    <h3 className="text-xl font-bold text-[#128C7E] mb-1">Need Urgent Help?</h3>
+                                    <p className="text-xs text-text-muted">Direct line to our kitchen manager.</p>
+                                </div>
+                                <button
+                                    onClick={() => window.open('https://wa.me/917428020104?text=Hi, I need help with my Maa Ki Rasoi order', '_blank')}
+                                    className="btn !bg-[#25D366] !text-white px-8 flex items-center gap-2 hover:!bg-[#128C7E]"
+                                >
+                                    <span className="material-symbols-outlined">chat</span>
+                                    WhatsApp Us
+                                </button>
+                            </section>
+                        </>
+                    ) : (
+                        <div className="card !p-8 border-brand-orange/30 animate-fade-in">
+                            <div className="flex items-center justify-between mb-8">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-lg bg-brand-orange/10 flex items-center justify-center text-brand-orange">
+                                        <span className="material-symbols-outlined">report</span>
+                                    </div>
+                                    <h2 className="text-2xl font-bold">Report {formData.category} Issue</h2>
+                                </div>
+                                <button onClick={() => setShowForm(false)} className="text-text-muted hover:text-text-main">
+                                    <span className="material-symbols-outlined">close</span>
+                                </button>
+                            </div>
+
+                            <form onSubmit={handleSubmit} className="space-y-6">
+                                <div>
+                                    <label className="block text-sm font-bold text-text-main mb-2 ml-1">Issue Details</label>
+                                    <textarea
+                                        autoFocus
+                                        required
+                                        value={formData.description}
+                                        onChange={e => setFormData({ ...formData, description: e.target.value })}
+                                        className="input-field"
+                                        placeholder="Please provide details so we can help you faster..."
+                                        rows={6}
+                                    />
+                                </div>
+                                <button
+                                    disabled={loading}
+                                    className="btn btn-block py-4 text-lg"
+                                >
+                                    {loading ? 'Submitting...' : 'Submit Ticket'}
+                                </button>
+                                <p className="text-[10px] text-center text-text-muted italic">
+                                    Our support team usually responds within 15 minutes.
+                                </p>
+                            </form>
+                        </div>
+                    )}
                 </div>
 
-                <section>
-                    <h2 className="text-slate-900 dark:text-white font-bold text-lg mb-3">What do you need help with?</h2>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                        {[
-                            { icon: 'moped', label: 'Delivery', desc: 'Late or missing tiffin' },
-                            { icon: 'restaurant_menu', label: 'Food Quality', desc: 'Taste, hygiene, portion' },
-                            { icon: 'payments', label: 'Billing', desc: 'Payment & refunds' },
-                            { icon: 'settings', label: 'Account', desc: 'Settings & preferences' },
-                        ].map((cat) => (
-                            <button
-                                key={cat.label}
-                                onClick={() => handleCategoryClick(cat.label)}
-                                className="bg-white dark:bg-[#2d2418] border border-gray-200 dark:border-gray-800 hover:border-brand-saffron/50 p-4 rounded-xl flex flex-col items-start gap-2 transition-all text-left shadow-sm group hover:shadow-md"
-                            >
-                                <div className="bg-gray-100 dark:bg-[#221b10] p-2 rounded-lg group-hover:bg-brand-saffron/20 transition-colors">
-                                    <span className="material-symbols-outlined text-brand-saffron">{cat.icon}</span>
-                                </div>
-                                <div>
-                                    <h3 className="font-bold text-slate-900 dark:text-white text-sm">{cat.label}</h3>
-                                    <p className="text-xs text-gray-500 dark:text-gray-400">{cat.desc}</p>
-                                </div>
-                            </button>
-                        ))}
-                    </div>
-                </section>
+                {/* Sidebar: Tickets History */}
+                <div className="space-y-6">
+                    <h3 className="text-sm font-bold uppercase tracking-widest text-text-muted ml-2">Ticket Status</h3>
 
-                <section>
-                    <button
-                        onClick={() => window.open('https://wa.me/917428020104?text=Hi, I need help with my Maa Ki Rasoi order', '_blank')}
-                        className="w-full bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold py-3.5 px-6 rounded-xl flex items-center justify-center gap-3 transition-colors shadow-md active:scale-95"
-                    >
-                        <span className="material-symbols-outlined">chat</span>
-                        <span>Chat with us on WhatsApp</span>
-                    </button>
-                    <p className="text-center text-gray-500 text-xs mt-2">Usually replies within 5 minutes</p>
-                </section>
-            </main>
+                    {!isLoggedIn ? (
+                        <div className="card text-center !p-8">
+                            <p className="text-sm text-text-muted italic">Login to view and track your support tickets.</p>
+                        </div>
+                    ) : openTickets.length === 0 ? (
+                        <div className="card !bg-success/5 border-success/20 !p-6 text-center">
+                            <span className="material-symbols-outlined text-success text-3xl mb-2">verified</span>
+                            <h4 className="font-bold text-success">All Clear!</h4>
+                            <p className="text-[10px] text-text-muted">No active issues found.</p>
+                        </div>
+                    ) : (
+                        <div className="space-y-4">
+                            {openTickets.map(ticket => (
+                                <div key={ticket.id} className="card !p-5 border-l-4 border-l-brand-orange">
+                                    <div className="flex justify-between items-start mb-2">
+                                        <span className="text-[10px] font-bold text-brand-orange uppercase">{ticket.category}</span>
+                                        <span className="text-[10px] text-text-muted">{new Date(ticket.createdAt).toLocaleDateString()}</span>
+                                    </div>
+                                    <p className="text-xs font-medium text-text-body line-clamp-2 mb-3">{ticket.description}</p>
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-2 h-2 rounded-full bg-warning animate-pulse" />
+                                        <span className="text-[10px] font-bold text-warning uppercase">Under Review</span>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+
+                    <div className="card !bg-brand-beige border-none shadow-none text-center">
+                        <p className="text-[10px] text-text-muted leading-relaxed">
+                            Support Operating Hours: <br />
+                            <b>10:00 AM - 10:00 PM IST</b>
+                        </p>
+                    </div>
+                </div>
+            </div>
         </div>
     );
 }

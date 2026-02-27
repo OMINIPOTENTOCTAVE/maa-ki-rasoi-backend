@@ -68,9 +68,9 @@ function DeliveryDashboard() {
         }
     };
 
-    const markDelivered = async (taskId, type) => {
+    const updateTaskStatus = async (taskId, type, status) => {
         try {
-            await axios.post('/delivery/tasks/status', { taskId, type, status: 'Delivered' });
+            await axios.post('/delivery/tasks/status', { taskId, type, status });
             fetchTasks();
         } catch (err) {
             alert('Failed to update status');
@@ -132,9 +132,15 @@ function DeliveryDashboard() {
                         </div>
                     )}
 
-                    <button onClick={() => markDelivered(task.id, 'subscription')} className="w-full py-3 mt-1 rounded-xl bg-brand-saffron text-white font-bold text-sm shadow-md flex items-center justify-center gap-2 group active:scale-95 hover:bg-brand-saffron-dark transition-all">
-                        Mark Delivered <span className="material-symbols-outlined text-sm group-hover:translate-x-1 transition-transform">check_circle</span>
-                    </button>
+                    {task.status === 'Pending' ? (
+                        <button onClick={() => updateTaskStatus(task.id, 'subscription', 'Out for Delivery')} className="w-full py-3 mt-1 rounded-xl bg-blue-500 text-white font-bold text-sm shadow-md flex items-center justify-center gap-2 group active:scale-95 hover:bg-blue-600 transition-all">
+                            Start Delivery <span className="material-symbols-outlined text-sm group-hover:translate-x-1 transition-transform">local_shipping</span>
+                        </button>
+                    ) : (
+                        <button onClick={() => updateTaskStatus(task.id, 'subscription', 'Delivered')} className="w-full py-3 mt-1 rounded-xl bg-brand-saffron text-white font-bold text-sm shadow-md flex items-center justify-center gap-2 group active:scale-95 hover:bg-brand-saffron-dark transition-all">
+                            Mark Delivered <span className="material-symbols-outlined text-sm group-hover:translate-x-1 transition-transform">check_circle</span>
+                        </button>
+                    )}
                 </div>
             ))}
 
@@ -178,9 +184,19 @@ function DeliveryDashboard() {
                         </div>
                     )}
 
-                    <button onClick={() => markDelivered(task.id, 'instant')} className="w-full py-3 mt-1 rounded-xl bg-brand-saffron text-white font-bold text-sm shadow-md flex items-center justify-center gap-2 group active:scale-95 hover:bg-brand-saffron-dark transition-all">
-                        Mark Delivered <span className="material-symbols-outlined text-sm group-hover:translate-x-1 transition-transform">check_circle</span>
-                    </button>
+                    {task.status === 'Pending' || task.status === 'Confirmed' ? (
+                        <button onClick={() => updateTaskStatus(task.id, 'instant', 'Preparing')} className="w-full py-3 mt-1 rounded-xl bg-yellow-500 text-white font-bold text-sm shadow-md flex items-center justify-center gap-2 group active:scale-95 hover:bg-yellow-600 transition-all">
+                            Start Preparing <span className="material-symbols-outlined text-sm transition-transform group-hover:translate-x-1">cooking</span>
+                        </button>
+                    ) : task.status === 'Preparing' ? (
+                        <button onClick={() => updateTaskStatus(task.id, 'instant', 'Out for Delivery')} className="w-full py-3 mt-1 rounded-xl bg-blue-500 text-white font-bold text-sm shadow-md flex items-center justify-center gap-2 group active:scale-95 hover:bg-blue-600 transition-all">
+                            Out for Delivery <span className="material-symbols-outlined text-sm transition-transform group-hover:translate-x-1">local_shipping</span>
+                        </button>
+                    ) : (
+                        <button onClick={() => updateTaskStatus(task.id, 'instant', 'Delivered')} className="w-full py-3 mt-1 rounded-xl bg-brand-saffron text-white font-bold text-sm shadow-md flex items-center justify-center gap-2 group active:scale-95 hover:bg-brand-saffron-dark transition-all">
+                            Mark Delivered <span className="material-symbols-outlined text-sm group-hover:translate-x-1 transition-transform">check_circle</span>
+                        </button>
+                    )}
                 </div>
             ))}
         </>

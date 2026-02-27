@@ -22,32 +22,35 @@ model MenuItem {
   price       Float
   category    String
   isAvailable Boolean     @default(true)
-  isArchived  Boolean     @default(false)
   createdAt   DateTime    @default(now())
+  isArchived  Boolean     @default(false)
   orderItems  OrderItem[]
 }
 
 model Order {
-  id            String      @id @default(uuid())
-  customerName  String
-  customerPhone String
-  address       String
-  totalAmount   Float
-  status        String      @default("Pending") // Pending, Confirmed, Preparing, Delivered
-  createdAt     DateTime    @default(now())
-  
-  paymentMethod     String    @default("COD") // COD, ONLINE
-  paymentStatus     String    @default("Pending") // Pending, Paid, Failed
+  id                String           @id @default(uuid())
+  customerName      String
+  customerPhone     String
+  address           String
+  totalAmount       Float
+  status            String           @default("Pending")
+  createdAt         DateTime         @default(now())
+  customerId        String?
+  deliveryPartnerId String?
+  paymentMethod     String           @default("COD")
+  paymentStatus     String           @default("Pending")
   razorpayOrderId   String?
   razorpayPaymentId String?
-  
-  customerId    String?
-  customer      Customer?   @relation(fields: [customerId], references: [id])
-  
-  deliveryPartnerId String?
+  deliveredAt       DateTime?
+  confirmedAt       DateTime?
+  dispatchedAt      DateTime?
+  feedback          String?
+  preparingAt       DateTime?
+  rating            Int?
+  complaints        Complaint[]
+  customer          Customer?        @relation(fields: [customerId], references: [id])
   deliveryPartner   DeliveryPartner? @relation(fields: [deliveryPartnerId], references: [id])
-
-  items         OrderItem[]
+  items             OrderItem[]
 }
 
 model OrderItem {
@@ -56,8 +59,8 @@ model OrderItem {
   menuItemId String
   quantity   Int
   price      Float
-  order      Order    @relation(fields: [orderId], references: [id])
   menuItem   MenuItem @relation(fields: [menuItemId], references: [id])
+  order      Order    @relation(fields: [orderId], references: [id])
 }
 
 model Customer {
@@ -66,42 +69,48 @@ model Customer {
   name          String?
   address       String?
   createdAt     DateTime       @default(now())
+  complaints    Complaint[]
+  orders        Order[]
   subscriptions Subscription[]
-  orders        Order[]        // Link legacy/instant orders to customers
 }
 
 model Subscription {
   id                String                 @id @default(uuid())
   customerId        String
-  planType          String                 // "Weekly", "Monthly", "MonthlyFull"
-  mealType          String                 // "Lunch", "Dinner", "Both"
-  dietaryPreference String                 // "Veg" (Veg-only kitchen)
+  planType          String
+  mealType          String
+  dietaryPreference String
   startDate         DateTime
   endDate           DateTime
-  status            String                 @default("Active") // Active, Paused, Cancelled
+  status            String                 @default("Active")
   totalPrice        Float
   createdAt         DateTime               @default(now())
-  
-  paymentMethod     String                 @default("COD") // COD, ONLINE
-  paymentStatus     String                 @default("Pending") // Pending, Paid, Failed
+  paymentMethod     String                 @default("COD")
+  paymentStatus     String                 @default("Pending")
   razorpayOrderId   String?
   razorpayPaymentId String?
-  
+  cancelledAt       DateTime?
+  complaints        Complaint[]
   customer          Customer               @relation(fields: [customerId], references: [id])
   deliveries        SubscriptionDelivery[]
 }
 
 model SubscriptionDelivery {
-  id             String       @id @default(uuid())
-  subscriptionId String
-  deliveryDate   DateTime     @db.Date
-  mealType       String       // "Lunch", "Dinner"
-  status         String       @default("Pending") // Pending, Delivered, Cancelled
-  createdAt      DateTime     @default(now())
-  
-  subscription   Subscription @relation(fields: [subscriptionId], references: [id])
+  id                String           @id @default(uuid())
+  subscriptionId    String
+  deliveryDate      DateTime         @db.Date
+  mealType          String
+  status            String           @default("Pending")
+  createdAt         DateTime         @default(now())
   deliveryPartnerId String?
+  deliveredAt       DateTime?
+  confirmedAt       DateTime?
+  dispatchedAt      DateTime?
+  feedback          String?
+  preparingAt       DateTime?
+  rating            Int?
   deliveryPartner   DeliveryPartner? @relation(fields: [deliveryPartnerId], references: [id])
+  subscription      Subscription     @relation(fields: [subscriptionId], references: [id])
 }
 
 model DeliveryPartner {
@@ -109,9 +118,23 @@ model DeliveryPartner {
   name           String
   phone          String                 @unique
   vehicleDetails String?
-  status         String                 @default("Active") // Active, Inactive
+  status         String                 @default("Active")
   createdAt      DateTime               @default(now())
-  
-  orders         Order[]                
-  deliveries     SubscriptionDelivery[] 
+  orders         Order[]
+  deliveries     SubscriptionDelivery[]
+}
+
+model Complaint {
+  id             String        @id @default(uuid())
+  customerId     String
+  orderId        String?
+  subscriptionId String?
+  category       String
+  description    String
+  status         String        @default("Open")
+  createdAt      DateTime      @default(now())
+  resolvedAt     DateTime?
+  customer       Customer      @relation(fields: [customerId], references: [id])
+  order          Order?        @relation(fields: [orderId], references: [id])
+  subscription   Subscription? @relation(fields: [subscriptionId], references: [id])
 }

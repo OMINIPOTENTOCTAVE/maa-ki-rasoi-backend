@@ -1,27 +1,19 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import useMediaQuery from '@/hooks/useMediaQuery';
 
 export default function ManageView({ onBack, subscriptions = [], onUpdate }) {
     const activeSub = subscriptions.find(s => s.status === 'Active' || s.status === 'Paused');
     const [loading, setLoading] = useState(false);
-    const { isMobile } = useMediaQuery();
 
     if (!activeSub) {
         return (
-            <div className="flex flex-col h-full w-full bg-brand-cream dark:bg-brand-dark pb-24 md:pb-8 overflow-y-auto no-scrollbar">
-                <div className="sticky top-0 z-50 flex items-center bg-white/90 dark:bg-[#2d2418]/90 p-4 pb-2 justify-between border-b border-gray-100 dark:border-gray-800 backdrop-blur-md">
-                    <button onClick={onBack} className="text-slate-900 dark:text-white flex size-12 shrink-0 items-center justify-center cursor-pointer hover:opacity-70 transition-opacity">
-                        <span className="material-symbols-outlined text-2xl">arrow_back</span>
-                    </button>
-                    <h2 className="text-slate-900 dark:text-white text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center pr-12 font-heading">Manage Active Plan</h2>
+            <div className="flex flex-col items-center justify-center py-20 text-center animate-fade-in">
+                <div className="w-24 h-24 bg-brand-beige text-brand-orange rounded-full flex items-center justify-center mb-6">
+                    <span className="material-symbols-outlined text-5xl">event_busy</span>
                 </div>
-                <div className="flex-1 flex flex-col items-center justify-center p-8 text-center mt-20">
-                    <span className="material-symbols-outlined text-5xl text-gray-300 mb-4">event_busy</span>
-                    <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">No Active Plan</h3>
-                    <p className="text-gray-500 mb-6">You don't have any active meal subscription.</p>
-                    <button onClick={onBack} className="px-6 py-2 bg-brand-saffron text-white font-bold rounded-lg shadow-md hover:bg-brand-saffron-dark transition-colors">Browse Plans</button>
-                </div>
+                <h1 className="text-2xl font-bold mb-2">No Active Plan</h1>
+                <p className="text-text-muted mb-8">You can start a new journey from the home screen.</p>
+                <button onClick={onBack} className="btn px-8">Back to Home</button>
             </div>
         );
     }
@@ -41,75 +33,93 @@ export default function ManageView({ onBack, subscriptions = [], onUpdate }) {
     };
 
     return (
-        <div className="flex flex-col h-full w-full bg-brand-cream dark:bg-brand-dark pb-24 md:pb-8 overflow-y-auto no-scrollbar">
-            <div className="sticky top-0 z-50 flex items-center bg-white/90 dark:bg-[#2d2418]/90 p-4 pb-2 justify-between border-b border-gray-100 dark:border-gray-800 backdrop-blur-md">
-                <button onClick={onBack} className="text-slate-900 dark:text-white flex size-12 shrink-0 items-center justify-center cursor-pointer hover:opacity-70 transition-opacity">
-                    <span className="material-symbols-outlined text-2xl">arrow_back</span>
+        <div className="space-y-8 animate-fade-in pb-12">
+            <div className="flex items-center gap-4">
+                <button onClick={onBack} className="p-2 rounded-full hover:bg-brand-beige text-brand-orange">
+                    <span className="material-symbols-outlined">arrow_back</span>
                 </button>
-                <h2 className="text-slate-900 dark:text-white text-lg md:text-xl font-bold leading-tight tracking-[-0.015em] flex-1 text-center pr-12 font-heading">Manage Active Plan</h2>
+                <div>
+                    <h1 className="text-3xl font-bold mb-1">Manage Plan</h1>
+                    <p className="text-text-muted">Control your active meal subscription.</p>
+                </div>
             </div>
 
-            {/* ── Desktop: side-by-side / Mobile: stacked ── */}
-            <div className="flex-1 overflow-y-auto">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 md:p-6 lg:p-8">
-                    {/* Left: Plan details */}
-                    <div className="flex flex-col gap-4 rounded-xl bg-white dark:bg-[#2d2418] p-5 md:p-6 shadow-sm border border-gray-100 dark:border-gray-800 hover:shadow-md transition-shadow">
-                        <div className="flex items-start justify-between gap-4">
-                            <div className="flex flex-col gap-1 flex-[2_2_0px]">
-                                <p className="text-brand-saffron text-xs font-bold uppercase tracking-wider mb-1">Current Plan</p>
-                                <h3 className="text-slate-900 dark:text-white text-xl md:text-2xl font-bold leading-tight capitalize">{activeSub.planType} Pure Veg</h3>
-                                <div className="flex items-center gap-1.5 mt-1">
-                                    <span className="material-symbols-outlined text-gray-400 text-sm">calendar_today</span>
-                                    <p className="text-gray-500 text-sm font-medium leading-normal">
-                                        Valid until {new Date(activeSub.endDate).toLocaleDateString()}
-                                    </p>
-                                </div>
-                            </div>
-                            <div className="w-20 h-20 bg-center bg-no-repeat bg-cover rounded-xl shadow-inner border border-gray-100 dark:border-gray-700 flex-shrink-0" style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuCGlGRd_WWFCu3VWXCsXfRnxjz1ikZkqley-3kWWgnza1UHD99gP7gvK_fT0Pi_I-DOR85tMwkRnUVV8Xvpemk_ppJfNbyc_Inwho59JyJ1HNuqZkpineJmTmaVbvmStAO7UGXlW0EwbvAxMDrzq7-eHExHninE0ck8wqXdKgVlndnOkbdrN8U7CZuZZExE6_5586t4Gcf4VCmXPtUknGjfORbbvt79ZOxYNUorqRhXH0NfVkesYsl8FsUWtp0dLXHrWD0DH0ObITsr')" }}></div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+
+                {/* Left: Current Subscription Details */}
+                <div className="card !bg-brand-brown text-white shadow-premium !p-8">
+                    <div className="flex justify-between items-start mb-8">
+                        <div>
+                            <p className="text-brand-orange-light text-xs font-bold uppercase tracking-widest mb-2">Subscription Details</p>
+                            <h2 className="text-2xl md:text-3xl font-bold capitalize">{activeSub.planType} Plan</h2>
+                            <p className="text-brand-beige/60 text-sm mt-1">100% Pure Veg • {activeSub.mealType}</p>
                         </div>
-                        <div className="flex flex-col gap-3 mt-2">
-                            <div className="flex gap-6 justify-between items-end">
-                                <p className="text-slate-900 dark:text-white text-lg font-bold leading-none">Status: <span className={activeSub.status === 'Active' ? 'text-green-500' : 'text-amber-500'}>{activeSub.status}</span></p>
-                                <p className="text-gray-500 text-sm font-bold leading-normal text-brand-saffron">₹{activeSub.totalPrice}</p>
-                            </div>
+                        <div className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider ${activeSub.status === 'Active' ? 'bg-success/20 text-success' : 'bg-warning/20 text-warning'
+                            }`}>
+                            {activeSub.status}
                         </div>
                     </div>
 
-                    {/* Right: Pause Controls */}
-                    <div className="space-y-4">
-                        <div className="rounded-xl bg-white dark:bg-[#2d2418] p-5 md:p-6 shadow-sm border border-gray-100 dark:border-gray-800 hover:shadow-md transition-shadow">
-                            <div className="flex items-center justify-between mb-4">
-                                <h3 className="text-slate-900 dark:text-white text-lg font-bold leading-tight">Master Pause</h3>
-                                <span className="text-xs text-brand-saffron font-medium bg-brand-saffron/10 px-2 py-1 rounded-full">Suspend deliveries</span>
-                            </div>
-                            <p className="text-sm text-slate-500 dark:text-gray-400 mb-5">
-                                Going out of town? You can pause your entire subscription here. We will not deliver any meals or charge your daily quota until you reactivate it.
-                            </p>
-                            <button onClick={toggleStatus} disabled={loading} className={`w-full py-3 rounded-lg font-bold text-white transition-all shadow-md active:scale-95 hover:shadow-lg ${activeSub.status === 'Active' ? 'bg-amber-500 hover:bg-amber-600' : 'bg-green-500 hover:bg-green-600'}`}>
-                                {loading ? 'Processing...' : (activeSub.status === 'Active' ? 'Pause Subscription' : 'Re-Activate Subscription')}
-                            </button>
-                            <div className="mt-4 flex items-center gap-2 bg-blue-500/10 p-3 rounded-lg border border-blue-500/20">
-                                <span className="material-symbols-outlined text-blue-500 text-sm">info</span>
-                                <p className="text-blue-600 dark:text-blue-200 text-xs">Stay tuned! We're adding more advanced scheduling features soon.</p>
-                            </div>
+                    <div className="space-y-4 mb-8">
+                        <div className="flex justify-between items-center py-3 border-b border-white/10">
+                            <span className="text-brand-beige/50 text-sm">Ends On</span>
+                            <span className="font-bold">{new Date(activeSub.endDate).toLocaleDateString()}</span>
                         </div>
+                        <div className="flex justify-between items-center py-3 border-b border-white/10">
+                            <span className="text-brand-beige/50 text-sm">Meals Remanining</span>
+                            <span className="font-bold">{activeSub.mealsRemaining} / {activeSub.totalMeals}</span>
+                        </div>
+                    </div>
 
-                        {/* Done button — inline on desktop, not fixed */}
-                        <button onClick={onBack} className="w-full bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-bold text-lg py-4 rounded-xl shadow-lg transition-all active:scale-[0.98] hover:shadow-xl">
-                            Done
+                    <div className="bg-white/5 rounded-xl p-4 border border-white/5 flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-lg bg-brand-orange/20 flex items-center justify-center text-brand-orange-light">
+                            <span className="material-symbols-outlined">lock_clock</span>
+                        </div>
+                        <p className="text-xs text-brand-beige/70 leading-relaxed">
+                            Order pauses made after 10:00 PM will be effective from the day after tomorrow.
+                        </p>
+                    </div>
+                </div>
+
+                {/* Right: Master Controls */}
+                <div className="space-y-6">
+                    <div className="card">
+                        <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+                            <span className="material-symbols-outlined text-brand-orange">pause_circle</span>
+                            Master Pause
+                        </h3>
+                        <p className="text-sm text-text-muted mb-8 leading-relaxed">
+                            Going out of town? Pause your entire subscription. No meals will be delivered and your quota remains safe.
+                        </p>
+
+                        <button
+                            onClick={toggleStatus}
+                            disabled={loading}
+                            className={`btn btn-block py-4 text-lg ${activeSub.status === 'Active' ? '!bg-brand-orange !text-white' : '!bg-success !text-white'
+                                }`}
+                        >
+                            {loading ? 'Processing...' : (activeSub.status === 'Active' ? 'Pause Subscription' : 'Resume Deliveries')}
                         </button>
                     </div>
-                </div>
-            </div>
 
-            {/* Fixed bottom button — mobile only */}
-            {isMobile && (
-                <div className="fixed bottom-0 w-full bg-white/80 dark:bg-[#181511]/80 backdrop-blur-xl border-t border-gray-200 dark:border-gray-800 p-4 pb-8 z-50 max-w-md md:hidden">
-                    <button onClick={onBack} className="w-full bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-bold text-lg py-4 rounded-xl shadow-lg transition-all active:scale-[0.98]">
-                        Done
+                    <div className="card !bg-brand-beige border-none shadow-none">
+                        <h3 className="text-lg font-bold mb-2">Need help?</h3>
+                        <p className="text-xs text-text-muted mb-4 leading-relaxed">
+                            If you have specific meal requests or need a partial pause for specific days, please contact our support team.
+                        </p>
+                        <button className="text-brand-orange font-bold text-sm flex items-center gap-1 hover:underline">
+                            Chat with Support <span className="material-symbols-outlined text-sm">chevron_right</span>
+                        </button>
+                    </div>
+
+                    <button
+                        onClick={onBack}
+                        className="btn btn-secondary btn-block py-4 shadow-sm"
+                    >
+                        Save & Exit
                     </button>
                 </div>
-            )}
+            </div>
         </div>
     );
 }

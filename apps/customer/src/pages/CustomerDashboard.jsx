@@ -1,18 +1,7 @@
-import React, { useState, useEffect, lazy, Suspense } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import useMediaQuery from '@/hooks/useMediaQuery';
-import MobileLayout from '@/layouts/MobileLayout';
 
-// Desktop-only: lazy-loaded so mobile users skip this code
-const DesktopLayout = lazy(() => import('@/layouts/DesktopLayout'));
-const RightPanel = lazy(() => import('@/components/RightPanel'));
-const DesktopModal = lazy(() => import('@/components/DesktopModal'));
-
-const LazyFallback = () => (
-    <div className="flex items-center justify-center h-screen bg-brand-cream dark:bg-brand-dark">
-        <span className="material-symbols-outlined animate-spin text-brand-saffron text-3xl">progress_activity</span>
-    </div>
-);
+// Sub-views
 import HomeView from './Customer/HomeView';
 import GuestHomeView from './Customer/GuestHomeView';
 import ManageView from './Customer/ManageView';
@@ -23,16 +12,14 @@ import ProfileView from './Customer/ProfileView';
 import CheckoutView from './Customer/CheckoutView';
 import SupportView from './Customer/SupportView';
 
-export default function CustomerDashboard({ cart, addToCart }) {
-    const [activeTab, setActiveTab] = useState('home');
+export default function CustomerDashboard({ activeView, cart, addToCart }) {
     const [subscriptions, setSubscriptions] = useState([]);
     const [orders, setOrders] = useState([]);
     const [loadingData, setLoadingData] = useState(true);
-    const { isMobile } = useMediaQuery();
     const isLoggedIn = !!localStorage.getItem('customer_token');
 
-    // Modal screens
-    const [modalView, setModalView] = useState(null);
+    // Internal navigation state (for sub-modals like 'explore' or 'checkout')
+    const [subView, setSubView] = useState(null);
     const [checkoutConfig, setCheckoutConfig] = useState(null);
 
     const fetchData = async () => {
@@ -49,7 +36,7 @@ export default function CustomerDashboard({ cart, addToCart }) {
             setSubscriptions(subRes.data.data || []);
             setOrders(ordRes.data.data || []);
         } catch (error) {
-            console.error(error);
+            console.error('Error fetching dashboard data:', error);
         } finally {
             setLoadingData(false);
         }
@@ -57,179 +44,96 @@ export default function CustomerDashboard({ cart, addToCart }) {
 
     useEffect(() => {
         fetchData();
-    }, []);
+        const interval = setInterval(fetchData, 60000); // Pulse every minute
+        return () => clearInterval(interval);
+    }, [isLoggedIn]);
 
-    const handleBack = () => {
-        setModalView(null);
+    // Handle internal sub-navigation (e.g. clicking "Explore Plans" from Home)
+    const handleSubBack = () => {
+        setSubView(null);
         setCheckoutConfig(null);
         fetchData();
     };
 
-    const handleSupportClick = () => {
-        if (isMobile) {
-            setModalView('support');
-        } else {
-            setActiveTab('support');
-        }
-    };
-
-    const handleTabChange = (tab) => {
-        if (tab === 'support') {
-            handleSupportClick();
-            return;
-        }
-        setModalView(null);
-        setActiveTab(tab);
-    };
-
-    // ── Mobile: full-screen modals (original behavior) ──
-    if (isMobile) {
-        if (modalView === 'explore') {
-            return <ExplorePlansView onBack={handleBack} onCheckout={(config) => {
-                setCheckoutConfig(config);
-                setModalView('checkout');
-            }} />;
-        }
-        if (modalView === 'checkout') {
-            return <CheckoutView planConfig={checkoutConfig} onBack={handleBack} onSuccessComplete={() => {
-                setModalView('manage');
-                fetchData();
-            }} />;
-        }
-        if (modalView === 'support') {
-            return <SupportView onBack={handleBack} />;
-        }
-        if (modalView === 'manage') {
-            return <ManageView onBack={handleBack} subscriptions={subscriptions} onUpdate={fetchData} />;
-        }
-    }
-
-    if (loadingData) {
+    if (loadingData && isLoggedIn) {
         return (
-            <div className="flex bg-brand-cream dark:bg-brand-dark h-screen w-full items-center justify-center">
-                <span className="material-symbols-outlined animate-spin text-brand-saffron text-4xl">progress_activity</span>
+            <div className="flex flex-col gap-6 w-full animate-fade-in">
+                <div className="skeleton-title"></div>
+                <div className="skeleton-card"></div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="skeleton-card !h-32"></div>
+                    <div className="skeleton-card !h-32"></div>
+                </div>
             </div>
         );
     }
 
-    // ── Render the active view content ──
-    const renderContent = () => {
-        switch (activeTab) {
-            case 'home':
-                return isLoggedIn ? (
-                    <HomeView
-                        subscriptions={subscriptions}
-                        onManageClick={() => setModalView('manage')}
-                        onExploreClick={() => setModalView('explore')}
-                    />
-                ) : (
-                    <GuestHomeView
-                        onExploreClick={() => setModalView('explore')}
-                        onMenuClick={() => setActiveTab('menu')}
-                    />
-                );
-            case 'menu':
-                return (
-                    <MenuView
-                        onBack={() => setActiveTab('home')}
-                        cart={cart}
-                        addToCart={addToCart}
-                    />
-                );
-            case 'orders':
-                return (
-                    <OrdersView
-                        orders={orders}
-                        subscriptions={subscriptions}
-                        onBack={() => setActiveTab('home')}
-                        onExtendPlan={() => setModalView('explore')}
-                        onReviewMeal={() => alert('Opening review prompt...')}
-                        onRepeatMeal={() => setModalView('checkout')}
-                    />
-                );
-            case 'profile':
-                return (
-                    <ProfileView
-                        onLogout={() => {
-                            localStorage.removeItem('customer_token');
-                            localStorage.removeItem('customer_data');
-                            window.location.href = '/';
-                        }}
-                        onManageSubscription={() => setModalView('manage')}
-                        onSupportClick={handleSupportClick}
-                        subscriptions={subscriptions}
-                    />
-                );
-            case 'support':
-                return <SupportView onBack={() => setActiveTab('home')} />;
-            default:
-                return null;
-        }
-    };
-
-    // ── Desktop: modal overlay titles ──
-    const modalTitles = {
-        explore: 'Explore Plans',
-        checkout: 'Complete Checkout',
-        support: 'Help & Support',
-        manage: 'Manage Subscription',
-    };
-
-    // ── Desktop: render modal content as overlay dialog ──
-    const renderDesktopModal = () => {
-        if (!modalView) return null;
-
-        let content;
-        switch (modalView) {
-            case 'explore':
-                content = <ExplorePlansView onBack={handleBack} onCheckout={(config) => {
-                    setCheckoutConfig(config);
-                    setModalView('checkout');
-                }} />;
-                break;
-            case 'checkout':
-                content = <CheckoutView planConfig={checkoutConfig} onBack={handleBack} onSuccessComplete={() => {
-                    setModalView('manage');
-                    fetchData();
-                }} />;
-                break;
-            case 'support':
-                content = <SupportView onBack={handleBack} />;
-                break;
-            case 'manage':
-                content = <ManageView onBack={handleBack} subscriptions={subscriptions} onUpdate={fetchData} />;
-                break;
-            default:
-                return null;
-        }
-
-        return (
-            <DesktopModal title={modalTitles[modalView]} onClose={handleBack}>
-                {content}
-            </DesktopModal>
-        );
-    };
-
-    // ── Layout Selection ──
-    if (isMobile) {
-        return (
-            <MobileLayout activeTab={activeTab} onTabChange={handleTabChange} isLoggedIn={isLoggedIn}>
-                {renderContent()}
-            </MobileLayout>
-        );
+    // Prioritize Sub-Views (these act like temporary overlays or flow steps)
+    if (subView === 'explore') {
+        return <ExplorePlansView onBack={handleSubBack} onCheckout={(config) => {
+            setCheckoutConfig(config);
+            setSubView('checkout');
+        }} />;
+    }
+    if (subView === 'checkout') {
+        return <CheckoutView planConfig={checkoutConfig} onBack={handleSubBack} onSuccessComplete={() => {
+            setSubView(null);
+            fetchData();
+        }} />;
+    }
+    if (subView === 'manage') {
+        return <ManageView onBack={handleSubBack} subscriptions={subscriptions} onUpdate={fetchData} />;
+    }
+    if (subView === 'support') {
+        return <SupportView onBack={handleSubBack} />;
     }
 
-    return (
-        <Suspense fallback={<LazyFallback />}>
-            <DesktopLayout
-                activeTab={activeTab}
-                onTabChange={handleTabChange}
-                rightPanel={isLoggedIn ? <RightPanel subscriptions={subscriptions} /> : null}
-                isLoggedIn={isLoggedIn}
-            >
-                {renderContent()}
-            </DesktopLayout>
-            {renderDesktopModal()}
-        </Suspense>
-    );
+    // Render Main Views based on activeView route
+    switch (activeView) {
+        case 'home':
+            return isLoggedIn ? (
+                <HomeView
+                    subscriptions={subscriptions}
+                    onManageClick={() => setSubView('manage')}
+                    onExploreClick={() => setSubView('explore')}
+                />
+            ) : (
+                <GuestHomeView
+                    onExploreClick={() => setSubView('explore')}
+                    onMenuClick={() => {/* Router will handle this via AppLayout nav */ }}
+                />
+            );
+        case 'menu':
+            return (
+                <MenuView
+                    onBack={null} // Back button is now in AppLayout header
+                    cart={cart}
+                    addToCart={addToCart}
+                />
+            );
+        case 'orders':
+            return (
+                <OrdersView
+                    orders={orders}
+                    subscriptions={subscriptions}
+                    onBack={null}
+                    onExtendPlan={() => setSubView('explore')}
+                />
+            );
+        case 'profile':
+            return (
+                <ProfileView
+                    onLogout={() => {
+                        localStorage.removeItem('customer_token');
+                        localStorage.removeItem('customer_data');
+                        window.location.href = '/login';
+                    }}
+                    onManageSubscription={() => setSubView('manage')}
+                    onSupportClick={() => setSubView('support')}
+                    subscriptions={subscriptions}
+                />
+            );
+        default:
+            return <Navigate to="/" replace />;
+    }
 }

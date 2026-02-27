@@ -24,15 +24,29 @@ const placeOrder = async (req, res) => {
             });
         }
 
+        // 2. Identify or update customer
+        let customer = await prisma.customer.findUnique({ where: { phone: customerPhone } });
+        if (!customer) {
+            customer = await prisma.customer.create({ data: { phone: customerPhone, name: customerName, address } });
+        } else if (address) {
+            customer = await prisma.customer.update({
+                where: { id: customer.id },
+                data: { address, name: customerName }
+            });
+        }
+
+        const isOnline = paymentMethod === 'ONLINE';
+
         const order = await prisma.order.create({
             data: {
                 customerName,
                 customerPhone,
-                customerId: customerId || null,
+                customerId: customer.id,
                 address,
                 paymentMethod: paymentMethod || 'COD',
+                paymentStatus: 'Pending', // Always starts as Pending
                 totalAmount,
-                status: "Pending",
+                status: isOnline ? "Payment Pending" : "Pending", // Distinction for kitchen
                 items: {
                     create: orderItemsData
                 }
@@ -99,9 +113,19 @@ const changeStatus = async (req, res) => {
     try {
         const { id } = req.params;
         const { status } = req.body;
+
+        const data = { status };
+        const now = new Date();
+
+        // SOP: Placed -> Confirmed -> Preparing -> Dispatched (Out for Delivery) -> Delivered
+        if (status === 'Confirmed') data.confirmedAt = now;
+        if (status === 'Preparing') data.preparingAt = now;
+        if (status === 'Out for Delivery') data.dispatchedAt = now;
+        if (status === 'Delivered') data.deliveredAt = now;
+
         const order = await prisma.order.update({
             where: { id },
-            data: { status }
+            data
         });
         res.json({ success: true, data: order });
     } catch (error) {

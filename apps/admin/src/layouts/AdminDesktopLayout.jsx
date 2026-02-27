@@ -5,6 +5,7 @@ const navItems = [
     { id: 'orders', icon: 'receipt_long', label: 'Orders' },
     { id: 'team', icon: 'local_shipping', label: 'Delivery Team' },
     { id: 'menu', icon: 'restaurant_menu', label: 'Menu' },
+    { id: 'complaints', icon: 'report_problem', label: 'Complaints' },
     { id: 'stats', icon: 'bar_chart', label: 'Stats' },
 ];
 

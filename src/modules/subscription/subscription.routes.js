@@ -1,14 +1,16 @@
 const express = require('express');
 const router = express.Router();
 const subscriptionController = require('./subscription.controller');
-const authMiddleware = require('../../middleware/auth');
+const { authMiddleware, isAdmin } = require('../../middleware/auth');
 
 // Protected route to buy a subscription
 router.post('/', authMiddleware, subscriptionController.createSubscription);
 
 // Admin protected routes
-router.get('/', authMiddleware, subscriptionController.getSubscriptions);
+router.get('/', authMiddleware, isAdmin, subscriptionController.getSubscriptions);
 router.patch('/:id/status', authMiddleware, subscriptionController.toggleSubscriptionStatus);
-router.get('/production/today', authMiddleware, subscriptionController.getDailyProduction);
+router.patch('/deliveries/:deliveryId', authMiddleware, subscriptionController.updateDeliveryStatus);
+router.get('/production/today', authMiddleware, isAdmin, subscriptionController.getDailyProduction);
+router.get('/manifest', authMiddleware, isAdmin, subscriptionController.getDispatchManifest);
 
 module.exports = router;

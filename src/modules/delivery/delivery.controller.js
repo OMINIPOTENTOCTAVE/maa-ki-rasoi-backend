@@ -83,13 +83,19 @@ exports.updateStatus = async (req, res, next) => {
         if (type === "subscription") {
             const result = await prisma.subscriptionDelivery.update({
                 where: { id: taskId },
-                data: { status }
+                data: {
+                    status,
+                    ...(status === 'Delivered' && { deliveredAt: new Date() })
+                }
             });
             return res.status(200).json({ success: true, result });
         } else if (type === "instant") {
             const result = await prisma.order.update({
                 where: { id: taskId },
-                data: { status }
+                data: {
+                    status,
+                    ...(status === 'Delivered' && { deliveredAt: new Date() })
+                }
             });
             return res.status(200).json({ success: true, result });
         } else {

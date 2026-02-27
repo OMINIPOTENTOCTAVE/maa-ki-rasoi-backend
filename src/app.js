@@ -10,6 +10,8 @@ const menuRoutes = require("./modules/menu/menu.routes");
 const orderRoutes = require("./modules/order/order.routes");
 const subscriptionRoutes = require("./modules/subscription/subscription.routes");
 const deliveryRoutes = require("./modules/delivery/delivery.routes");
+const analyticsRoutes = require("./modules/analytics/analytics.routes");
+const complaintRoutes = require("./modules/complaint/complaint.routes");
 
 const app = express();
 
@@ -55,6 +57,8 @@ app.use("/orders", orderRoutes);
 app.use("/subscriptions", subscriptionRoutes);
 app.use("/delivery", deliveryRoutes);
 app.use("/payments", paymentRoutes);
+app.use("/analytics", analyticsRoutes);
+app.use("/complaints", complaintRoutes);
 
 app.get("/health", (req, res) => {
   res.status(200).json({ status: "OK", timestamp: new Date().toISOString() });

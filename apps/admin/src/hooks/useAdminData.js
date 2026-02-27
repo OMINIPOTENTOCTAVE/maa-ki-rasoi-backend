@@ -25,8 +25,11 @@ export default function useAdminData() {
                 const res = await axios.get('/menu');
                 setMenuItems(res.data.data);
             } else if (activeTab === 'stats') {
-                const res = await axios.get('/orders/stats');
-                setStats(res.data.data);
+                const [statsRes, kpiRes] = await Promise.all([
+                    axios.get('/orders/stats'),
+                    axios.get('/analytics/kpis')
+                ]);
+                setStats({ ...statsRes.data.data, ...kpiRes.data.data });
             } else if (activeTab === 'subscriptions') {
                 const subRes = await axios.get('/subscriptions');
                 setSubscriptions(subRes.data.data);

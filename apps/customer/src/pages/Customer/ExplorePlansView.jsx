@@ -6,105 +6,89 @@ export default function ExplorePlansView({ onBack, onCheckout }) {
     const planList = Object.values(PLANS);
 
     return (
-        <div className="flex flex-col h-full w-full bg-brand-cream dark:bg-brand-dark overflow-y-auto pb-24 md:pb-8 no-scrollbar">
-            <header className="sticky top-0 z-20 bg-white/80 dark:bg-[#221b10]/80 backdrop-blur-md border-b border-gray-200 dark:border-white/5 px-4 md:px-6 py-3">
-                <div className="flex items-center justify-between">
-                    <button onClick={onBack} className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors md:hidden">
-                        <span className="material-symbols-outlined text-slate-900 dark:text-slate-100">arrow_back</span>
+        <div className="space-y-8 animate-fade-in pb-12">
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+                <div className="flex items-center gap-4">
+                    <button onClick={onBack} className="p-2 rounded-full hover:bg-brand-beige text-brand-orange">
+                        <span className="material-symbols-outlined">arrow_back</span>
                     </button>
-                    <h1 className="text-lg md:text-xl font-bold text-slate-900 dark:text-slate-100 font-heading">Choose Your Plan</h1>
-                    <button onClick={() => window.open(`https://wa.me/${SUPPORT_WHATSAPP}?text=Hi, I need help choosing a plan`, '_blank')} className="text-brand-saffron text-sm font-bold hover:text-brand-saffron/80 transition-colors">
-                        Help
-                    </button>
-                </div>
-            </header>
-
-            <main className="flex flex-col gap-6 p-4 md:p-6 lg:p-8">
-                <div className="flex flex-col gap-2 mt-2">
-                    <h2 className="text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-white leading-tight">
-                        Unlock Daily <br />
-                        <span className="text-brand-saffron">Home-Cooked Meals</span>
-                    </h2>
-                    <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">
-                        Experience the warmth of Maa Ki Rasoi. Simple, healthy, and delivered to your door.
-                    </p>
-                </div>
-
-                {/* ── Meal Type Selector ── */}
-                <div>
-                    <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-3">Select Your Meal</h3>
-                    <div className="grid grid-cols-3 gap-2">
-                        {Object.values(MEAL_TYPES).map(meal => (
-                            <button
-                                key={meal.id}
-                                onClick={() => setSelectedMeal(meal.id)}
-                                className={`flex flex-col items-center gap-1 py-3 px-2 rounded-xl border-2 transition-all text-sm font-bold active:scale-95 ${selectedMeal === meal.id
-                                        ? 'border-brand-saffron bg-brand-saffron/10 text-brand-saffron shadow-sm'
-                                        : 'border-gray-200 dark:border-gray-700 text-slate-600 dark:text-slate-300 hover:border-brand-saffron/40'
-                                    }`}
-                            >
-                                <span className="text-lg">{meal.icon}</span>
-                                {meal.label}
-                            </button>
-                        ))}
+                    <div>
+                        <h1 className="text-3xl font-bold mb-1">Choose Your Plan</h1>
+                        <p className="text-text-muted">Pure Veg Home-style Meals, delivered daily.</p>
                     </div>
                 </div>
+                <button
+                    onClick={() => window.open(`https://wa.me/${SUPPORT_WHATSAPP}?text=Hi, I need help choosing a plan`, '_blank')}
+                    className="text-brand-orange font-bold text-sm flex items-center gap-1 hover:underline"
+                >
+                    <span className="material-symbols-outlined text-sm">help</span>
+                    Assistance
+                </button>
+            </div>
 
-                {/* ── Plan Cards ── */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {/* Meal Type Selection */}
+            <div className="card !p-6 border-none shadow-sm bg-brand-beige">
+                <h3 className="text-xs font-bold uppercase tracking-widest text-text-muted mb-4">1. Select Delivery Slot</h3>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    {Object.values(MEAL_TYPES).map(meal => (
+                        <button
+                            key={meal.id}
+                            onClick={() => setSelectedMeal(meal.id)}
+                            className={`flex items-center gap-3 p-3 rounded-xl border-2 transition-all font-bold text-sm ${selectedMeal === meal.id
+                                    ? 'border-brand-orange bg-white text-brand-orange shadow-md scale-[1.02]'
+                                    : 'border-transparent bg-white/50 text-text-muted hover:border-brand-orange/30'
+                                }`}
+                        >
+                            <span className="text-xl">{meal.icon}</span>
+                            {meal.label}
+                        </button>
+                    ))}
+                </div>
+            </div>
+
+            {/* Plan Grid */}
+            <div>
+                <h3 className="text-xs font-bold uppercase tracking-widest text-text-muted mb-6 ml-2">2. Pick Your Duration</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {planList.map(plan => {
                         const price = computePrice(plan.id, selectedMeal);
-                        const isHighlighted = !!plan.badge;
+                        const isPopular = !!plan.badge;
 
                         return (
                             <div
                                 key={plan.id}
-                                className={`relative flex flex-col gap-4 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all duration-300 ${isHighlighted
-                                        ? 'border-2 border-brand-saffron bg-white dark:bg-[#2d2418] shadow-xl shadow-brand-saffron/10 md:scale-100 scale-[1.02] z-10'
-                                        : 'group border border-gray-200 dark:border-gray-800 bg-white dark:bg-[#2d2418]'
+                                className={`card flex flex-col h-full transition-all duration-300 ${isPopular
+                                        ? 'border-2 border-brand-orange shadow-premium scale-[1.02] z-10'
+                                        : 'hover:scale-[1.02]'
                                     }`}
                             >
                                 {plan.badge && (
-                                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-brand-saffron text-slate-900 px-4 py-1 rounded-full text-xs font-extrabold tracking-wide uppercase shadow-sm">
+                                    <div className="bg-brand-orange text-white text-[10px] font-bold uppercase tracking-widest py-1 px-4 rounded-full w-fit mb-4 mx-auto">
                                         {plan.badge}
                                     </div>
                                 )}
 
-                                <div className={`flex justify-between items-start ${isHighlighted ? 'mt-2' : ''}`}>
-                                    <div className="flex flex-col">
-                                        <h3 className={`font-bold text-slate-900 dark:text-white ${isHighlighted ? 'text-xl font-extrabold' : 'text-lg group-hover:text-brand-saffron'} transition-colors`}>
-                                            {plan.title}
-                                        </h3>
-                                        <span className="text-xs text-slate-500 dark:text-slate-400 mt-1">{plan.subtitle}</span>
+                                <div className="text-center mb-6">
+                                    <h3 className="text-2xl font-bold mb-1 capitalize">{plan.title} Plan</h3>
+                                    <p className="text-xs text-text-muted mb-4 italic">"Ideal for {plan.duration} days"</p>
+
+                                    <div className="flex items-baseline justify-center gap-1 mb-2">
+                                        <span className="text-4xl font-bold text-text-main">₹{price}</span>
+                                        <span className="text-xs text-text-muted font-medium">/{plan.duration}d</span>
                                     </div>
-                                    {!isHighlighted && (
-                                        <div className="bg-slate-100 dark:bg-white/5 px-3 py-1 rounded-full border border-slate-200 dark:border-white/10">
-                                            <span className="text-xs font-bold text-slate-900 dark:text-slate-200">₹{plan.perMealPrice}/meal</span>
-                                        </div>
-                                    )}
+                                    <div className="text-[10px] font-bold text-brand-orange bg-brand-orange/5 px-2 py-1 rounded inline-block">
+                                        SAVE ₹{(plan.perMealPrice * 30 - price) > 0 ? (plan.perMealPrice * 30 - price) : 0} compared to daily
+                                    </div>
                                 </div>
 
-                                <div className="flex items-baseline gap-1">
-                                    <span className={`font-extrabold text-slate-900 dark:text-white tracking-tight ${isHighlighted ? 'text-4xl font-black' : 'text-3xl'}`}>
-                                        ₹{price.toLocaleString('en-IN')}
-                                    </span>
-                                    <span className="text-sm font-medium text-slate-500 dark:text-slate-400">
-                                        / {plan.duration} days
-                                    </span>
-                                </div>
-
-                                {isHighlighted && (
-                                    <ul className="flex flex-col gap-3 mt-2">
-                                        {plan.features.slice(0, 2).map((feat, i) => (
-                                            <li key={i} className="flex items-center gap-3 text-sm font-medium text-slate-700 dark:text-slate-200">
-                                                <span className="material-symbols-outlined text-brand-saffron">check_circle</span>
-                                                {feat}
-                                            </li>
-                                        ))}
-                                    </ul>
-                                )}
-
-                                <div className="h-px w-full bg-gray-100 dark:bg-white/5"></div>
+                                <ul className="space-y-3 mb-8 flex-1">
+                                    {plan.features.map((feat, i) => (
+                                        <li key={i} className="flex items-start gap-2 text-sm text-text-body">
+                                            <span className="material-symbols-outlined text-success text-sm mt-0.5">check_circle</span>
+                                            {feat}
+                                        </li>
+                                    ))}
+                                </ul>
 
                                 <button
                                     onClick={() => onCheckout({
@@ -113,23 +97,20 @@ export default function ExplorePlansView({ onBack, onCheckout }) {
                                         dietaryPreference: DIETARY_PREFERENCE,
                                         totalPrice: price,
                                     })}
-                                    className={`mt-1 w-full rounded-xl font-bold text-sm active:scale-95 transition-all ${isHighlighted
-                                            ? 'py-4 bg-brand-saffron text-slate-900 font-extrabold text-base shadow-lg shadow-brand-saffron/25 hover:-translate-y-0.5'
-                                            : 'py-3 bg-slate-900 dark:bg-white/10 text-white hover:bg-brand-saffron dark:hover:bg-brand-saffron'
-                                        }`}
+                                    className={`btn btn-block py-4 text-base ${isPopular ? '' : 'btn-secondary'}`}
                                 >
-                                    Subscribe for ₹{price.toLocaleString('en-IN')}
+                                    Choose {plan.title}
                                 </button>
                             </div>
                         );
                     })}
                 </div>
+            </div>
 
-                {/* ── Inclusions ── */}
-                <p className="text-xs text-center text-slate-400 dark:text-slate-500 px-4">
-                    All prices are exclusive of 5% GST. Cancel or pause anytime.
-                </p>
-            </main>
+            <p className="text-[10px] text-center text-text-muted italic px-8">
+                * Prices exclude 5% GST. Delivery timings: Lunch (12-2 PM), Dinner (7-9 PM). <br />
+                Managed by Maa Ki Rasoi Home Kitchen Network.
+            </p>
         </div>
     );
 }

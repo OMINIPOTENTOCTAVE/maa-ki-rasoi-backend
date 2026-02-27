@@ -9,7 +9,7 @@ const addDays = (date, days) => {
 
 const createSubscription = async (req, res) => {
     try {
-        const { customerId, customerPhone, customerName, address, planType, mealType, dietaryPreference = 'Veg', startDate } = req.body;
+        const { customerId, customerPhone, customerName, address, planType, mealType, dietaryPreference = 'Veg', startDate, paymentMethod } = req.body;
 
         if (!planType || !mealType || !startDate) {
             return res.status(400).json({ success: false, message: "Missing required fields" });
@@ -32,6 +32,14 @@ const createSubscription = async (req, res) => {
 
         if (!customer) {
             return res.status(400).json({ success: false, message: "Customer identification required" });
+        }
+
+        // Update address if provided
+        if (address) {
+            customer = await prisma.customer.update({
+                where: { id: customer.id },
+                data: { address }
+            });
         }
 
         // 2. Calculate subscription duration & pricing
@@ -59,7 +67,9 @@ const createSubscription = async (req, res) => {
                 startDate: start,
                 endDate: end,
                 totalPrice,
-                status: "Active"
+                status: paymentMethod === 'COD' ? "Active" : "Pending", // Pending until paid for ONLINE
+                paymentMethod,
+                paymentStatus: "Pending"
             }
         });
 
@@ -108,7 +118,7 @@ const getSubscriptions = async (req, res) => {
                 customer: true,
                 deliveries: {
                     where: {
-                        deliveryDate: { gte: new Date() }
+                        status: 'Pending'
                     },
                     orderBy: { deliveryDate: 'asc' },
                     take: 1
@@ -124,10 +134,21 @@ const getSubscriptions = async (req, res) => {
             query.where = { customerId: req.user.id };
         }
 
-        const [subscriptions, totalCount] = await Promise.all([
+        const [subscriptionsRaw, totalCount] = await Promise.all([
             prisma.subscription.findMany(query),
             prisma.subscription.count({ where: query.where })
         ]);
+
+        // Enrich with mealsRemaining count
+        const subscriptions = await Promise.all(subscriptionsRaw.map(async (s) => {
+            const pendingCount = await prisma.subscriptionDelivery.count({
+                where: {
+                    subscriptionId: s.id,
+                    status: 'Pending'
+                }
+            });
+            return { ...s, mealsRemaining: pendingCount };
+        }));
 
         res.json({
             success: true,
@@ -154,22 +175,27 @@ const toggleSubscriptionStatus = async (req, res) => {
             data: { status }
         });
 
-        // Fix: Proper IST boundary using UTC+5:30 offset (no toLocaleString)
-        // This ensures pause/cancel takes effect for today's remaining + all future deliveries
+        // 10 PM IST Cutoff Logic (SOP Section 4)
+        // If before 10 PM IST, change starts from Tomorrow.
+        // If after 10 PM IST, change starts from Day-after-Tomorrow.
+        const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000;
+        const nowUTC = Date.now();
+        const nowIST = new Date(nowUTC + IST_OFFSET_MS);
+
+        const hourIST = nowIST.getUTCHours();
+        let daysToSkip = 1; // Default: start from tomorrow
+        if (hourIST >= 22) { // 10 PM or later
+            daysToSkip = 2; // Start from day after tomorrow
+        }
+
+        const startOfEffectiveDayIST = new Date(Date.UTC(
+            nowIST.getUTCFullYear(),
+            nowIST.getUTCMonth(),
+            nowIST.getUTCDate() + daysToSkip
+        ));
+        const effectiveDate = new Date(startOfEffectiveDayIST.getTime() - IST_OFFSET_MS);
+
         if (status === 'Paused' || status === 'Cancelled') {
-            const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000; // +5:30 in ms
-            const nowUTC = Date.now();
-            const nowIST = new Date(nowUTC + IST_OFFSET_MS);
-
-            // Start of current IST day in UTC — any pending delivery from today onward gets cancelled
-            const startOfTodayIST = new Date(Date.UTC(
-                nowIST.getUTCFullYear(),
-                nowIST.getUTCMonth(),
-                nowIST.getUTCDate()
-            ));
-            // Convert back to UTC by subtracting IST offset
-            const effectiveDate = new Date(startOfTodayIST.getTime() - IST_OFFSET_MS);
-
             await prisma.subscriptionDelivery.updateMany({
                 where: {
                     subscriptionId: id,
@@ -180,19 +206,7 @@ const toggleSubscriptionStatus = async (req, res) => {
             });
         }
 
-        // If reactivated, restore paused deliveries from today onward
         if (status === 'Active') {
-            const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000;
-            const nowUTC = Date.now();
-            const nowIST = new Date(nowUTC + IST_OFFSET_MS);
-
-            const startOfTodayIST = new Date(Date.UTC(
-                nowIST.getUTCFullYear(),
-                nowIST.getUTCMonth(),
-                nowIST.getUTCDate()
-            ));
-            const effectiveDate = new Date(startOfTodayIST.getTime() - IST_OFFSET_MS);
-
             await prisma.subscriptionDelivery.updateMany({
                 where: {
                     subscriptionId: id,
@@ -202,6 +216,37 @@ const toggleSubscriptionStatus = async (req, res) => {
                 data: { status: 'Pending' }
             });
         }
+
+        res.json({
+            success: true,
+            data: updated,
+            message: `Status updated to ${status}. Changes effective from ${startOfEffectiveDayIST.toISOString().split('T')[0]}`
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+const updateDeliveryStatus = async (req, res) => {
+    try {
+        const { deliveryId } = req.params;
+        const { status, rating, feedback } = req.body;
+
+        const data = { status };
+        const now = new Date();
+
+        if (status === 'Confirmed') data.confirmedAt = now;
+        if (status === 'Preparing') data.preparingAt = now;
+        if (status === 'Out for Delivery') data.dispatchedAt = now;
+        if (status === 'Delivered') data.deliveredAt = now;
+
+        if (rating !== undefined) data.rating = rating;
+        if (feedback !== undefined) data.feedback = feedback;
+
+        const updated = await prisma.subscriptionDelivery.update({
+            where: { id: deliveryId },
+            data
+        });
 
         res.json({ success: true, data: updated });
     } catch (error) {
@@ -224,7 +269,10 @@ const getDailyProduction = async (req, res) => {
                     gte: today,
                     lt: tomorrow
                 },
-                status: 'Pending'
+                status: 'Pending',
+                subscription: {
+                    status: 'Active'
+                }
             },
             include: {
                 subscription: {
@@ -255,4 +303,62 @@ const getDailyProduction = async (req, res) => {
     }
 }
 
-module.exports = { createSubscription, getSubscriptions, toggleSubscriptionStatus, getDailyProduction };
+const getDispatchManifest = async (req, res) => {
+    try {
+        const { date } = req.query;
+        const targetDate = date ? new Date(date) : new Date();
+
+        // If no date provided, default to Tomorrow (as per SOP prep)
+        if (!date) {
+            targetDate.setDate(targetDate.getDate() + 1);
+        }
+        targetDate.setHours(0, 0, 0, 0);
+
+        const nextDay = new Date(targetDate);
+        nextDay.setDate(nextDay.getDate() + 1);
+
+        const deliveries = await prisma.subscriptionDelivery.findMany({
+            where: {
+                deliveryDate: {
+                    gte: targetDate,
+                    lt: nextDay
+                },
+                status: 'Pending',
+                subscription: {
+                    status: 'Active'
+                }
+            },
+            include: {
+                subscription: {
+                    include: { customer: true }
+                }
+            }
+        });
+
+        // SOP Section 9: Clustering & Manifest Preparation
+        // Grouping by Address (Basic Clustering)
+        const manifest = deliveries.reduce((acc, d) => {
+            const addr = d.subscription.customer.address || "Unknown Address";
+            if (!acc[addr]) acc[addr] = [];
+            acc[addr].push({
+                deliveryId: d.id,
+                customerName: d.subscription.customer.name,
+                customerPhone: d.subscription.customer.phone,
+                mealType: d.mealType,
+                planType: d.subscription.planType
+            });
+            return acc;
+        }, {});
+
+        res.json({
+            success: true,
+            date: targetDate.toISOString().split('T')[0],
+            totalDeliveries: deliveries.length,
+            manifest
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+module.exports = { createSubscription, getSubscriptions, toggleSubscriptionStatus, getDailyProduction, updateDeliveryStatus, getDispatchManifest };

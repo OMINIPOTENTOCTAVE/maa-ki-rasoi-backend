@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const menuController = require("./menu.controller");
-const authMiddleware = require("../../middleware/auth");
+const { authMiddleware } = require("../../middleware/auth");
 
 // Public
 router.get("/", menuController.getMenuItems);

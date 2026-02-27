@@ -11,6 +11,7 @@ import TeamManagement from '../components/dashboard/TeamManagement';
 import SubscriptionList from '../components/dashboard/SubscriptionList';
 import MenuManagement from '../components/dashboard/MenuManagement';
 import OrderQueue from '../components/dashboard/OrderQueue';
+import ComplaintManager from '../components/dashboard/ComplaintManager';
 
 export default function AdminDashboard() {
     const [activeTab, setActiveTab] = useState('subscriptions');
@@ -37,7 +38,14 @@ export default function AdminDashboard() {
         }
         axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
         loadData();
-    }, [token, activeTab, loadData]);
+
+        // Auto-refresh every 30 seconds
+        const interval = setInterval(() => {
+            fetchData(activeTab, token);
+        }, 30000);
+
+        return () => clearInterval(interval);
+    }, [token, activeTab, loadData, fetchData]);
 
     const handleStatusChange = async (orderId, newStatus) => {
         try {
@@ -160,6 +168,8 @@ export default function AdminDashboard() {
                     handleStatusChange={handleStatusChange}
                 />
             )}
+
+            {activeTab === 'complaints' && <ComplaintManager />}
         </div>
     );
 

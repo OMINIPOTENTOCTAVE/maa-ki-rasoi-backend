@@ -17,7 +17,7 @@ const login = async (req, res) => {
             return res.status(401).json({ success: false, message: "Invalid credentials" });
         }
 
-        const token = jwt.sign({ id: admin.id, username: admin.username }, process.env.JWT_SECRET, {
+        const token = jwt.sign({ id: admin.id, username: admin.username, role: 'admin' }, process.env.JWT_SECRET, {
             expiresIn: "7d",
         });
 
@@ -61,8 +61,8 @@ const requestOTP = async (req, res) => {
         authService.storeOTP(phone, otp);
 
         try {
-            await authService.sendSMS(phone, otp);
-            res.json({ success: true, message: "OTP sent successfully" });
+            const result = await authService.sendSMS(phone, otp);
+            res.json({ success: true, message: "OTP sent successfully", ...result });
         } catch (error) {
             res.status(500).json({ success: false, message: error.message });
         }
@@ -157,13 +157,28 @@ const refreshToken = async (req, res) => {
     }
 };
 
-const logout = async (req, res) => {
-    res.clearCookie('customer_token', {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-    });
-    res.json({ success: true, message: 'Logged out successfully' });
+const updateProfile = async (req, res) => {
+    try {
+        const { name, address } = req.body;
+        const customerId = req.user.id;
+
+        const updatedCustomer = await prisma.customer.update({
+            where: { id: customerId },
+            data: {
+                ...(name && { name }),
+                ...(address && { address })
+            }
+        });
+
+        res.json({ success: true, customer: updatedCustomer });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
 };
 
-module.exports = { login, createAdmin, requestOTP, verifyOTP, refreshToken, logout };
+const logout = async (req, res) => {
+    res.clearCookie('customer_refresh_token');
+    res.json({ success: true, message: "Logged out successfully" });
+};
+
+module.exports = { login, createAdmin, requestOTP, verifyOTP, refreshToken, logout, updateProfile };

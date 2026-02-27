@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import useMediaQuery from '@/hooks/useMediaQuery';
+import axios from 'axios';
 
 export default function ProfileView({ onLogout, onManageSubscription, onSupportClick, subscriptions = [] }) {
     const [isDarkMode, setIsDarkMode] = useState(false);
     const [customer, setCustomer] = useState(null);
-    const { isMobile } = useMediaQuery();
+    const [isEditingAddress, setIsEditingAddress] = useState(false);
+    const [address, setAddress] = useState('');
+    const [isSaving, setIsSaving] = useState(false);
 
     const activeSub = subscriptions.find(s => s.status === 'Active');
 
@@ -13,7 +15,9 @@ export default function ProfileView({ onLogout, onManageSubscription, onSupportC
         const storedCustomer = localStorage.getItem('customer_data');
         if (storedCustomer) {
             try {
-                setCustomer(JSON.parse(storedCustomer));
+                const parsedCustomer = JSON.parse(storedCustomer);
+                setCustomer(parsedCustomer);
+                setAddress(parsedCustomer.address || '');
             } catch (e) {
                 console.error(e);
             }
@@ -33,129 +37,164 @@ export default function ProfileView({ onLogout, onManageSubscription, onSupportC
     };
 
     return (
-        <div className="flex flex-col h-full w-full bg-brand-cream dark:bg-brand-dark overflow-y-auto no-scrollbar pb-24 md:pb-8">
-            <div className="flex items-center justify-between p-4 pt-5 md:p-6 bg-brand-cream dark:bg-[#2d2418] sticky top-0 z-20 border-b border-gray-100 dark:border-gray-800">
-                <h2 className="text-slate-900 dark:text-white text-lg md:text-2xl font-bold leading-tight tracking-[-0.015em] ml-2 font-heading">Profile & Settings</h2>
-                <button className="text-slate-900 dark:text-white flex size-10 shrink-0 items-center justify-center rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors">
-                    <span className="material-symbols-outlined text-2xl">notifications</span>
-                </button>
+        <div className="space-y-8 animate-fade-in">
+            <div>
+                <h1 className="text-3xl font-bold mb-2">Profile & Settings</h1>
+                <p className="text-text-muted">Manage your account and preferences.</p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 p-4 md:p-6 lg:p-8">
-                {/* Left: Profile Info + Plan */}
-                <div className="space-y-5">
-                    {/* Avatar + Name */}
-                    <div className="flex flex-col items-center md:items-start md:flex-row md:gap-5 pt-2">
-                        <div className="relative group cursor-pointer shrink-0">
-                            <div className="bg-brand-saffron/10 rounded-full h-24 w-24 md:h-20 md:w-20 border-4 border-white dark:border-[#2d2418] shadow-lg flex items-center justify-center text-3xl font-bold text-brand-saffron capitalize">
-                                {customer?.name?.charAt(0) || 'C'}
-                            </div>
-                            <div className="absolute bottom-0 right-0 bg-brand-saffron text-white p-1 rounded-full border-2 border-brand-cream dark:border-brand-dark flex items-center justify-center shadow-md">
-                                <span className="material-symbols-outlined text-xs">edit</span>
-                            </div>
-                        </div>
-                        <div className="mt-3 md:mt-0 text-center md:text-left">
-                            <h1 className="text-xl font-bold text-slate-900 dark:text-white capitalize">{customer?.name || 'Customer'}</h1>
-                            <p className="text-slate-500 dark:text-slate-400 font-medium text-sm mt-0.5">+91 {customer?.phone || '...'}</p>
-                        </div>
-                    </div>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
 
-                    {/* Active Plan Card — bound to real data */}
-                    <div className="bg-white dark:bg-[#2d2418] rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-800 relative overflow-hidden group hover:shadow-md transition-shadow">
-                        <div className="flex justify-between items-start">
-                            <div>
-                                <p className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-0.5">Active Plan</p>
-                                {activeSub ? (
-                                    <>
-                                        <h3 className="text-lg font-bold text-slate-900 dark:text-white capitalize">{activeSub.planType} Pure Veg</h3>
-                                        <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
-                                            {activeSub.mealsRemaining} meals remaining • Expires {new Date(activeSub.endDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
-                                        </p>
-                                    </>
-                                ) : (
-                                    <>
-                                        <h3 className="text-lg font-bold text-slate-900 dark:text-white">No Active Plan</h3>
-                                        <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Subscribe to get daily meals!</p>
-                                    </>
+                {/* User Info & Subscription Card */}
+                <div className="lg:col-span-1 space-y-6">
+                    <div className="card text-center flex flex-col items-center !p-8">
+                        <div className="w-24 h-24 bg-brand-beige text-brand-orange rounded-full flex items-center justify-center text-4xl font-bold mb-4 border-4 border-white shadow-lg">
+                            {customer?.name?.charAt(0) || 'C'}
+                        </div>
+                        <h2 className="text-2xl font-bold capitalize">{customer?.name || 'Customer'}</h2>
+                        <p className="text-text-muted font-medium mb-6">+91 {customer?.phone || '...'}</p>
+
+                        <div className="w-full pt-6 border-t border-brand-beige">
+                            <div className="flex justify-between items-center mb-4">
+                                <p className="text-xs font-bold uppercase tracking-widest text-text-muted">Active Plan</p>
+                                {activeSub && (
+                                    <span className="bg-success/10 text-success px-2 py-0.5 rounded text-[10px] font-bold uppercase">Active</span>
                                 )}
                             </div>
-                            {activeSub && (
-                                <div className="bg-brand-green/20 text-brand-green px-2.5 py-0.5 rounded-lg">
-                                    <span className="text-xs font-bold">Active</span>
+
+                            {activeSub ? (
+                                <div className="text-left mb-6">
+                                    <h3 className="font-bold text-brand-orange">{activeSub.planType} Pure Veg</h3>
+                                    <p className="text-xs text-text-muted">
+                                        {activeSub.mealsRemaining} meals left • Expires {new Date(activeSub.endDate).toLocaleDateString()}
+                                    </p>
                                 </div>
+                            ) : (
+                                <p className="text-sm text-text-muted mb-6">No active subscription</p>
                             )}
+
+                            <button
+                                onClick={onManageSubscription}
+                                className="btn btn-block btn-secondary"
+                            >
+                                {activeSub ? 'Manage Plan' : 'View Plans'}
+                            </button>
                         </div>
-                        <button onClick={onManageSubscription} className="mt-3 w-full py-2 rounded-lg border border-gray-200 dark:border-gray-700 text-sm font-bold text-slate-700 dark:text-slate-200 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors flex items-center justify-center gap-2">
-                            <span>{activeSub ? 'Manage Subscription' : 'Explore Plans'}</span>
-                            <span className="material-symbols-outlined text-lg">arrow_forward</span>
-                        </button>
                     </div>
+
+                    <button
+                        onClick={onLogout}
+                        className="btn btn-block !bg-red-50 !text-error !shadow-none hover:!bg-red-100"
+                    >
+                        <span className="material-symbols-outlined">logout</span>
+                        Sign Out
+                    </button>
                 </div>
 
-                {/* Right: Settings */}
-                <div className="space-y-5">
-                    <div>
-                        <h3 className="px-2 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">App Settings</h3>
-                        <div className="bg-white dark:bg-[#2d2418] rounded-xl overflow-hidden shadow-sm border border-gray-100 dark:border-gray-800">
-                            <button onClick={toggleDarkMode} className="w-full flex items-center justify-between p-3.5 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors border-b border-gray-100 dark:border-gray-800">
-                                <div className="flex items-center gap-3">
-                                    <div className="size-8 rounded-lg bg-indigo-500/10 text-indigo-500 flex items-center justify-center">
-                                        <span className="material-symbols-outlined text-lg">{isDarkMode ? 'light_mode' : 'dark_mode'}</span>
-                                    </div>
-                                    <span className="font-medium text-sm text-slate-900 dark:text-slate-100">
-                                        {isDarkMode ? 'Light Mode' : 'Dark Mode'}
-                                    </span>
+                {/* Settings & Address */}
+                <div className="lg:col-span-2 space-y-6">
+
+                    {/* Address Section */}
+                    <div className="card">
+                        <h3 className="text-lg font-bold mb-6 flex items-center gap-2 text-brand-orange">
+                            <span className="material-symbols-outlined">location_on</span>
+                            Delivery Address
+                        </h3>
+
+                        {isEditingAddress ? (
+                            <div className="space-y-4">
+                                <textarea
+                                    value={address}
+                                    onChange={(e) => setAddress(e.target.value)}
+                                    className="input-field"
+                                    rows={4}
+                                    placeholder="Enter your full delivery address..."
+                                />
+                                <div className="flex gap-4">
+                                    <button onClick={() => setIsEditingAddress(false)} className="btn btn-secondary flex-1">Cancel</button>
+                                    <button
+                                        disabled={isSaving}
+                                        onClick={async () => {
+                                            setIsSaving(true);
+                                            try {
+                                                const res = await axios.patch('/auth/profile', { address });
+                                                if (res.data.success) {
+                                                    localStorage.setItem('customer_data', JSON.stringify(res.data.customer));
+                                                    setIsEditingAddress(false);
+                                                }
+                                            } catch (err) { console.error(err); }
+                                            finally { setIsSaving(false); }
+                                        }}
+                                        className="btn flex-[2]"
+                                    >
+                                        {isSaving ? 'Saving...' : 'Save Changes'}
+                                    </button>
                                 </div>
-                                <label className="relative inline-flex cursor-pointer items-center pointer-events-none">
-                                    <input type="checkbox" className="peer sr-only" checked={isDarkMode} readOnly />
-                                    <div className="peer h-5 w-9 rounded-full bg-slate-300 after:absolute after:left-[2px] after:top-[2px] after:h-4 after:w-4 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-brand-saffron peer-checked:after:translate-x-full peer-checked:after:border-white dark:bg-slate-700"></div>
-                                </label>
-                            </button>
-                            <button className="w-full flex items-center justify-between p-3.5 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                                <div className="flex items-center gap-3">
-                                    <div className="size-8 rounded-lg bg-blue-500/10 text-blue-500 flex items-center justify-center">
-                                        <span className="material-symbols-outlined text-lg">location_on</span>
+                            </div>
+                        ) : (
+                            <div className="flex items-start justify-between gap-6 p-4 bg-brand-beige/30 rounded-xl border border-brand-beige">
+                                <p className="text-sm leading-relaxed">
+                                    {address || 'No address saved yet. Please add one for deliveries!'}
+                                </p>
+                                <button
+                                    onClick={() => setIsEditingAddress(true)}
+                                    className="text-brand-orange font-bold text-xs flex items-center gap-1 hover:underline"
+                                >
+                                    <span className="material-symbols-outlined text-sm">edit</span>
+                                    {address ? 'Edit' : 'Add'}
+                                </button>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* App Settings */}
+                    <div className="card">
+                        <h3 className="text-lg font-bold mb-6 flex items-center gap-2 text-brand-orange">
+                            <span className="material-symbols-outlined">settings</span>
+                            Preferences
+                        </h3>
+
+                        <div className="divide-y divide-brand-beige">
+                            <div className="py-4 flex items-center justify-between">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-10 h-10 rounded-lg bg-brand-beige flex items-center justify-center text-brand-orange">
+                                        <span className="material-symbols-outlined">{isDarkMode ? 'dark_mode' : 'light_mode'}</span>
                                     </div>
-                                    <span className="font-medium text-sm text-slate-900 dark:text-slate-100">Manage Addresses</span>
+                                    <div>
+                                        <p className="font-bold">Dark Theme</p>
+                                        <p className="text-xs text-text-muted">Switch between light and dark appearance</p>
+                                    </div>
                                 </div>
-                                <span className="material-symbols-outlined text-slate-400 text-lg">chevron_right</span>
+                                <button
+                                    onClick={toggleDarkMode}
+                                    className={`w-12 h-6 rounded-full transition-colors relative ${isDarkMode ? 'bg-brand-orange' : 'bg-brand-beige'}`}
+                                >
+                                    <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${isDarkMode ? 'left-7' : 'left-1'}`} />
+                                </button>
+                            </div>
+
+                            <button
+                                onClick={onSupportClick}
+                                className="w-full py-4 flex items-center justify-between hover:bg-brand-beige/10 transition-colors"
+                            >
+                                <div className="flex items-center gap-4 text-left">
+                                    <div className="w-10 h-10 rounded-lg bg-brand-beige flex items-center justify-center text-brand-orange">
+                                        <span className="material-symbols-outlined">help</span>
+                                    </div>
+                                    <div>
+                                        <p className="font-bold">Help & Support</p>
+                                        <p className="text-xs text-text-muted">Frequently asked questions and chat</p>
+                                    </div>
+                                </div>
+                                <span className="material-symbols-outlined text-text-muted">chevron_right</span>
                             </button>
                         </div>
                     </div>
-
-                    <div>
-                        <h3 className="px-2 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Support & Legal</h3>
-                        <div className="bg-white dark:bg-[#2d2418] rounded-xl overflow-hidden shadow-sm border border-gray-100 dark:border-gray-800">
-                            <button onClick={onSupportClick} className="w-full flex items-center justify-between p-3.5 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors border-b border-gray-100 dark:border-gray-800">
-                                <div className="flex items-center gap-3">
-                                    <div className="size-8 rounded-lg bg-gray-100 dark:bg-gray-700 text-slate-600 dark:text-slate-300 flex items-center justify-center">
-                                        <span className="material-symbols-outlined text-lg">help</span>
-                                    </div>
-                                    <span className="font-medium text-sm text-slate-900 dark:text-slate-100">Help & Support</span>
-                                </div>
-                                <span className="material-symbols-outlined text-slate-400 text-lg">chevron_right</span>
-                            </button>
-                            <button className="w-full flex items-center justify-between p-3.5 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                                <div className="flex items-center gap-3">
-                                    <div className="size-8 rounded-lg bg-gray-100 dark:bg-gray-700 text-slate-600 dark:text-slate-300 flex items-center justify-center">
-                                        <span className="material-symbols-outlined text-lg">description</span>
-                                    </div>
-                                    <span className="font-medium text-sm text-slate-900 dark:text-slate-100">Terms & Conditions</span>
-                                </div>
-                                <span className="material-symbols-outlined text-slate-400 text-lg">chevron_right</span>
-                            </button>
-                        </div>
-                    </div>
-
-                    {isMobile && (
-                        <div className="flex flex-col items-center gap-3 mt-2 mb-4">
-                            <button onClick={onLogout} className="flex items-center gap-2 text-red-500 dark:text-red-400 font-bold px-6 py-2 rounded-full hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors text-sm">
-                                <span className="material-symbols-outlined text-lg">logout</span> Log Out
-                            </button>
-                            <p className="text-[10px] text-slate-400 dark:text-slate-500">Maa Ki Rasoi v2.4.0</p>
-                        </div>
-                    )}
                 </div>
+            </div>
+
+            <div className="text-center pt-8">
+                <p className="text-[10px] text-text-muted font-bold uppercase tracking-[0.2em]">Maa Ki Rasoi PWA v3.0.0</p>
             </div>
         </div>
     );

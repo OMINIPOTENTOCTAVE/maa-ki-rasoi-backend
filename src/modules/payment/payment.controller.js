@@ -89,6 +89,8 @@ const verifyPayment = async (req, res, next) => {
                     where: { id: referenceId },
                     data: {
                         paymentStatus: 'Paid',
+                        status: 'Pending', // Release to kitchen display
+                        confirmedAt: new Date(),
                         paymentMethod: 'ONLINE',
                         razorpayPaymentId: razorpay_payment_id
                     }
@@ -98,6 +100,7 @@ const verifyPayment = async (req, res, next) => {
                     where: { id: referenceId },
                     data: {
                         paymentStatus: 'Paid',
+                        status: 'Active',
                         paymentMethod: 'ONLINE',
                         razorpayPaymentId: razorpay_payment_id
                     }
