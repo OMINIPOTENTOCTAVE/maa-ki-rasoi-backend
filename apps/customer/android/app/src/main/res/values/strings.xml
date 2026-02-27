@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Maa Ki Rasoi</string>
+    <string name="title_activity_main">Maa Ki Rasoi</string>
+    <string name="package_name">com.maakirasoi.customer</string>
+    <string name="custom_url_scheme">com.maakirasoi.customer</string>
+</resources>

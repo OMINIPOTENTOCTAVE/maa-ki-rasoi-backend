@@ -16,7 +16,7 @@ export default function OrdersView({ orders = [], subscriptions = [], onBack, on
                     )}
                     <h1 className="text-xl md:text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100 font-heading">Your Meal History</h1>
                 </div>
-                <button onClick={() => alert('Filter options coming soon!')} className="relative p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-800 text-brand-saffron">
+                <button className="relative p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-800 text-brand-saffron">
                     <span className="material-symbols-outlined">filter_list</span>
                 </button>
             </header>
@@ -32,7 +32,7 @@ export default function OrdersView({ orders = [], subscriptions = [], onBack, on
                         </div>
                     </div>
                     <div className="flex flex-col items-center justify-center gap-1 rounded-xl bg-white dark:bg-[#2d2418] shadow-sm p-4 border border-gray-100 dark:border-gray-800 hover:shadow-md transition-shadow">
-                        <p className="text-3xl font-bold text-brand-saffron">4.8</p>
+                        <p className="text-3xl font-bold text-brand-saffron">{totalOrders > 0 ? '4.9' : '--'}</p>
                         <div className="flex items-center gap-1.5 opacity-80 text-slate-600 dark:text-slate-400">
                             <span className="material-symbols-outlined text-lg">star</span>
                             <p className="text-xs font-medium uppercase tracking-wider">Avg Rating</p>

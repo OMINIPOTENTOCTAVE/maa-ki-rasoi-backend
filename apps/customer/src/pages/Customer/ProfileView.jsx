@@ -21,12 +21,14 @@ export default function ProfileView({ onLogout, onManageSubscription, onSupportC
     }, []);
 
     const toggleDarkMode = () => {
-        if (isDarkMode) {
-            document.documentElement.classList.remove('dark');
-            setIsDarkMode(false);
-        } else {
+        const nextMode = !isDarkMode;
+        setIsDarkMode(nextMode);
+        if (nextMode) {
             document.documentElement.classList.add('dark');
-            setIsDarkMode(true);
+            localStorage.setItem('theme', 'dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+            localStorage.setItem('theme', 'light');
         }
     };
 
@@ -34,7 +36,7 @@ export default function ProfileView({ onLogout, onManageSubscription, onSupportC
         <div className="flex flex-col h-full w-full bg-brand-cream dark:bg-brand-dark overflow-y-auto no-scrollbar pb-24 md:pb-8">
             <div className="flex items-center justify-between p-4 pt-5 md:p-6 bg-brand-cream dark:bg-[#2d2418] sticky top-0 z-20 border-b border-gray-100 dark:border-gray-800">
                 <h2 className="text-slate-900 dark:text-white text-lg md:text-2xl font-bold leading-tight tracking-[-0.015em] ml-2 font-heading">Profile & Settings</h2>
-                <button onClick={() => alert('Notifications coming soon!')} className="text-slate-900 dark:text-white flex size-10 shrink-0 items-center justify-center rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors">
+                <button className="text-slate-900 dark:text-white flex size-10 shrink-0 items-center justify-center rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors">
                     <span className="material-symbols-outlined text-2xl">notifications</span>
                 </button>
             </div>
@@ -44,7 +46,7 @@ export default function ProfileView({ onLogout, onManageSubscription, onSupportC
                 <div className="space-y-5">
                     {/* Avatar + Name */}
                     <div className="flex flex-col items-center md:items-start md:flex-row md:gap-5 pt-2">
-                        <div className="relative group cursor-pointer shrink-0" onClick={() => alert('Profile photo upload coming soon!')}>
+                        <div className="relative group cursor-pointer shrink-0">
                             <div className="bg-brand-saffron/10 rounded-full h-24 w-24 md:h-20 md:w-20 border-4 border-white dark:border-[#2d2418] shadow-lg flex items-center justify-center text-3xl font-bold text-brand-saffron capitalize">
                                 {customer?.name?.charAt(0) || 'C'}
                             </div>
@@ -109,7 +111,7 @@ export default function ProfileView({ onLogout, onManageSubscription, onSupportC
                                     <div className="peer h-5 w-9 rounded-full bg-slate-300 after:absolute after:left-[2px] after:top-[2px] after:h-4 after:w-4 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-brand-saffron peer-checked:after:translate-x-full peer-checked:after:border-white dark:bg-slate-700"></div>
                                 </label>
                             </button>
-                            <button onClick={() => alert('Address management coming soon!')} className="w-full flex items-center justify-between p-3.5 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                            <button className="w-full flex items-center justify-between p-3.5 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
                                 <div className="flex items-center gap-3">
                                     <div className="size-8 rounded-lg bg-blue-500/10 text-blue-500 flex items-center justify-center">
                                         <span className="material-symbols-outlined text-lg">location_on</span>
@@ -133,7 +135,7 @@ export default function ProfileView({ onLogout, onManageSubscription, onSupportC
                                 </div>
                                 <span className="material-symbols-outlined text-slate-400 text-lg">chevron_right</span>
                             </button>
-                            <button onClick={() => alert('Terms & Conditions page coming soon!')} className="w-full flex items-center justify-between p-3.5 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                            <button className="w-full flex items-center justify-between p-3.5 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
                                 <div className="flex items-center gap-3">
                                     <div className="size-8 rounded-lg bg-gray-100 dark:bg-gray-700 text-slate-600 dark:text-slate-300 flex items-center justify-center">
                                         <span className="material-symbols-outlined text-lg">description</span>

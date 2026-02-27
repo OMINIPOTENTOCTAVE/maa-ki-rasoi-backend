@@ -3,8 +3,8 @@ const router = express.Router();
 const subscriptionController = require('./subscription.controller');
 const authMiddleware = require('../../middleware/auth');
 
-// Public route to buy a subscription
-router.post('/', subscriptionController.createSubscription);
+// Protected route to buy a subscription
+router.post('/', authMiddleware, subscriptionController.createSubscription);
 
 // Admin protected routes
 router.get('/', authMiddleware, subscriptionController.getSubscriptions);

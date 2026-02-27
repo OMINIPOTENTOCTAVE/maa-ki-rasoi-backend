@@ -46,7 +46,7 @@ export default function HomeView({ subscriptions = [], onManageClick, onExploreC
                                 subtitle="Dal Tadka, Sabzi, Rice, 3 Rotis"
                                 image="https://lh3.googleusercontent.com/aida-public/AB6AXuCn5WRfuP-mNB5rtMQEMXgvPQ9qdY68cmNoOkTLqZve4qs9riUQ7db6vKkvUmDKJ8IhZYryISONHkTIuWzqR8WYLgMz7GUCVKX4o7q3jV47b8HBZnjMde1auW2Nj-RBjAasxahXXTSqr_KdFc4BHKEvD2vW4JujWFJpG9RROM7ZFr8PvBBVsbjvnddjGKiigxeEK0px1AQpTZOq4I0HtNDcbC-K2LUtq8ejWebW5QisqTPZDFHMye_NW-_rCnJmFz6nONBShxiyreal"
                                 tags={[`Upcoming ${nextDelivery.mealType}`]}
-                                onAction={() => alert('Meal Details')}
+                                onAction={() => { }}
                             />
                         ) : (
                             <div className="bg-white dark:bg-brand-dark/50 p-6 md:p-8 rounded-xl border border-gray-100 dark:border-gray-800 text-center shadow-sm">

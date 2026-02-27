@@ -96,6 +96,14 @@ function App() {
         window.addEventListener('online', handleOnline);
         window.addEventListener('offline', handleOffline);
 
+        // Load saved theme
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+            document.documentElement.classList.add('dark');
+        } else if (savedTheme === 'light') {
+            document.documentElement.classList.remove('dark');
+        }
+
         // Remove initial skeleton loader once React mounts
         const loader = document.getElementById('initial-loader');
         if (loader) {

@@ -90,7 +90,7 @@ export default function ManageView({ onBack, subscriptions = [], onUpdate }) {
                             </button>
                             <div className="mt-4 flex items-center gap-2 bg-blue-500/10 p-3 rounded-lg border border-blue-500/20">
                                 <span className="material-symbols-outlined text-blue-500 text-sm">info</span>
-                                <p className="text-blue-600 dark:text-blue-200 text-xs">Note: Active daily management calendar is coming in v2.</p>
+                                <p className="text-blue-600 dark:text-blue-200 text-xs">Stay tuned! We're adding more advanced scheduling features soon.</p>
                             </div>
                         </div>
 

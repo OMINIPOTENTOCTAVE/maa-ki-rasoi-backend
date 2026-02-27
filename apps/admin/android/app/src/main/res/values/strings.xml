@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">MKR Admin</string>
+    <string name="title_activity_main">MKR Admin</string>
+    <string name="package_name">com.maakirasoi.admin</string>
+    <string name="custom_url_scheme">com.maakirasoi.admin</string>
+</resources>

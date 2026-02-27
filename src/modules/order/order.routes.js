@@ -3,8 +3,8 @@ const router = express.Router();
 const orderController = require("./order.controller");
 const authMiddleware = require("../../middleware/auth");
 
-// Public
-router.post("/", orderController.placeOrder);
+// Protected
+router.post("/", authMiddleware, orderController.placeOrder);
 
 // Protected (Admin)
 router.get("/", authMiddleware, orderController.getOrders);

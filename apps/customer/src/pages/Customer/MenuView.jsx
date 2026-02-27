@@ -55,23 +55,6 @@ export default function MenuView({ onBack, cart, addToCart }) {
                         )}
                     </button>
                 </div>
-                <div className="px-4 md:px-6 pb-0 pt-1">
-                    <div className="flex space-x-3 overflow-x-auto no-scrollbar pb-2.5 snap-x">
-                        {weekDates.map((d, idx) => (
-                            <button
-                                key={idx}
-                                onClick={() => setSelectedDate(idx)}
-                                className={`snap-start flex flex-col items-center justify-center min-w-[4rem] py-2.5 rounded-xl transition-all active:scale-95 ${selectedDate === idx
-                                        ? 'bg-brand-saffron text-white shadow-md shadow-brand-saffron/30'
-                                        : 'bg-white dark:bg-[#2d2418] border border-gray-200 dark:border-gray-700 text-slate-500 dark:text-slate-400 hover:border-brand-saffron/50'
-                                    }`}
-                            >
-                                <span className="text-[10px] font-medium uppercase tracking-wide">{d.day}</span>
-                                <span className={`text-lg font-bold ${selectedDate === idx ? '' : 'text-slate-800 dark:text-slate-200'}`}>{d.date}</span>
-                            </button>
-                        ))}
-                    </div>
-                </div>
             </header>
 
             <main className="flex flex-col gap-4 p-4 md:p-6 lg:p-8 mt-1">
