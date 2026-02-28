@@ -4,7 +4,7 @@
 
 Maa Ki Rasoi (MKR) is a state-of-the-art, mobile-first PWA designed to deliver healthy, "ghar jaisa khana" (home-cooked food) through a seamless subscription model. Built with a focus on consistency, premium aesthetics, and operational efficiency.
 
-[![Live Demo](https://img.shields.io/badge/Status-Production--Ready-success?style=for-the-badge)](https://maakirasoi.in)
+[![Live Demo](https://img.shields.io/badge/Status-Live--On--Cloud-success?style=for-the-badge)](https://maakirasoi-customer-2026.web.app)
 [![Design](https://img.shields.io/badge/UI--UX-Premium--Refactor--v3.0-orange?style=for-the-badge)](#)
 
 ---
@@ -45,7 +45,7 @@ The application features a custom-built design system focused on "Warmth and Tru
 | **Database** | PostgreSQL + Prisma ORM |
 | **Payments** | Razorpay (Live Subscriptions & COD Verification) |
 | **Auth** | JWT + OTP (Fast2SMS) |
-| **Infra** | Render (API), Vercel (Frontends), Supabase (DB) |
+| **Infra** | Google Cloud Run (API), Firebase Hosting (Frontends), Cloud SQL (DB) |
 
 ---
 
@@ -82,6 +82,16 @@ cd apps/customer
 npm install
 npm run dev # http://localhost:5173
 ```
+
+---
+
+## 🌐 Live Deployment
+
+The platform is fully operational on Google Cloud Platform:
+- 🥘 **[Customer PWA](https://maakirasoi-customer-2026.web.app)** - Order and manage subscriptions.
+- 👨‍🍳 **[Admin Dashboard](https://maakirasoi-admin-2026.web.app)** - Operational control and analytics.
+- 📦 **[Delivery Partner](https://maakirasoi-delivery-2026.web.app)** - Rider tracking and dispatch.
+- 🔌 **[Backend API](https://maakirasoi-api-213402009735.asia-south1.run.app)** - Secure Cloud Run endpoint.
 
 ---
 
