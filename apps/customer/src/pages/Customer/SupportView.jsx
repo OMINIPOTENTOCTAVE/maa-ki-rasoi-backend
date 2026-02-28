@@ -17,7 +17,7 @@ export default function SupportView({ onBack }) {
             const res = await axios.get('/complaints');
             setComplaints(res.data.data);
         } catch (err) {
-            console.error(err);
+            
         }
     };
 
@@ -46,7 +46,7 @@ export default function SupportView({ onBack }) {
     return (
         <div className="space-y-8 animate-fade-in pb-12">
             <div className="flex items-center gap-4">
-                <button onClick={onBack} className="p-2 rounded-full hover:bg-brand-beige text-brand-orange">
+                <button onClick={onBack} className="p-2 rounded-full hover:bg-transparent text-brand-orange">
                     <span className="material-symbols-outlined">arrow_back</span>
                 </button>
                 <div>
@@ -76,7 +76,7 @@ export default function SupportView({ onBack }) {
                                             onClick={() => handleCategoryClick(cat.label)}
                                             className="card !p-6 flex items-center gap-4 text-left hover:border-brand-orange/40 hover:scale-[1.02] transition-all group"
                                         >
-                                            <div className="w-12 h-12 rounded-xl bg-brand-beige flex items-center justify-center text-brand-orange group-hover:bg-brand-orange group-hover:text-white transition-colors">
+                                            <div className="w-12 h-12 rounded-xl bg-transparent flex items-center justify-center text-brand-orange group-hover:bg-brand-orange group-hover:text-white transition-colors">
                                                 <span className="material-symbols-outlined">{cat.icon}</span>
                                             </div>
                                             <div>
@@ -131,6 +131,7 @@ export default function SupportView({ onBack }) {
                                     />
                                 </div>
                                 <button
+                                    type="submit"
                                     disabled={loading}
                                     className="btn btn-block py-4 text-lg"
                                 >
@@ -176,7 +177,7 @@ export default function SupportView({ onBack }) {
                         </div>
                     )}
 
-                    <div className="card !bg-brand-beige border-none shadow-none text-center">
+                    <div className="card !bg-transparent border-none shadow-none text-center">
                         <p className="text-[10px] text-text-muted leading-relaxed">
                             Support Operating Hours: <br />
                             <b>10:00 AM - 10:00 PM IST</b>
@@ -187,3 +188,7 @@ export default function SupportView({ onBack }) {
         </div>
     );
 }
+
+
+
+

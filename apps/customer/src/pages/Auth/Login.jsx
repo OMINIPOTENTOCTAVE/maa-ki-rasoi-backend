@@ -57,13 +57,13 @@ export default function Login() {
     };
 
     return (
-        <div className="flex items-center justify-center min-h-[calc(100vh-var(--header-height)-var(--bottom-nav-height)-8rem)] animate-slide-up">
+        <div className="flex items-center justify-center min-h-[calc(100vh-var(--header-height)-var(--bottom-nav-height)-4rem)] animate-slide-up">
             <div className="card w-full max-w-md p-8 md:p-12">
                 {/* Header with Back Button */}
                 <div className="flex items-center justify-between mb-8">
                     <button
                         onClick={() => navigate('/')}
-                        className="p-2 -ml-2 rounded-full hover:bg-brand-beige text-brand-orange transition-colors"
+                        className="p-2 -ml-2 rounded-full hover:bg-transparent text-brand-orange transition-colors"
                         title="Back to Home"
                     >
                         <span className="material-symbols-outlined text-2xl">arrow_back</span>
@@ -75,7 +75,7 @@ export default function Login() {
 
                 <div className="text-center mb-10">
                     <h1 className="text-3xl font-bold mb-2">Welcome Back</h1>
-                    <p className="text-text-muted">
+                    <p className="text-brand-dark">
                         Login required only for <span className="text-brand-orange font-semibold">Subscription</span>.
                     </p>
                 </div>
@@ -156,4 +156,7 @@ export default function Login() {
         </div>
     );
 }
+
+
+
 

@@ -11,7 +11,7 @@ export default function MenuManagement({ menuItems, menuForm, setMenuForm, handl
                     <input className="input-field" placeholder="Category" required value={menuForm.category} onChange={e => setMenuForm({ ...menuForm, category: e.target.value })} style={{ marginBottom: 0 }} />
                     <input className="input-field" placeholder="Short Description" required value={menuForm.description} onChange={e => setMenuForm({ ...menuForm, description: e.target.value })} style={{ marginBottom: 0 }} />
                 </div>
-                <button className="btn btn-block" style={{ marginTop: '1.5rem' }}>+ Add Item to Menu</button>
+                <button type="submit" className="btn btn-block" style={{ marginTop: '1.5rem' }}>+ Add Item to Menu</button>
             </form>
 
             <h3 style={{ marginBottom: '1rem', paddingLeft: '0.5rem' }}>Current Menu ({menuItems.length})</h3>

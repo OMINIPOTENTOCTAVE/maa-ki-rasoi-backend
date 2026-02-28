@@ -14,7 +14,7 @@ export default function HomeView({ subscriptions = [], onManageClick, onExploreC
             <header className="flex items-center justify-between">
                 <div>
                     <h1 className="text-3xl font-bold mb-1">Namaste, {greetingName}! 👋</h1>
-                    <p className="text-text-muted flex items-center gap-2">
+                    <p className="text-brand-dark flex items-center gap-2">
                         {activeSub ? (
                             <>
                                 <span className="w-2 h-2 rounded-full bg-success"></span>
@@ -34,7 +34,7 @@ export default function HomeView({ subscriptions = [], onManageClick, onExploreC
                         <div className="flex items-center justify-between mb-4">
                             <h2 className="text-xl font-bold">Your Next Meal</h2>
                             {nextDelivery && (
-                                <span className="text-xs font-bold text-brand-orange bg-brand-beige px-3 py-1 rounded-full uppercase tracking-wider">
+                                <span className="text-xs font-bold text-brand-orange bg-[#fffaf4] border border-brand-orange/10 px-3 py-1 rounded-full uppercase tracking-wider">
                                     {new Date(nextDelivery.deliveryDate).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
                                 </span>
                             )}
@@ -49,11 +49,11 @@ export default function HomeView({ subscriptions = [], onManageClick, onExploreC
                                 onAction={() => { }}
                             />
                         ) : (
-                            <div className="card text-center py-12">
+                            <div className="card text-center py-10">
                                 <span className="material-symbols-outlined text-5xl text-brand-orange/20 mb-4">restaurant</span>
                                 <h3 className="text-xl font-bold mb-2">Ready to eat healthy?</h3>
-                                <p className="text-text-muted mb-6 max-w-xs mx-auto">You don't have any meals scheduled. Subscribe to start receiving home-cooked food.</p>
-                                <button onClick={onExploreClick} className="btn">
+                                <p className="text-brand-dark mb-6 max-w-xs mx-auto text-sm">You don't have any meals scheduled. Subscribe to start receiving home-cooked food.</p>
+                                <button onClick={onExploreClick} className="btn py-3 px-8">
                                     Browse Plans
                                 </button>
                             </div>
@@ -84,9 +84,9 @@ export default function HomeView({ subscriptions = [], onManageClick, onExploreC
                         message="Refer a friend and get 3 free meals added to your current plan!"
                     />
 
-                    <div className="card bg-brand-brown text-white shadow-premium">
+                    <div className="card bg-brand-dark text-white">
                         <h3 className="text-lg font-bold mb-2 text-brand-orange-light">Chef's Choice</h3>
-                        <p className="text-brand-beige/60 text-sm mb-6">Our chefs recommend the Monthly Premium plan for consistent nutrition.</p>
+                        <p className="text-brand-dark/60 text-sm mb-6">Our chefs recommend the Monthly Premium plan for consistent nutrition.</p>
                         <button onClick={onExploreClick} className="btn btn-block">
                             Explore All Plans
                         </button>
@@ -96,3 +96,5 @@ export default function HomeView({ subscriptions = [], onManageClick, onExploreC
         </div>
     );
 }
+
+

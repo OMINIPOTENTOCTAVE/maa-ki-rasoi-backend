@@ -10,7 +10,7 @@ export default function TeamManagement({ partners, partnerForm, setPartnerForm, 
                     <input className="input-field" placeholder="Phone Number" required value={partnerForm.phone} onChange={e => setPartnerForm({ ...partnerForm, phone: e.target.value })} style={{ marginBottom: 0 }} />
                     <input className="input-field" placeholder="Vehicle Details (Optional)" value={partnerForm.vehicleDetails} onChange={e => setPartnerForm({ ...partnerForm, vehicleDetails: e.target.value })} style={{ marginBottom: 0, gridColumn: 'span 2' }} />
                 </div>
-                <button className="btn btn-block" style={{ marginTop: '1.5rem', background: '#222' }}>+ Create Driver Profile</button>
+                <button type="submit" className="btn btn-block" style={{ marginTop: '1.5rem', background: '#222' }}>+ Create Driver Profile</button>
             </form>
 
             <h3 style={{ marginBottom: '1rem', paddingLeft: '0.5rem' }}>Active Drivers ({partners.length})</h3>

@@ -10,7 +10,7 @@ const allNavItems = [
 export default function DesktopLayout({ children, activeTab, onTabChange, rightPanel, isLoggedIn }) {
     const navItems = allNavItems.filter(item => isLoggedIn || item.guestVisible);
     return (
-        <div className="flex h-screen w-full bg-brand-cream dark:bg-brand-dark overflow-hidden">
+        <div className="flex h-screen w-full bg-transparent dark:bg-brand-dark overflow-hidden">
             {/* ── Skip to Content (A11y) ── */}
             <a
                 href="#main-content"
@@ -119,3 +119,4 @@ export default function DesktopLayout({ children, activeTab, onTabChange, rightP
         </div>
     );
 }
+

@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import useMediaQuery from '../hooks/useMediaQuery';
-import AdminDesktopLayout from '../layouts/AdminDesktopLayout';
+import AppLayout from '../layouts/AppLayout';
 import useAdminData from '../hooks/useAdminData';
 
 // Dashboard Components
@@ -113,21 +113,7 @@ export default function AdminDashboard() {
     };
 
     const content = (
-        <div style={{ padding: isMobile ? '0.5rem' : '0' }}>
-            {/* Inline tab bar — mobile only */}
-            {isMobile && (
-                <>
-                    <header className="top-nav"><h1>Maa Ki Rasoi - Kitchen</h1></header>
-                    <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.5rem', overflowX: 'auto', paddingBottom: '0.5rem', padding: '0.5rem' }}>
-                        <button className={`category-pill ${activeTab === 'subscriptions' ? 'active' : ''}`} onClick={() => setActiveTab('subscriptions')}>Subscriptions</button>
-                        <button className={`category-pill ${activeTab === 'orders' ? 'active' : ''}`} onClick={() => setActiveTab('orders')}>Orders ({orders.length})</button>
-                        <button className={`category-pill ${activeTab === 'team' ? 'active' : ''}`} onClick={() => setActiveTab('team')}>Team</button>
-                        <button className={`category-pill ${activeTab === 'stats' ? 'active' : ''}`} onClick={() => setActiveTab('stats')}>Stats</button>
-                        <button className={`category-pill ${activeTab === 'menu' ? 'active' : ''}`} onClick={() => setActiveTab('menu')}>Menu</button>
-                        <button className="category-pill" style={{ marginLeft: 'auto', background: 'transparent', border: '1px solid var(--text-muted)' }} onClick={handleLogout}>Logout</button>
-                    </div>
-                </>
-            )}
+        <div style={{ padding: isMobile ? '0' : '0' }}>
 
             {activeTab === 'stats' && <StatsPanel stats={stats} />}
 
@@ -173,13 +159,9 @@ export default function AdminDashboard() {
         </div>
     );
 
-    if (isMobile) {
-        return <div className="app-container"><main className="main-content">{content}</main></div>;
-    }
-
     return (
-        <AdminDesktopLayout activeTab={activeTab} onTabChange={setActiveTab} onLogout={handleLogout}>
+        <AppLayout activeTab={activeTab} onTabChange={setActiveTab} onLogout={handleLogout}>
             {content}
-        </AdminDesktopLayout>
+        </AppLayout>
     );
 }

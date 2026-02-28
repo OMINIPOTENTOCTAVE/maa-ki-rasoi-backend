@@ -28,7 +28,7 @@ export default function MenuView({ cart, addToCart }) {
                 const res = await axios.get('/menu');
                 setMenuItems(res.data.data.filter(m => m.isAvailable));
             } catch (err) {
-                console.error('Error fetching menu:', err);
+                
             } finally {
                 setLoading(false);
             }
@@ -40,8 +40,8 @@ export default function MenuView({ cart, addToCart }) {
         return (
             <div className="space-y-6">
                 <div className="mb-8">
-                    <h1 className="text-3xl font-bold mb-2">Today's Selection</h1>
-                    <p className="text-text-muted">Freshly prepared, pure vegetarian meals.</p>
+                    <h1 className="text-3xl font-bold mb-1">Today's Selection</h1>
+                    <p className="text-brand-dark">Freshly prepared, pure vegetarian meals.</p>
                 </div>
                 <MenuSkeleton />
             </div>
@@ -51,7 +51,7 @@ export default function MenuView({ cart, addToCart }) {
     if (menuItems.length === 0) {
         return (
             <div className="flex flex-col items-center justify-center py-20 text-center animate-fade-in">
-                <div className="w-24 h-24 rounded-full bg-brand-beige flex items-center justify-center text-brand-orange mb-6">
+                <div className="w-24 h-24 rounded-full bg-transparent flex items-center justify-center text-brand-orange mb-6">
                     <span className="material-symbols-outlined text-5xl">restaurant_menu</span>
                 </div>
                 <h1 className="text-3xl font-bold mb-4">Updating the Kitchen</h1>
@@ -73,8 +73,8 @@ export default function MenuView({ cart, addToCart }) {
         <div className="animate-fade-in">
             <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold mb-2">Today's Selection</h1>
-                    <p className="text-text-muted">Freshly prepared, pure vegetarian meals.</p>
+                    <h1 className="text-3xl font-bold mb-1">Today's Selection</h1>
+                    <p className="text-brand-dark">Freshly prepared, pure vegetarian meals.</p>
                 </div>
                 <div className="flex items-center gap-3">
                     <span className="text-sm font-bold text-success flex items-center gap-1">
@@ -88,7 +88,7 @@ export default function MenuView({ cart, addToCart }) {
                 {menuItems.map(item => (
                     <div key={item.id} className="card flex flex-col">
                         <div className="flex justify-between items-start mb-4">
-                            <span className="text-xs font-bold uppercase tracking-widest text-brand-orange bg-brand-beige px-3 py-1 rounded-full">
+                            <span className="text-xs font-bold uppercase tracking-widest text-brand-orange bg-transparent px-3 py-1 rounded-full">
                                 {item.category}
                             </span>
                             <span className="text-xl font-bold text-text-main">₹{item.price}</span>
@@ -115,7 +115,7 @@ export default function MenuView({ cart, addToCart }) {
                 <div className="md:hidden fixed bottom-[96px] left-4 right-4 z-50">
                     <button
                         onClick={() => navigate('/checkout')}
-                        className="btn btn-block !bg-brand-brown !text-brand-cream border-2 border-brand-orange-light shadow-2xl py-4"
+                        className="btn btn-block !bg-brand-dark !text-brand-cream border-2 border-brand-orange-light shadow-2xl py-4"
                     >
                         <div className="flex items-center justify-between w-full px-2">
                             <span className="font-bold flex items-center gap-2">
@@ -133,3 +133,7 @@ export default function MenuView({ cart, addToCart }) {
         </div>
     );
 }
+
+
+
+

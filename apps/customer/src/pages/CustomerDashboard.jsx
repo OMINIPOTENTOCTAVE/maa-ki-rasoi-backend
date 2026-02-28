@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { Navigate } from 'react-router-dom';
 
 // Sub-views
 import HomeView from './Customer/HomeView';
@@ -36,7 +37,7 @@ export default function CustomerDashboard({ activeView, cart, addToCart }) {
             setSubscriptions(subRes.data.data || []);
             setOrders(ordRes.data.data || []);
         } catch (error) {
-            console.error('Error fetching dashboard data:', error);
+            
         } finally {
             setLoadingData(false);
         }
@@ -137,3 +138,4 @@ export default function CustomerDashboard({ activeView, cart, addToCart }) {
             return <Navigate to="/" replace />;
     }
 }
+

@@ -1,0 +1,20 @@
+{
+  "projects": {
+    "default": "maa-ki-rasoi-app-2026"
+  },
+  "targets": {
+    "maa-ki-rasoi-app-2026": {
+      "hosting": {
+        "customer": [
+          "maakirasoi-customer-2026"
+        ],
+        "admin": [
+          "maakirasoi-admin-2026"
+        ],
+        "delivery": [
+          "maakirasoi-delivery-2026"
+        ]
+      }
+    }
+  }
+}

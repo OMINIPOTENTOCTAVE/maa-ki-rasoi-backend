@@ -27,7 +27,7 @@ export default function DesktopModal({ children, onClose, title }) {
                 onClick={onClose}
             />
             {/* Dialog Container */}
-            <div className="relative z-10 w-full max-w-4xl max-h-[90vh] mx-4 bg-brand-cream dark:bg-brand-dark rounded-2xl shadow-2xl overflow-hidden animate-in flex flex-col">
+            <div className="relative z-10 w-full max-w-4xl max-h-[90vh] mx-4 bg-transparent dark:bg-brand-dark rounded-2xl shadow-2xl overflow-hidden animate-in flex flex-col">
                 {/* Header */}
                 {title && (
                     <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-[#1e1710]/80 backdrop-blur-sm shrink-0">
@@ -48,3 +48,4 @@ export default function DesktopModal({ children, onClose, title }) {
         </div>
     );
 }
+

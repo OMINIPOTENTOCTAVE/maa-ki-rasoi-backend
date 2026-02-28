@@ -10,6 +10,8 @@ export default {
             colors: {
                 brand: {
                     saffron: '#C8550A',
+                    orange: '#C8550A',
+                    'orange-light': '#E8712A',
                     'saffron-dark': '#A03F05',
                     'saffron-light': '#E8712A',
                     cream: '#F9F4EE',
@@ -40,3 +42,4 @@ export default {
         require('@tailwindcss/container-queries')
     ],
 }
+

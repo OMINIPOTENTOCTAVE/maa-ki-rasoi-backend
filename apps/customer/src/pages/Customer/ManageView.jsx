@@ -8,7 +8,7 @@ export default function ManageView({ onBack, subscriptions = [], onUpdate }) {
     if (!activeSub) {
         return (
             <div className="flex flex-col items-center justify-center py-20 text-center animate-fade-in">
-                <div className="w-24 h-24 bg-brand-beige text-brand-orange rounded-full flex items-center justify-center mb-6">
+                <div className="w-24 h-24 bg-transparent text-brand-orange rounded-full flex items-center justify-center mb-6">
                     <span className="material-symbols-outlined text-5xl">event_busy</span>
                 </div>
                 <h1 className="text-2xl font-bold mb-2">No Active Plan</h1>
@@ -25,7 +25,7 @@ export default function ManageView({ onBack, subscriptions = [], onUpdate }) {
             await axios.patch(`/subscriptions/${activeSub.id}/status`, { status: newStatus });
             if (onUpdate) await onUpdate();
         } catch (error) {
-            console.error(error);
+            
             alert("Failed to update status");
         } finally {
             setLoading(false);
@@ -35,7 +35,7 @@ export default function ManageView({ onBack, subscriptions = [], onUpdate }) {
     return (
         <div className="space-y-8 animate-fade-in pb-12">
             <div className="flex items-center gap-4">
-                <button onClick={onBack} className="p-2 rounded-full hover:bg-brand-beige text-brand-orange">
+                <button onClick={onBack} className="p-2 rounded-full hover:bg-transparent text-brand-orange">
                     <span className="material-symbols-outlined">arrow_back</span>
                 </button>
                 <div>
@@ -47,12 +47,12 @@ export default function ManageView({ onBack, subscriptions = [], onUpdate }) {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
 
                 {/* Left: Current Subscription Details */}
-                <div className="card !bg-brand-brown text-white shadow-premium !p-8">
+                <div className="card !bg-brand-dark text-white shadow-premium !p-8">
                     <div className="flex justify-between items-start mb-8">
                         <div>
                             <p className="text-brand-orange-light text-xs font-bold uppercase tracking-widest mb-2">Subscription Details</p>
                             <h2 className="text-2xl md:text-3xl font-bold capitalize">{activeSub.planType} Plan</h2>
-                            <p className="text-brand-beige/60 text-sm mt-1">100% Pure Veg • {activeSub.mealType}</p>
+                            <p className="text-brand-dark/60 text-sm mt-1">100% Pure Veg • {activeSub.mealType}</p>
                         </div>
                         <div className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider ${activeSub.status === 'Active' ? 'bg-success/20 text-success' : 'bg-warning/20 text-warning'
                             }`}>
@@ -62,11 +62,11 @@ export default function ManageView({ onBack, subscriptions = [], onUpdate }) {
 
                     <div className="space-y-4 mb-8">
                         <div className="flex justify-between items-center py-3 border-b border-white/10">
-                            <span className="text-brand-beige/50 text-sm">Ends On</span>
+                            <span className="text-brand-dark/50 text-sm">Ends On</span>
                             <span className="font-bold">{new Date(activeSub.endDate).toLocaleDateString()}</span>
                         </div>
                         <div className="flex justify-between items-center py-3 border-b border-white/10">
-                            <span className="text-brand-beige/50 text-sm">Meals Remanining</span>
+                            <span className="text-brand-dark/50 text-sm">Meals Remanining</span>
                             <span className="font-bold">{activeSub.mealsRemaining} / {activeSub.totalMeals}</span>
                         </div>
                     </div>
@@ -75,7 +75,7 @@ export default function ManageView({ onBack, subscriptions = [], onUpdate }) {
                         <div className="w-12 h-12 rounded-lg bg-brand-orange/20 flex items-center justify-center text-brand-orange-light">
                             <span className="material-symbols-outlined">lock_clock</span>
                         </div>
-                        <p className="text-xs text-brand-beige/70 leading-relaxed">
+                        <p className="text-xs text-brand-dark/70 leading-relaxed">
                             Order pauses made after 10:00 PM will be effective from the day after tomorrow.
                         </p>
                     </div>
@@ -102,12 +102,12 @@ export default function ManageView({ onBack, subscriptions = [], onUpdate }) {
                         </button>
                     </div>
 
-                    <div className="card !bg-brand-beige border-none shadow-none">
+                    <div className="card !bg-transparent border-none shadow-none">
                         <h3 className="text-lg font-bold mb-2">Need help?</h3>
                         <p className="text-xs text-text-muted mb-4 leading-relaxed">
                             If you have specific meal requests or need a partial pause for specific days, please contact our support team.
                         </p>
-                        <button className="text-brand-orange font-bold text-sm flex items-center gap-1 hover:underline">
+                        <button onClick={() => window.open('https://wa.me/917428020104?text=Hi, I need help with my Maa Ki Rasoi Manage View', '_blank')} className="text-brand-orange font-bold text-sm flex items-center gap-1 hover:underline">
                             Chat with Support <span className="material-symbols-outlined text-sm">chevron_right</span>
                         </button>
                     </div>
@@ -123,3 +123,7 @@ export default function ManageView({ onBack, subscriptions = [], onUpdate }) {
         </div>
     );
 }
+
+
+
+

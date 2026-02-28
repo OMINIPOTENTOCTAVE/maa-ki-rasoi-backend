@@ -9,8 +9,8 @@ export default function OrdersView({ orders = [], subscriptions = [], onExtendPl
         <div className="space-y-8 animate-fade-in">
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold mb-2">Order History</h1>
-                    <p className="text-text-muted">Tracking your journey of healthy home-cooked meals.</p>
+                    <h1 className="text-3xl font-bold mb-1">Order History</h1>
+                    <p className="text-brand-dark">Tracking your journey of healthy home-cooked meals.</p>
                 </div>
             </div>
 
@@ -20,7 +20,7 @@ export default function OrdersView({ orders = [], subscriptions = [], onExtendPl
                     { label: 'Total Orders', value: totalOrders, icon: 'history', color: 'text-brand-orange' },
                     { label: 'Active Plans', value: activeSubs, icon: 'check_circle', color: 'text-success' },
                     { label: 'Avg Rating', value: totalOrders > 0 ? '4.9' : '--', icon: 'star', color: 'text-warning' },
-                    { label: 'Total Spent', value: `₹${totalSpent}`, icon: 'payments', color: 'text-brand-brown' },
+                    { label: 'Total Spent', value: `₹${totalSpent}`, icon: 'payments', color: 'text-brand-dark' },
                 ].map((stat, i) => (
                     <div key={i} className="card !p-6 text-center">
                         <span className={`material-symbols-outlined text-2xl ${stat.color} mb-2`}>{stat.icon}</span>
@@ -50,7 +50,7 @@ export default function OrdersView({ orders = [], subscriptions = [], onExtendPl
 
                 {orders.length === 0 ? (
                     <div className="card py-20 text-center flex flex-col items-center">
-                        <div className="w-20 h-20 bg-brand-beige text-brand-orange rounded-full flex items-center justify-center mb-6">
+                        <div className="w-20 h-20 bg-transparent text-brand-orange rounded-full flex items-center justify-center mb-6">
                             <span className="material-symbols-outlined text-4xl">receipt_long</span>
                         </div>
                         <h3 className="text-xl font-bold mb-2">No history yet</h3>
@@ -68,7 +68,7 @@ export default function OrdersView({ orders = [], subscriptions = [], onExtendPl
                             <div key={order.id} className="card flex flex-col hover:scale-[1.01] transition-transform">
                                 <div className="flex justify-between items-start mb-4">
                                     <div className="flex items-center gap-4">
-                                        <div className="w-12 h-12 rounded-xl bg-brand-beige flex items-center justify-center text-brand-orange">
+                                        <div className="w-12 h-12 rounded-xl bg-transparent flex items-center justify-center text-brand-orange">
                                             <span className="material-symbols-outlined">restaurant</span>
                                         </div>
                                         <div>
@@ -93,7 +93,7 @@ export default function OrdersView({ orders = [], subscriptions = [], onExtendPl
                                     ))}
                                 </div>
 
-                                <div className="pt-4 border-t border-brand-beige flex justify-between items-center">
+                                <div className="pt-4 border-t border-transparent flex justify-between items-center">
                                     <span className="text-xs font-bold text-text-muted uppercase">Total Paid</span>
                                     <span className="text-lg font-bold text-brand-orange">₹{order.totalAmount}</span>
                                 </div>
@@ -105,3 +105,6 @@ export default function OrdersView({ orders = [], subscriptions = [], onExtendPl
         </div>
     );
 }
+
+
+

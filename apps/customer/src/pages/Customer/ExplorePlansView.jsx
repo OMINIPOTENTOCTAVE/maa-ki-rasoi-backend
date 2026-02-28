@@ -9,12 +9,12 @@ export default function ExplorePlansView({ onBack, onCheckout }) {
         <div className="space-y-8 animate-fade-in pb-12">
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
                 <div className="flex items-center gap-4">
-                    <button onClick={onBack} className="p-2 rounded-full hover:bg-brand-beige text-brand-orange">
+                    <button onClick={onBack} className="p-2 rounded-full hover:bg-transparent text-brand-orange">
                         <span className="material-symbols-outlined">arrow_back</span>
                     </button>
                     <div>
                         <h1 className="text-3xl font-bold mb-1">Choose Your Plan</h1>
-                        <p className="text-text-muted">Pure Veg Home-style Meals, delivered daily.</p>
+                        <p className="text-brand-dark">Pure Veg Home-style Meals, delivered daily.</p>
                     </div>
                 </div>
                 <button
@@ -27,7 +27,7 @@ export default function ExplorePlansView({ onBack, onCheckout }) {
             </div>
 
             {/* Meal Type Selection */}
-            <div className="card !p-6 border-none shadow-sm bg-brand-beige">
+            <div className="card">
                 <h3 className="text-xs font-bold uppercase tracking-widest text-text-muted mb-4">1. Select Delivery Slot</h3>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     {Object.values(MEAL_TYPES).map(meal => (
@@ -35,8 +35,8 @@ export default function ExplorePlansView({ onBack, onCheckout }) {
                             key={meal.id}
                             onClick={() => setSelectedMeal(meal.id)}
                             className={`flex items-center gap-3 p-3 rounded-xl border-2 transition-all font-bold text-sm ${selectedMeal === meal.id
-                                    ? 'border-brand-orange bg-white text-brand-orange shadow-md scale-[1.02]'
-                                    : 'border-transparent bg-white/50 text-text-muted hover:border-brand-orange/30'
+                                ? 'border-brand-orange bg-white text-brand-orange shadow-md'
+                                : 'border-transparent bg-transparent/50 text-text-muted hover:border-brand-orange/30'
                                 }`}
                         >
                             <span className="text-xl">{meal.icon}</span>
@@ -58,8 +58,8 @@ export default function ExplorePlansView({ onBack, onCheckout }) {
                             <div
                                 key={plan.id}
                                 className={`card flex flex-col h-full transition-all duration-300 ${isPopular
-                                        ? 'border-2 border-brand-orange shadow-premium scale-[1.02] z-10'
-                                        : 'hover:scale-[1.02]'
+                                    ? 'border-2 border-brand-orange z-10'
+                                    : ''
                                     }`}
                             >
                                 {plan.badge && (
@@ -114,3 +114,6 @@ export default function ExplorePlansView({ onBack, onCheckout }) {
         </div>
     );
 }
+
+
+

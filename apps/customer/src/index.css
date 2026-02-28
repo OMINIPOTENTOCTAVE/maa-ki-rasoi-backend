@@ -24,23 +24,22 @@ body,
 :root {
   /* Colors - Maa Ki Rasoi Palette */
   --brand-cream: #FAF9F6;
+  --brand-saffron: #FF9933;
+  --brand-dark: #1A1008;
   --brand-orange: #C8550A;
   --brand-orange-light: #E8712A;
   --brand-orange-dark: #A03F05;
-  --brand-brown: #1A1008;
-  --brand-brown-muted: #3D2B1A;
-  --brand-beige: #F4EBE2;
-  --brand-white: #FFFFFF;
+    --brand-white: #FFFFFF;
 
   /* UI Colors */
   --primary: var(--brand-orange);
-  --primary-hover: var(--brand-orange-dark);
+  --primary-hover: #E68A2E;
   --success: #2E7D4F;
   --warning: #E67E22;
   --error: #C0392B;
   --bg-main: var(--brand-cream);
-  --text-main: var(--brand-brown);
-  --text-body: var(--brand-brown-muted);
+  --text-main: var(--brand-dark);
+  --text-body: var(--brand-dark);
   --text-muted: #8A6E58;
 
   /* Spacing Scale (xs to xl) */
@@ -75,7 +74,6 @@ body,
   --brand-white: #1E1E1E;
   --text-main: #F3F4F6;
   --text-body: #D1D5DB;
-  --brand-beige: #2D2D2D;
   --shadow-premium: 0 20px 25px -5px rgba(0, 0, 0, 0.4);
 }
 
@@ -153,13 +151,14 @@ h3 {
 }
 
 .btn-secondary {
-  background-color: var(--brand-beige);
+  background-color: transparent;
+  border: 1px solid var(--primary);
   color: var(--primary);
   box-shadow: none;
 }
 
 .btn-secondary:hover {
-  background-color: rgba(200, 85, 10, 0.1);
+  background-color: rgba(255, 153, 51, 0.1);
 }
 
 .btn-block {
@@ -173,18 +172,18 @@ h3 {
 }
 
 .card {
-  border: 1px solid var(--brand-white);
+  border: 1px solid rgba(138, 110, 88, 0.1);
   border-radius: var(--radius-lg);
   padding: var(--spacing-lg);
   background: var(--brand-white);
   box-shadow: var(--shadow-sm);
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
   overflow: hidden;
 }
 
 .card:hover {
   transform: translateY(-4px);
-  box-shadow: var(--shadow-premium);
+  box-shadow: 0 12px 30px rgba(210, 160, 110, 0.15);
 }
 
 /* Skeleton Loader System */
@@ -481,7 +480,7 @@ h3 {
     position: fixed;
     left: 0;
     top: 0;
-    background: var(--brand-white);
+    background: var(--brand-cream);
     border-right: 1px solid rgba(200, 85, 10, 0.05);
     display: flex;
     flex-direction: column;
@@ -524,3 +523,4 @@ h3 {
     opacity: 1;
   }
 }
+

@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "node --watch src/server.js",
     "start": "node src/server.js",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "build:apps": "npm run build --prefix apps/customer && npm run build --prefix apps/admin && npm run build --prefix apps/delivery",
+    "install:all": "npm install && npm install --prefix apps/customer && npm install --prefix apps/admin && npm install --prefix apps/delivery"
   },
   "keywords": [],
   "author": "",

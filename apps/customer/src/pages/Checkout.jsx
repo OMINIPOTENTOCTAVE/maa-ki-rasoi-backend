@@ -40,7 +40,7 @@ export default function Checkout({ cart, updateQty, clearCart }) {
                 address: storedUser.address || ''
             }));
         } catch (e) {
-            console.error(e);
+            
         }
     }, []);
 
@@ -209,7 +209,7 @@ export default function Checkout({ cart, updateQty, clearCart }) {
     if (cart.length === 0) {
         return (
             <div className="flex flex-col items-center justify-center py-20 text-center animate-fade-in">
-                <div className="w-20 h-20 bg-brand-beige text-brand-orange rounded-full flex items-center justify-center mb-6">
+                <div className="w-20 h-20 bg-transparent text-brand-orange rounded-full flex items-center justify-center mb-6">
                     <span className="material-symbols-outlined text-4xl">shopping_bag</span>
                 </div>
                 <h3 className="text-2xl font-bold mb-2">Your cart is empty</h3>
@@ -261,14 +261,14 @@ export default function Checkout({ cart, updateQty, clearCart }) {
                             Payment Method
                         </h3>
                         <div className="space-y-4">
-                            <label className={`flex items-center gap-4 p-4 rounded-xl border-2 transition-all cursor-pointer ${paymentMethod === 'ONLINE' ? 'border-brand-orange bg-brand-orange/5' : 'border-brand-beige shadow-sm'}`}>
+                            <label className={`flex items-center gap-4 p-4 rounded-xl border-2 transition-all cursor-pointer ${paymentMethod === 'ONLINE' ? 'border-brand-orange bg-brand-orange/5' : 'border-transparent shadow-sm'}`}>
                                 <input type="radio" checked={paymentMethod === 'ONLINE'} onChange={() => setPaymentMethod('ONLINE')} className="accent-brand-orange size-5" />
                                 <div className="flex-1">
                                     <p className="font-bold">Pay Online</p>
                                     <p className="text-xs text-text-muted">UPI, Cards, and Netbanking enabled</p>
                                 </div>
                             </label>
-                            <label className={`flex items-center gap-4 p-4 rounded-xl border-2 transition-all cursor-pointer ${paymentMethod === 'COD' ? 'border-brand-orange bg-brand-orange/5' : 'border-brand-beige shadow-sm'}`}>
+                            <label className={`flex items-center gap-4 p-4 rounded-xl border-2 transition-all cursor-pointer ${paymentMethod === 'COD' ? 'border-brand-orange bg-brand-orange/5' : 'border-transparent shadow-sm'}`}>
                                 <input type="radio" checked={paymentMethod === 'COD'} onChange={() => setPaymentMethod('COD')} className="accent-brand-orange size-5" />
                                 <div className="flex-1">
                                     <p className="font-bold">Cash on Delivery</p>
@@ -281,7 +281,7 @@ export default function Checkout({ cart, updateQty, clearCart }) {
 
                 {/* Order Summary */}
                 <div className="lg:sticky lg:top-8">
-                    <div className="card !bg-brand-brown text-white shadow-premium">
+                    <div className="card !bg-brand-dark text-white shadow-premium">
                         <h3 className="text-lg font-bold mb-6 flex items-center gap-2 text-brand-orange-light">
                             <span className="material-symbols-outlined">receipt_long</span>
                             Order Summary
@@ -290,8 +290,8 @@ export default function Checkout({ cart, updateQty, clearCart }) {
                             {cart.map(item => (
                                 <div key={item.id} className="flex justify-between items-center text-sm">
                                     <div className="flex-1">
-                                        <p className="font-bold text-brand-beige">{item.name}</p>
-                                        <p className="text-[10px] text-brand-beige/50">Qty: {item.qty} × ₹{item.price}</p>
+                                        <p className="font-bold text-brand-dark">{item.name}</p>
+                                        <p className="text-[10px] text-brand-dark/50">Qty: {item.qty} × ₹{item.price}</p>
                                     </div>
                                     <span className="font-bold ml-4">₹{item.price * item.qty}</span>
                                 </div>
@@ -299,7 +299,7 @@ export default function Checkout({ cart, updateQty, clearCart }) {
                         </div>
 
                         <div className="pt-6 border-t border-white/10 space-y-2">
-                            <div className="flex justify-between text-sm text-brand-beige/70">
+                            <div className="flex justify-between text-sm text-brand-dark/70">
                                 <span>Delivery Fee</span>
                                 <span className="text-success font-bold">FREE</span>
                             </div>
@@ -328,7 +328,7 @@ export default function Checkout({ cart, updateQty, clearCart }) {
 
             {/* OTP Modal for COD */}
             {showOtpModal && (
-                <div className="fixed inset-0 z-[2000] flex items-center justify-center p-4 bg-brand-brown/80 backdrop-blur-md animate-fade-in">
+                <div className="fixed inset-0 z-[2000] flex items-center justify-center p-4 bg-brand-dark/80 backdrop-blur-md animate-fade-in">
                     <div className="card w-full max-w-sm !p-8 text-center space-y-6">
                         <h3 className="text-2xl font-bold">Verify Phone</h3>
                         <p className="text-text-muted">Enter the 4-digit OTP sent to your phone to confirm COD.</p>
@@ -366,3 +366,7 @@ export default function Checkout({ cart, updateQty, clearCart }) {
         </div>
     );
 }
+
+
+
+

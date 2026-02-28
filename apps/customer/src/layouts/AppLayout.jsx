@@ -27,10 +27,10 @@ const AppLayout = ({ children }) => {
     };
 
     return (
-        <div className="min-h-screen bg-brand-cream dark:bg-brand-dark flex flex-col md:flex-row overflow-x-hidden">
+        <div className="min-h-screen bg-[var(--brand-cream)] dark:bg-[#121212] flex flex-col md:flex-row overflow-x-hidden">
             {/* Desktop Sidebar */}
             {isDesktop && (
-                <aside className="sidebar fixed left-0 top-0 h-screen bg-brand-white border-r border-gray-100 flex flex-col p-8 z-50">
+                <aside className="sidebar fixed left-0 top-0 h-screen bg-[var(--brand-cream)] border-r border-brand-orange/5 flex flex-col p-8 z-50">
                     <div className="mb-12">
                         <h1 className="text-2xl font-bold bg-gradient-to-r from-brand-orange to-brand-orange-light bg-clip-text text-transparent">
                             Maa Ki Rasoi
@@ -44,7 +44,7 @@ const AppLayout = ({ children }) => {
                                 onClick={() => handleNav(item.path)}
                                 className={`flex items-center gap-4 p-4 rounded-xl transition-all ${location.pathname === item.path
                                     ? 'bg-brand-orange text-white shadow-lg'
-                                    : 'text-brand-brown-muted hover:bg-brand-beige'
+                                    : 'text-brand-dark hover:bg-transparent'
                                     }`}
                             >
                                 <span className="material-symbols-outlined">{item.icon}</span>
@@ -119,3 +119,6 @@ const AppLayout = ({ children }) => {
 };
 
 export default AppLayout;
+
+
+

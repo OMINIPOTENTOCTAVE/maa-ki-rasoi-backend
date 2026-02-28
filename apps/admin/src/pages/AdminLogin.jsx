@@ -40,7 +40,7 @@ export default function AdminLogin() {
                         onChange={e => setPassword(e.target.value)}
                         required
                     />
-                    <button className="btn btn-block">Login</button>
+                    <button type="submit" className="btn btn-block">Login</button>
                 </form>
             </div>
         </div>

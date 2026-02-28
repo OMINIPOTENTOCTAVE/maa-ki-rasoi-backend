@@ -152,7 +152,7 @@ export default function CheckoutView({ onBack, onSuccessComplete, planConfig }) 
             const rzp1 = new window.Razorpay(options);
             rzp1.open();
         } catch (error) {
-            console.error(error);
+            
             alert("An error occurred");
         } finally {
             setIsProcessing(false);
@@ -183,7 +183,7 @@ export default function CheckoutView({ onBack, onSuccessComplete, planConfig }) 
     return (
         <div className="animate-fade-in pb-32">
             <div className="flex items-center gap-4 mb-8">
-                <button onClick={onBack} className="p-2 rounded-full hover:bg-brand-beige text-brand-orange">
+                <button onClick={onBack} className="p-2 rounded-full hover:bg-transparent text-brand-orange">
                     <span className="material-symbols-outlined">arrow_back</span>
                 </button>
                 <div>
@@ -232,14 +232,14 @@ export default function CheckoutView({ onBack, onSuccessComplete, planConfig }) 
                             Payment Method
                         </h4>
                         <div className="space-y-3">
-                            <label className={`flex items-center gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all ${paymentMethod === 'ONLINE' ? 'border-brand-orange bg-brand-orange/5' : 'border-brand-beige opacity-70'}`}>
+                            <label className={`flex items-center gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all ${paymentMethod === 'ONLINE' ? 'border-brand-orange bg-brand-orange/5' : 'border-transparent opacity-70'}`}>
                                 <input type="radio" checked={paymentMethod === 'ONLINE'} onChange={() => setPaymentMethod('ONLINE')} className="accent-brand-orange size-5" />
                                 <div className="flex-1">
                                     <p className="font-bold text-sm">Secure Online Payment</p>
                                     <p className="text-[10px] text-text-muted">UPI, Cards, Mandates enabled</p>
                                 </div>
                             </label>
-                            <label className={`flex items-center gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all ${paymentMethod === 'COD' ? 'border-brand-orange bg-brand-orange/5' : 'border-brand-beige opacity-70'}`}>
+                            <label className={`flex items-center gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all ${paymentMethod === 'COD' ? 'border-brand-orange bg-brand-orange/5' : 'border-transparent opacity-70'}`}>
                                 <input type="radio" checked={paymentMethod === 'COD'} onChange={() => setPaymentMethod('COD')} className="accent-brand-orange size-5" />
                                 <div className="flex-1">
                                     <p className="font-bold text-sm">Pay on Delivery</p>
@@ -252,22 +252,22 @@ export default function CheckoutView({ onBack, onSuccessComplete, planConfig }) 
 
                 {/* Right: Price Sidebar */}
                 <div className="lg:sticky lg:top-8">
-                    <div className="card !bg-brand-brown text-white shadow-premium !p-8">
+                    <div className="card !bg-brand-dark text-white shadow-premium !p-8">
                         <h3 className="text-lg font-bold mb-6 flex items-center gap-2 text-brand-orange-light">
                             <span className="material-symbols-outlined">account_balance_wallet</span>
                             Billing Details
                         </h3>
 
                         <div className="space-y-4 mb-8">
-                            <div className="flex justify-between text-sm text-brand-beige/60">
+                            <div className="flex justify-between text-sm text-brand-dark/60">
                                 <span>Subscription Price</span>
                                 <span>₹{uiPrice}</span>
                             </div>
-                            <div className="flex justify-between text-sm text-brand-beige/60">
+                            <div className="flex justify-between text-sm text-brand-dark/60">
                                 <span>GST (5%)</span>
                                 <span>₹{gstAmount}</span>
                             </div>
-                            <div className="flex justify-between text-sm text-brand-beige/60">
+                            <div className="flex justify-between text-sm text-brand-dark/60">
                                 <span>Delivery Fee</span>
                                 <span className="text-success font-bold">FREE</span>
                             </div>
@@ -285,7 +285,7 @@ export default function CheckoutView({ onBack, onSuccessComplete, planConfig }) 
                             {isProcessing ? 'Processing...' : (paymentMethod === 'ONLINE' ? 'Pay & Activate' : 'Activate with COD')}
                         </button>
 
-                        <p className="text-[10px] text-center text-brand-beige/40 mt-4 leading-relaxed">
+                        <p className="text-[10px] text-center text-brand-dark/40 mt-4 leading-relaxed">
                             Secured by Razorpay. 256-bit encryption. <br />
                             By continuing, you agree to our Subscription Terms.
                         </p>
@@ -295,7 +295,7 @@ export default function CheckoutView({ onBack, onSuccessComplete, planConfig }) 
 
             {/* OTP Modal */}
             {showOtpModal && (
-                <div className="fixed inset-0 z-[2000] flex items-center justify-center p-4 bg-brand-brown/80 backdrop-blur-md animate-fade-in">
+                <div className="fixed inset-0 z-[2000] flex items-center justify-center p-4 bg-brand-dark/80 backdrop-blur-md animate-fade-in">
                     <div className="card w-full max-w-sm !p-8 text-center space-y-6">
                         <h3 className="text-2xl font-bold">Verify COD Order</h3>
                         <p className="text-text-muted">Enter the 4-digit code sent to your phone to proceed.</p>
@@ -333,3 +333,7 @@ export default function CheckoutView({ onBack, onSuccessComplete, planConfig }) 
         </div>
     );
 }
+
+
+
+

@@ -19,7 +19,7 @@ export default function ProfileView({ onLogout, onManageSubscription, onSupportC
                 setCustomer(parsedCustomer);
                 setAddress(parsedCustomer.address || '');
             } catch (e) {
-                console.error(e);
+                
             }
         }
     }, []);
@@ -48,13 +48,13 @@ export default function ProfileView({ onLogout, onManageSubscription, onSupportC
                 {/* User Info & Subscription Card */}
                 <div className="lg:col-span-1 space-y-6">
                     <div className="card text-center flex flex-col items-center !p-8">
-                        <div className="w-24 h-24 bg-brand-beige text-brand-orange rounded-full flex items-center justify-center text-4xl font-bold mb-4 border-4 border-white shadow-lg">
+                        <div className="w-24 h-24 bg-transparent text-brand-orange rounded-full flex items-center justify-center text-4xl font-bold mb-4 border-4 border-white shadow-lg">
                             {customer?.name?.charAt(0) || 'C'}
                         </div>
                         <h2 className="text-2xl font-bold capitalize">{customer?.name || 'Customer'}</h2>
                         <p className="text-text-muted font-medium mb-6">+91 {customer?.phone || '...'}</p>
 
-                        <div className="w-full pt-6 border-t border-brand-beige">
+                        <div className="w-full pt-6 border-t border-transparent">
                             <div className="flex justify-between items-center mb-4">
                                 <p className="text-xs font-bold uppercase tracking-widest text-text-muted">Active Plan</p>
                                 {activeSub && (
@@ -122,7 +122,7 @@ export default function ProfileView({ onLogout, onManageSubscription, onSupportC
                                                     localStorage.setItem('customer_data', JSON.stringify(res.data.customer));
                                                     setIsEditingAddress(false);
                                                 }
-                                            } catch (err) { console.error(err); }
+                                            } catch (err) {  }
                                             finally { setIsSaving(false); }
                                         }}
                                         className="btn flex-[2]"
@@ -132,7 +132,7 @@ export default function ProfileView({ onLogout, onManageSubscription, onSupportC
                                 </div>
                             </div>
                         ) : (
-                            <div className="flex items-start justify-between gap-6 p-4 bg-brand-beige/30 rounded-xl border border-brand-beige">
+                            <div className="flex items-start justify-between gap-6 p-4 bg-transparent/30 rounded-xl border border-transparent">
                                 <p className="text-sm leading-relaxed">
                                     {address || 'No address saved yet. Please add one for deliveries!'}
                                 </p>
@@ -154,10 +154,10 @@ export default function ProfileView({ onLogout, onManageSubscription, onSupportC
                             Preferences
                         </h3>
 
-                        <div className="divide-y divide-brand-beige">
+                        <div className="divide-y divide-transparent">
                             <div className="py-4 flex items-center justify-between">
                                 <div className="flex items-center gap-4">
-                                    <div className="w-10 h-10 rounded-lg bg-brand-beige flex items-center justify-center text-brand-orange">
+                                    <div className="w-10 h-10 rounded-lg bg-transparent flex items-center justify-center text-brand-orange">
                                         <span className="material-symbols-outlined">{isDarkMode ? 'dark_mode' : 'light_mode'}</span>
                                     </div>
                                     <div>
@@ -167,7 +167,7 @@ export default function ProfileView({ onLogout, onManageSubscription, onSupportC
                                 </div>
                                 <button
                                     onClick={toggleDarkMode}
-                                    className={`w-12 h-6 rounded-full transition-colors relative ${isDarkMode ? 'bg-brand-orange' : 'bg-brand-beige'}`}
+                                    className={`w-12 h-6 rounded-full transition-colors relative ${isDarkMode ? 'bg-brand-orange' : 'bg-transparent'}`}
                                 >
                                     <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${isDarkMode ? 'left-7' : 'left-1'}`} />
                                 </button>
@@ -175,10 +175,10 @@ export default function ProfileView({ onLogout, onManageSubscription, onSupportC
 
                             <button
                                 onClick={onSupportClick}
-                                className="w-full py-4 flex items-center justify-between hover:bg-brand-beige/10 transition-colors"
+                                className="w-full py-4 flex items-center justify-between hover:bg-brand-orange/10 transition-colors"
                             >
                                 <div className="flex items-center gap-4 text-left">
-                                    <div className="w-10 h-10 rounded-lg bg-brand-beige flex items-center justify-center text-brand-orange">
+                                    <div className="w-10 h-10 rounded-lg bg-transparent flex items-center justify-center text-brand-orange">
                                         <span className="material-symbols-outlined">help</span>
                                     </div>
                                     <div>
@@ -199,3 +199,7 @@ export default function ProfileView({ onLogout, onManageSubscription, onSupportC
         </div>
     );
 }
+
+
+
+

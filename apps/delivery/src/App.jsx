@@ -6,6 +6,8 @@ import useMediaQuery from './hooks/useMediaQuery';
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 axios.defaults.baseURL = API_URL;
 
+import AppLayout from './layouts/AppLayout';
+
 function DeliveryLogin() {
     const [phone, setPhone] = useState('');
     const navigate = useNavigate();
@@ -22,7 +24,7 @@ function DeliveryLogin() {
     };
 
     return (
-        <div className="flex flex-col items-center justify-center min-h-screen bg-brand-cream dark:bg-brand-dark p-4 font-display">
+        <div className="flex flex-col items-center justify-center min-h-screen bg-[var(--brand-cream)] dark:bg-brand-dark p-4 font-display">
             <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white mb-8">Delivery Partner</h1>
             <form onSubmit={handleLogin} className="w-full max-w-sm flex flex-col items-center">
                 <input
@@ -202,99 +204,29 @@ function DeliveryDashboard() {
         </>
     );
 
-    // ── Desktop Layout: Sidebar + 2-column card grid ──
-    if (!isMobile) {
-        return (
-            <div className="flex h-screen w-full bg-brand-cream dark:bg-brand-dark overflow-hidden">
-                {/* Skip to Content */}
-                <a href="#delivery-main" className="sr-only focus:not-sr-only focus:absolute focus:z-[200] focus:top-4 focus:left-4 focus:bg-brand-saffron focus:text-white focus:px-4 focus:py-2 focus:rounded-lg focus:font-bold focus:shadow-lg">Skip to content</a>
-                {/* Sidebar */}
-                <aside className="w-[250px] shrink-0 bg-white dark:bg-[#1e1710] border-r border-gray-200 dark:border-gray-800 h-screen flex flex-col" role="navigation" aria-label="Delivery navigation">
-                    <div className="px-6 pt-6 pb-4 border-b border-gray-100 dark:border-gray-800">
-                        <h1 className="font-heading text-xl font-bold text-brand-saffron leading-tight">
-                            Maa Ki<br /><span className="italic opacity-80">Rasoi</span>
-                        </h1>
-                        <p className="text-[10px] uppercase tracking-widest text-slate-400 mt-1 font-medium">Delivery Partner</p>
-                    </div>
-
-                    <nav className="flex-1 flex flex-col gap-1 px-3 py-4" aria-label="Delivery route">
-                        <div className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold bg-brand-saffron/10 text-brand-saffron">
-                            <span className="material-symbols-outlined text-xl">route</span>
-                            Today's Route
-                            <span className="ml-auto w-1.5 h-1.5 rounded-full bg-brand-saffron"></span>
-                        </div>
-                    </nav>
-
-                    {/* Stats */}
-                    <div className="px-4 pb-4 space-y-2">
-                        <div className="flex items-center justify-between px-3 py-2 bg-brand-saffron/5 rounded-lg">
-                            <span className="text-xs font-medium text-slate-500 dark:text-slate-400">Meal Plans</span>
-                            <span className="text-sm font-bold text-brand-saffron">{pendingSubs.length} pending</span>
-                        </div>
-                        <div className="flex items-center justify-between px-3 py-2 bg-blue-50 dark:bg-blue-900/10 rounded-lg">
-                            <span className="text-xs font-medium text-slate-500 dark:text-slate-400">Instant Orders</span>
-                            <span className="text-sm font-bold text-blue-500">{pendingInstant.length} pending</span>
-                        </div>
-                    </div>
-
-                    {/* Online Status + Logout */}
-                    <div className="px-3 pb-4 border-t border-gray-100 dark:border-gray-800 pt-3 space-y-2">
-                        <div className="flex items-center gap-2 px-4 py-2">
-                            <span className="relative flex h-3 w-3">
-                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                                <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
-                            </span>
-                            <span className="text-xs font-bold text-slate-600 dark:text-slate-300">Online</span>
-                        </div>
-                        <button
-                            onClick={handleLogout}
-                            className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-slate-500 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 dark:hover:text-red-400 transition-all w-full group"
-                        >
-                            <span className="material-symbols-outlined text-xl">logout</span>
-                            Logout
-                        </button>
-                    </div>
-                </aside>
-
-                {/* Main Content */}
-                <main className="flex-1 overflow-y-auto h-screen">
-                    <div className="max-w-5xl mx-auto p-6 md:p-8">
-                        <div className="flex items-center justify-between mb-6">
-                            <h1 className="text-2xl font-bold text-slate-900 dark:text-white font-heading">Today's Deliveries</h1>
-                            <div className="text-sm text-slate-500">{pendingSubs.length + pendingInstant.length} tasks remaining</div>
-                        </div>
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                            {taskCards}
-                        </div>
-                    </div>
-                </main>
+    const customSidebarData = (
+        <div className="px-4 pb-4 space-y-2 mt-4">
+            <div className="flex items-center justify-between px-3 py-2 bg-brand-saffron/5 rounded-lg">
+                <span className="text-xs font-medium text-slate-500 dark:text-slate-400">Meal Plans</span>
+                <span className="text-sm font-bold text-brand-saffron">{pendingSubs.length} pending</span>
             </div>
-        );
-    }
-
-    // ── Mobile Layout: Original single-column ──
-    return (
-        <div className="flex flex-col h-full min-h-screen w-full bg-brand-cream dark:bg-brand-dark overflow-y-auto no-scrollbar pb-safe font-display text-slate-900">
-            <header className="sticky top-0 z-20 flex items-center justify-between bg-white/95 dark:bg-[#181511]/95 px-4 py-4 border-b border-gray-100 dark:border-gray-800 shadow-sm">
-                <h1 className="text-lg font-bold text-slate-900 dark:text-white tracking-tight">Today's Route</h1>
-                <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-2">
-                        <span className="relative flex h-3 w-3">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
-                        </span>
-                        <span className="text-xs font-bold text-slate-600 dark:text-slate-300">Online</span>
-                    </div>
-                    <button onClick={handleLogout} className="text-xs font-bold text-slate-400 hover:text-slate-600">
-                        Logout
-                    </button>
-                </div>
-            </header>
-
-            <main className="p-4 flex flex-col gap-4">
-                {taskCards}
-            </main>
+            <div className="flex items-center justify-between px-3 py-2 bg-blue-50 dark:bg-blue-900/10 rounded-lg">
+                <span className="text-xs font-medium text-slate-500 dark:text-slate-400">Instant Orders</span>
+                <span className="text-sm font-bold text-blue-500">{pendingInstant.length} pending</span>
+            </div>
         </div>
+    );
+
+    return (
+        <AppLayout customSidebarData={customSidebarData}>
+            <div className="flex items-center justify-between mb-6">
+                <h1 className="text-2xl font-bold text-slate-900 dark:text-white font-heading">Today's Deliveries</h1>
+                <div className="text-sm text-slate-500">{pendingSubs.length + pendingInstant.length} tasks remaining</div>
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 pb-20">
+                {taskCards}
+            </div>
+        </AppLayout>
     );
 }
 

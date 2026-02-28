@@ -12,7 +12,7 @@ export default function MobileLayout({ children, activeTab, onTabChange, isLogge
     const navItems = allNavItems.filter(item => isLoggedIn || item.guestVisible);
 
     return (
-        <div className="relative flex h-full min-h-screen w-full flex-col overflow-x-hidden max-w-md mx-auto bg-brand-cream dark:bg-brand-dark shadow-xl font-display text-slate-900 pb-[72px]">
+        <div className="relative flex h-full min-h-screen w-full flex-col overflow-x-hidden max-w-md mx-auto bg-transparent dark:bg-brand-dark shadow-xl font-display text-slate-900 pb-[72px]">
             {children}
 
             {/* Fixed Bottom Navigation */}
@@ -51,3 +51,4 @@ export default function MobileLayout({ children, activeTab, onTabChange, isLogge
         </div>
     );
 }
+

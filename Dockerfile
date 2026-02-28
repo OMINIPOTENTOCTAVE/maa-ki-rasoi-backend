@@ -1,31 +1,24 @@
-# ── Stage 1: Install dependencies ──────────────────────────────────────────
-FROM node:20-alpine AS deps
+# Use Node.js 20 Alpine for a small, secure footprint
+FROM node:20-alpine
+
+# Set working directory inside the container
 WORKDIR /app
 
+# Copy package files
 COPY package*.json ./
-COPY prisma ./prisma/
 
-# Install ALL deps (needed for prisma generate)
-RUN npm ci && npx prisma generate
+# Install dependencies (only production if possible)
+RUN npm install
 
-# ── Stage 2: Production image ───────────────────────────────────────────────
-FROM node:20-alpine AS runner
-WORKDIR /app
+# Copy the backend source code and Prisma schema
+# Note: We ignore the /apps folder via .dockerignore to keep the image small
+COPY . .
 
-ENV NODE_ENV=production
-ENV PORT=8080
+# Generate the Prisma Client tailored for the Linux container
+RUN npx prisma generate
 
-# Only copy what we need
-COPY --from=deps /app/node_modules ./node_modules
-COPY --from=deps /app/prisma ./prisma
-COPY src ./src
-COPY package.json ./
+# Expose the port Cloud Run will use
+EXPOSE 5000
 
-# Expose Cloud Run's default port
-EXPOSE 8080
-
-# Health check (Cloud Run pings this)
-HEALTHCHECK --interval=30s --timeout=5s --start-period=10s \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:8080/health || exit 1
-
-CMD ["node", "src/server.js"]
+# Start the Node backend natively
+CMD ["npm", "start"]

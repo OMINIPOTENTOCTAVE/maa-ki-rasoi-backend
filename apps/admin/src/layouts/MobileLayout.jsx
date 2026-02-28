@@ -9,7 +9,7 @@ export default function MobileLayout({ children, activeTab, onTabChange }) {
     ];
 
     return (
-        <div className="relative flex h-full min-h-screen w-full flex-col overflow-x-hidden max-w-md mx-auto bg-brand-cream dark:bg-brand-dark shadow-xl font-display text-slate-900 pb-[72px]">
+        <div className="relative flex h-full min-h-screen w-full flex-col overflow-x-hidden max-w-md mx-auto bg-transparent dark:bg-brand-dark shadow-xl font-display text-slate-900 pb-[72px]">
             {/* Dynamic Content Area */}
             {children}
 
@@ -36,3 +36,4 @@ export default function MobileLayout({ children, activeTab, onTabChange }) {
         </div>
     );
 }
+

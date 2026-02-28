@@ -1,10 +1,11 @@
 node_modules
 .env
-.env.*
-apps/
-docs/
-*.log
-*.md
 .git
 .gitignore
-test-*.js
+.vscode
+apps/
+README.md
+Dockerfile
+.dockerignore
+docs/
+logs/

@@ -20,9 +20,9 @@ function App() {
             <Routes>
                 <Route path="/" element={<Navigate to="/admin" replace />} />
                 <Route path="/admin/login" element={
-                    <div className="app-container">
+                    <div className="min-h-screen bg-[var(--brand-cream)] flex flex-col items-center justify-center p-4">
                         <MobileHeader />
-                        <main className="main-content"><AdminLogin /></main>
+                        <main className="w-full max-w-sm"><AdminLogin /></main>
                     </div>
                 } />
                 <Route path="/admin/*" element={<AdminDashboard />} />
