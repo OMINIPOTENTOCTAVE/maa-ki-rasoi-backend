@@ -1,33 +1,51 @@
 const jwt = require("jsonwebtoken");
 
 const authMiddleware = (req, res, next) => {
-    let token = req.cookies?.customer_token;
-
-    // Fallback to Authorization header if not found in cookie
     const authHeader = req.headers.authorization;
-    if (!token && authHeader && authHeader.startsWith("Bearer ")) {
-        token = authHeader.split(" ")[1];
-    }
+    const token = req.cookies?.customer_token ||
+        (authHeader?.startsWith("Bearer ") ? authHeader.split(" ")[1] : null);
 
-    if (!token) {
-        return res.status(401).json({ success: false, message: "No token provided" });
-    }
+    if (!token) return res.status(401).json({
+        success: false, message: "Authentication required"
+    });
 
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        if (decoded.role !== 'customer') return res.status(403).json({
+            success: false, message: "Customer access only"
+        });
         req.user = decoded;
         next();
     } catch (error) {
+        if (error.name === 'TokenExpiredError') return res.status(401).json({
+            success: false, message: "Token expired", code: "TOKEN_EXPIRED"
+        });
         return res.status(401).json({ success: false, message: "Invalid token" });
     }
 };
 
-const isAdmin = (req, res, next) => {
-    if (req.user && req.user.role === 'admin') {
+const authenticateAdmin = (req, res, next) => {
+    const authHeader = req.headers.authorization;
+    const token = req.cookies?.admin_token ||
+        (authHeader?.startsWith("Bearer ") ? authHeader.split(" ")[1] : null);
+
+    if (!token) return res.status(401).json({
+        success: false, message: "Admin authentication required"
+    });
+
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        if (decoded.role !== 'admin') return res.status(403).json({
+            success: false, message: "Forbidden: Admin access only"
+        });
+        req.user = decoded;
         next();
-    } else {
-        res.status(403).json({ success: false, message: "Forbidden: Admin access only" });
+    } catch (error) {
+        if (error.name === 'TokenExpiredError') return res.status(401).json({
+            success: false, message: "Token expired", code: "TOKEN_EXPIRED"
+        });
+        return res.status(401).json({ success: false, message: "Invalid admin token" });
     }
 };
 
-module.exports = { authMiddleware, isAdmin };
+module.exports = { authMiddleware, authenticateAdmin };
