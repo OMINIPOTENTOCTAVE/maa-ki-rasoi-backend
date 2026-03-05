@@ -39,7 +39,7 @@ export default function CheckoutView({ onBack, onSuccessComplete, planConfig }) 
     const getSubscriptionPayload = () => {
         const currentUser = JSON.parse(localStorage.getItem('customer_data') || '{}');
         return {
-            customerName: name || "Customer",
+            customerName: name || currentUser.name || "Customer",
             customerPhone: phone || currentUser.phone || "9999999999",
             customerId: currentUser.id,
             address: address || currentUser.address || "Address not provided",
@@ -50,17 +50,29 @@ export default function CheckoutView({ onBack, onSuccessComplete, planConfig }) 
         };
     };
 
+    // Require OTP if phone isn't already verified
+    const [isPhoneVerified, setIsPhoneVerified] = useState(false);
+
     const handleVerifyOtp = async () => {
         if (otp.length < 4) return;
         setOtpError('');
         setOtpLoading(true);
         const payload = getSubscriptionPayload();
         try {
-            const verifyRes = await axios.post('/auth/otp/verify', { phone: payload.customerPhone, otp });
+            const verifyRes = await axios.post('/auth/otp/verify', { phone: payload.customerPhone, otp, name: payload.customerName });
             if (verifyRes.data.success) {
                 setShowOtpModal(false);
-                await axios.post('/subscriptions', payload);
-                setShowSuccess(true);
+                setIsPhoneVerified(true);
+
+                // Keep the token up to date with the newly linked phone number
+                if (verifyRes.data.token) {
+                    localStorage.setItem('customer_token', verifyRes.data.token);
+                    localStorage.setItem('customer_data', JSON.stringify(verifyRes.data.customer));
+                    axios.defaults.headers.common['Authorization'] = `Bearer ${verifyRes.data.token}`;
+                }
+
+                // Immediately proceed with payment after successful verification
+                processPayment(payload);
             }
         } catch (err) {
             setOtpError(err.response?.data?.message || 'Invalid OTP');
@@ -70,7 +82,7 @@ export default function CheckoutView({ onBack, onSuccessComplete, planConfig }) 
         }
     };
 
-    const handlePay = useCallback(async () => {
+    const handlePayClick = async () => {
         if (payDebounceRef.current || isProcessing) return;
 
         if (!name || name.length < 2) {
@@ -86,16 +98,38 @@ export default function CheckoutView({ onBack, onSuccessComplete, planConfig }) 
             return;
         }
 
-        payDebounceRef.current = true;
-        setIsProcessing(true);
         const subscriptionPayload = getSubscriptionPayload();
 
-        if (paymentMethod === 'COD') {
+        // If phone hasn't been verified yet (especially for Google Logins), verify it now
+        if (!isPhoneVerified) {
+            payDebounceRef.current = true;
+            setIsProcessing(true);
             try {
                 await axios.post('/auth/otp/request', { phone: subscriptionPayload.customerPhone });
                 setShowOtpModal(true);
             } catch (err) {
-                alert("Failed to send OTP");
+                alert("Failed to send OTP to verify your number.");
+            } finally {
+                setIsProcessing(false);
+                payDebounceRef.current = false;
+            }
+            return;
+        }
+
+        // If already verified, directly process payment
+        processPayment(subscriptionPayload);
+    };
+
+    const processPayment = async (subscriptionPayload) => {
+        payDebounceRef.current = true;
+        setIsProcessing(true);
+
+        if (paymentMethod === 'COD') {
+            try {
+                await axios.post('/subscriptions', subscriptionPayload);
+                setShowSuccess(true);
+            } catch (err) {
+                alert("Failed to create COD order");
             } finally {
                 setIsProcessing(false);
                 payDebounceRef.current = false;
@@ -110,7 +144,7 @@ export default function CheckoutView({ onBack, onSuccessComplete, planConfig }) 
 
             const scriptLoaded = await loadRazorpayScript();
             if (!scriptLoaded) {
-                alert("SDK Load Error");
+                alert("Payment Gateway SDK failed to load. Are you offline?");
                 setIsProcessing(false);
                 payDebounceRef.current = false;
                 return;
@@ -140,7 +174,7 @@ export default function CheckoutView({ onBack, onSuccessComplete, planConfig }) 
 
             const options = {
                 key: import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_dummykey',
-                amount: totalPrice * 100,
+                amount: Math.round(totalPrice * 100),
                 currency: "INR",
                 name: "Maa Ki Rasoi",
                 description: uiTitle,
@@ -156,7 +190,7 @@ export default function CheckoutView({ onBack, onSuccessComplete, planConfig }) 
                         });
                         if (verifyRes.data.success) setShowSuccess(true);
                     } catch (err) {
-                        alert("Verification Error");
+                        alert("Payment successful but verification failed. Please contact support.");
                     }
                 },
                 prefill: {
@@ -172,13 +206,12 @@ export default function CheckoutView({ onBack, onSuccessComplete, planConfig }) 
             });
             rzp1.open();
         } catch (error) {
-
-            alert("An error occurred");
+            alert("Error initializing payment. Please try again.");
         } finally {
             setIsProcessing(false);
             payDebounceRef.current = false;
         }
-    }, [isProcessing, paymentMethod, planConfig]);
+    };
 
     if (showSuccess) {
         return (
@@ -327,7 +360,7 @@ export default function CheckoutView({ onBack, onSuccessComplete, planConfig }) 
 
                         <button
                             disabled={isProcessing || !address}
-                            onClick={handlePay}
+                            onClick={handlePayClick}
                             className="btn btn-block py-4 text-lg"
                         >
                             {isProcessing ? 'Processing...' : (paymentMethod === 'ONLINE' ? 'Pay & Activate' : 'Activate with COD')}

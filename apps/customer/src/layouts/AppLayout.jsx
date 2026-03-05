@@ -29,6 +29,8 @@ const AppLayout = ({ children }) => {
 
     return (
         <div className="min-h-screen bg-background text-foreground flex flex-col md:flex-row overflow-x-hidden selection:bg-primary/20">
+            {/* Global noise texture overlay — subtle paper feel */}
+            <div className="noise-overlay" aria-hidden="true" />
             {/* Desktop Sidebar */}
             {isDesktop && (
                 <aside className="sidebar fixed left-0 top-0 h-screen bg-background border-r border-border flex flex-col p-8 z-50 w-[280px]">
@@ -45,8 +47,8 @@ const AppLayout = ({ children }) => {
                                 key={item.id}
                                 onClick={() => handleNav(item.path)}
                                 className={`flex items-center gap-4 px-5 py-4 rounded-[1.5rem] transition-all outline-none font-bold ${location.pathname === item.path
-                                        ? 'bg-primary text-white shadow-md shadow-primary/20 translate-x-2'
-                                        : 'text-muted-foreground hover:bg-white hover:text-foreground hover:shadow-sm border border-transparent hover:border-border'
+                                    ? 'bg-primary text-white shadow-md shadow-primary/20 translate-x-2'
+                                    : 'text-muted-foreground hover:bg-white hover:text-foreground hover:shadow-sm border border-transparent hover:border-border'
                                     }`}
                             >
                                 {item.icon}
