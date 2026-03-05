@@ -28,28 +28,66 @@ export default function SubscriptionList({ subscriptions, dailyProduction, partn
                 <div style={{ flex: '2 1 400px' }}>
                     {dailyProduction && dailyProduction.data && (
                         <div className="card" style={{ height: '100%' }}>
-                            <h3 style={{ marginBottom: '1rem' }}>Assign Setup (Today's Scheduled Deliveries)</h3>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', maxHeight: '300px', overflowY: 'auto', paddingRight: '0.5rem' }}>
-                                {dailyProduction.data.map(delivery => (
-                                    <div key={delivery.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(0,0,0,0.02)', padding: '0.75rem 1rem', borderRadius: '8px', borderLeft: `3px solid ${delivery.mealType === 'Lunch' ? '#2E7D4F' : '#E67E22'}` }}>
-                                        <div>
-                                            <div style={{ fontWeight: 'bold' }}>{delivery.subscription.customer?.name} ({delivery.mealType})</div>
-                                            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{delivery.subscription.customer?.address}</div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                                <h3 style={{ margin: 0 }}>Dispatch Manifest (Today)</h3>
+                                <span style={{ fontSize: '0.8rem', background: 'var(--primary)', color: 'white', padding: '2px 8px', borderRadius: '12px' }}>
+                                    {dailyProduction.data.length} Total Deliveries
+                                </span>
+                            </div>
+
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', maxHeight: '400px', overflowY: 'auto', paddingRight: '0.5rem' }}>
+                                {(() => {
+                                    // Group deliveries by partner
+                                    const grouped = dailyProduction.data.reduce((acc, delivery) => {
+                                        const partnerId = delivery.deliveryPartnerId || 'unassigned';
+                                        if (!acc[partnerId]) acc[partnerId] = [];
+                                        acc[partnerId].push(delivery);
+                                        return acc;
+                                    }, {});
+
+                                    const getPartnerName = (id) => {
+                                        if (id === 'unassigned') return '⚠️ Unassigned';
+                                        const p = partners.find(p => p.id === id);
+                                        return p ? `🚚 ${p.name}` : 'Unknown Partner';
+                                    };
+
+                                    return Object.entries(grouped).map(([partnerId, deliveries]) => (
+                                        <div key={partnerId} style={{ background: '#f8f9fa', padding: '1rem', borderRadius: '12px', border: partnerId === 'unassigned' ? '1px dashed #E67E22' : '1px solid #eee' }}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem', paddingBottom: '0.5rem', borderBottom: '1px solid #ddd' }}>
+                                                <strong style={{ color: partnerId === 'unassigned' ? '#E67E22' : 'var(--text-main)' }}>
+                                                    {getPartnerName(partnerId)}
+                                                </strong>
+                                                <span style={{ fontSize: '0.8rem', fontWeight: 'bold' }}>{deliveries.length} orders</span>
+                                            </div>
+
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                                                {deliveries.map(delivery => (
+                                                    <div key={delivery.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'white', padding: '0.5rem 0.75rem', borderRadius: '6px', borderLeft: `3px solid ${delivery.mealType === 'Lunch' ? '#2E7D4F' : '#E67E22'}`, boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
+                                                        <div>
+                                                            <div style={{ fontWeight: 'bold', fontSize: '0.9rem' }}>{delivery.subscription.customer?.name} ({delivery.mealType})</div>
+                                                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{delivery.subscription.customer?.address}</div>
+                                                        </div>
+                                                        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                                                            <span style={{ fontSize: '0.7rem', fontWeight: 'bold', padding: '2px 6px', borderRadius: '4px', background: delivery.status === 'Pending' ? '#E67E2220' : '#2E7D4F20', color: delivery.status === 'Pending' ? '#E67E22' : '#2E7D4F' }}>
+                                                                {delivery.status}
+                                                            </span>
+                                                            <select
+                                                                value={delivery.deliveryPartnerId || ''}
+                                                                onChange={(e) => handleAssignDriver(delivery.id, e.target.value, 'subscription')}
+                                                                style={{ padding: '0.2rem', borderRadius: '4px', border: '1px solid #ccc', fontSize: '0.75rem', maxWidth: '100px' }}
+                                                            >
+                                                                <option value="" disabled>Assign</option>
+                                                                {partners.map(p => <option key={p.id} value={p.id}>{p.name.split(' ')[0]}</option>)}
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
                                         </div>
-                                        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                                            <span style={{ fontSize: '0.8rem', fontWeight: 'bold', color: delivery.status === 'Pending' ? '#E67E22' : '#2E7D4F' }}>{delivery.status}</span>
-                                            <select
-                                                value={delivery.deliveryPartnerId || ''}
-                                                onChange={(e) => handleAssignDriver(delivery.id, e.target.value, 'subscription')}
-                                                style={{ padding: '0.4rem', borderRadius: '6px', border: '1px solid #ddd', fontSize: '0.85rem' }}
-                                            >
-                                                <option value="" disabled>Assign Driver</option>
-                                                {partners.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-                                            </select>
-                                        </div>
-                                    </div>
-                                ))}
-                                {dailyProduction.data.length === 0 && <div style={{ color: 'var(--text-muted)' }}>No pending deliveries for today.</div>}
+                                    ));
+                                })()}
+
+                                {dailyProduction.data.length === 0 && <div style={{ color: 'var(--text-muted)', textAlign: 'center', padding: '2rem' }}>No pending deliveries for today.</div>}
                             </div>
                         </div>
                     )}
