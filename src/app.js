@@ -14,7 +14,6 @@ const analyticsRoutes = require("./modules/analytics/analytics.routes");
 const complaintRoutes = require("./modules/complaint/complaint.routes");
 const usersRoutes = require("./modules/users/users.routes");
 const contentRoutes = require("./modules/content/content.routes");
-const ticketsRoutes = require("./modules/tickets/tickets.routes");
 
 const app = express();
 
@@ -64,7 +63,6 @@ app.use("/analytics", analyticsRoutes);
 app.use("/complaints", complaintRoutes);
 app.use("/users", usersRoutes);       // Customer profile CRUD
 app.use("/content", contentRoutes);   // Menu, FAQs, Testimonials
-app.use("/tickets", ticketsRoutes);   // Support ticket CRUD
 
 app.get("/health", (req, res) => {
   res.status(200).json({ status: "OK", timestamp: new Date().toISOString() });
