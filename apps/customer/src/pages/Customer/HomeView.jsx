@@ -1,6 +1,6 @@
 import React from 'react';
-import MealCard from '../../components/ui/MealCard';
-import StatusBanner from '../../components/ui/StatusBanner';
+import MealCard from '../../components/MealCard';
+import StatusBanner from '../../components/StatusBanner';
 import { Settings, CalendarRange, UtensilsCrossed, Gift, ChevronRight } from 'lucide-react';
 
 export default function HomeView({ subscriptions = [], onManageClick, onExploreClick }) {
