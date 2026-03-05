@@ -21,10 +21,32 @@ model MenuItem {
   description String
   price       Float
   category    String
+  isVeg       Boolean     @default(true)
   isAvailable Boolean     @default(true)
   createdAt   DateTime    @default(now())
   isArchived  Boolean     @default(false)
+  
   orderItems  OrderItem[]
+  dailyMenus1 DailyMenu[] @relation("Item1")
+  dailyMenus2 DailyMenu[] @relation("Item2")
+}
+
+model DailyMenu {
+  id          String   @id @default(uuid())
+  date        DateTime @unique
+  item1Id     String
+  item2Id     String
+  saladNote   String?
+  status      String   @default("DRAFT")
+  publishedAt DateTime?
+  publishedBy String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  item1 MenuItem @relation("Item1", fields: [item1Id], references: [id])
+  item2 MenuItem @relation("Item2", fields: [item2Id], references: [id])
+  
+  orders Order[]
 }
 
 model Order {
@@ -37,8 +59,14 @@ model Order {
   createdAt         DateTime         @default(now())
   customerId        String?
   deliveryPartnerId String?
+  dailyMenuId       String?
   paymentMethod     String           @default("COD")
   paymentStatus     String           @default("Pending")
+  deliveryZoneId    String?
+  deliveryType      String           @default("IN_HOUSE")
+  mealSlot          String           @default("LUNCH")
+  subscriptionId    String?
+
   razorpayOrderId   String?
   razorpayPaymentId String?
   deliveredAt       DateTime?
@@ -51,6 +79,8 @@ model Order {
   customer          Customer?        @relation(fields: [customerId], references: [id])
   deliveryPartner   DeliveryPartner? @relation(fields: [deliveryPartnerId], references: [id])
   items             OrderItem[]
+  dailyMenu         DailyMenu?       @relation(fields: [dailyMenuId], references: [id])
+  subscription      Subscription?    @relation(fields: [subscriptionId], references: [id])
 }
 
 model OrderItem {
@@ -79,28 +109,48 @@ model Customer {
 }
 
 model Subscription {
-  id                String                 @id @default(uuid())
-  customerId        String
-  planType          String
-  mealType          String
-  dietaryPreference String
-  startDate         DateTime
-  endDate           DateTime
-  status            String                 @default("Active")
-  paused            Boolean                @default(false)
-  pausedAt          DateTime?
-  mealsRemaining    Int                    @default(0)
-  totalPrice        Float
-  createdAt         DateTime               @default(now())
-  updatedAt         DateTime               @updatedAt
-  paymentMethod     String                 @default("COD")
-  paymentStatus     String                 @default("Pending")
+  id                  String                 @id @default(uuid())
+  customerId          String
+  mealSlot            String                 @default("LUNCH")
+  planType            String
+  dietaryPreference   String
+  status              String                 @default("Active")
+  startDate           DateTime
+  endDate             DateTime
+  totalTiffins        Int                    @default(0)
+  tiffinsDelivered    Int                    @default(0)
+  tiffinsRemaining    Int                    @default(0)
+  
+  paused              Boolean                @default(false)
+  pausedAt            DateTime?
+  pauseEffectiveFrom  DateTime?
+  pausedTotalDays     Int                    @default(0)
+  
+  paymentMethod       String                 @default("COD")
+  paymentStatus       String                 @default("Pending")
+  autoRenew           Boolean                @default(false)
+  securityDepositPaid Boolean                @default(false)
+  securityDepositAmt  Int                    @default(0)
+  totalPrice          Float
+  
+  deliveryZoneId      String                 @default("ZONE_1")
+  riderId             String?
+  
+  cancelledAt         DateTime?
+  cancelledBy         String?
+  cancellationReason  String?
+  
   razorpayOrderId   String?
   razorpayPaymentId String?
-  cancelledAt       DateTime?
+  
+  createdAt         DateTime               @default(now())
+  updatedAt         DateTime               @updatedAt
+
   complaints        Complaint[]
-  customer          Customer               @relation(fields: [customerId], references: [id])
   deliveries        SubscriptionDelivery[]
+  orders            Order[]
+  
+  customer          Customer               @relation(fields: [customerId], references: [id])
 }
 
 model SubscriptionDelivery {
@@ -146,4 +196,27 @@ model Complaint {
   customer       Customer      @relation(fields: [customerId], references: [id])
   order          Order?        @relation(fields: [orderId], references: [id])
   subscription   Subscription? @relation(fields: [subscriptionId], references: [id])
+}
+
+model Holiday {
+  id         String   @id @default(uuid())
+  date       DateTime @unique
+  name       String
+  noDelivery Boolean  @default(true)
+  notified   Boolean  @default(false)
+  createdBy  String
+  createdAt  DateTime @default(now())
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  adminId    String
+  action     String
+  targetType String
+  targetId   String
+  before     Json?
+  after      Json?
+  reason     String?
+  ipAddress  String?
+  createdAt  DateTime @default(now())
 }
