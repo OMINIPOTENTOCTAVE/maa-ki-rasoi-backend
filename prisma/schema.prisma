@@ -220,3 +220,11 @@ model AuditLog {
   ipAddress  String?
   createdAt  DateTime @default(now())
 }
+
+model AppSetting {
+  id        String   @id @default(uuid())
+  key       String   @unique
+  value     String
+  type      String   @default("STRING") // "BOOLEAN" | "NUMBER" | "STRING" | "JSON"
+  updatedAt DateTime @updatedAt
+}
