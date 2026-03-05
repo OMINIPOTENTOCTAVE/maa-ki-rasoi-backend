@@ -5,8 +5,19 @@ const jwt = require('jsonwebtoken');
 // Mock OTP storage for MVP 
 const otpStore = new Map();
 
+// Test account for Razorpay / payment gateway verification
+// Phone: 9999999999, OTP: 1234
+const TEST_PHONE = '9999999999';
+const TEST_OTP = '1234';
+
 class AuthService {
     async sendSMS(phone, otp) {
+        // Test account bypass — no SMS needed
+        if (phone === TEST_PHONE) {
+            console.log(`[TEST ACCOUNT] Skipping SMS for test phone ${TEST_PHONE}. Use OTP: ${TEST_OTP}`);
+            return { success: true, devOtp: TEST_OTP };
+        }
+
         const isDummyKey = !process.env.FAST2SMS_API_KEY || process.env.FAST2SMS_API_KEY.includes('dummy');
 
         // Add API Key Debug
@@ -54,7 +65,9 @@ class AuthService {
     }
 
     storeOTP(phone, otp) {
-        otpStore.set(phone, { otp, expiresAt: Date.now() + 5 * 60 * 1000 }); // 5 min expiry
+        // For test account, always store the fixed test OTP
+        const otpToStore = (phone === TEST_PHONE) ? TEST_OTP : otp;
+        otpStore.set(phone, { otp: otpToStore, expiresAt: Date.now() + 5 * 60 * 1000 }); // 5 min expiry
     }
 
     validateOTP(phone, otp) {
