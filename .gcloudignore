@@ -9,3 +9,9 @@ README.md
 .dockerignore
 docs/
 logs/
+
+apps/*/android/
+apps/*/ios/
+apps/*/node_modules/
+test/
+tmp/

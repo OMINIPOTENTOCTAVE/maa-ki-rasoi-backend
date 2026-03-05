@@ -1,24 +1,38 @@
-# Use Node.js 20 Alpine for a small, secure footprint
-FROM node:20-alpine
+# Use Node.js 20 slim
+FROM node:20-slim
 
-# Set working directory inside the container
+# Install system dependencies
+# openssl for Prisma, python3/make/g++ for native builds if needed
+RUN apt-get update && apt-get install -y \
+    openssl \
+    ca-certificates \
+    libssl-dev \
+    python3 \
+    make \
+    g++ \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set working directory
 WORKDIR /app
 
-# Copy package files
+# Copy package files and prisma schema first
 COPY package*.json ./
+COPY prisma ./prisma/
 
-# Install dependencies (only production if possible)
+# Install dependencies
+# We use --production to skip devDependencies, but we need prisma CLI to generate client
+# If prisma is in devDependencies, we might need a different approach.
+# In your package.json, prisma is in dependencies. Correct.
 RUN npm install
 
-# Copy the backend source code and Prisma schema
-# Note: We ignore the /apps folder via .dockerignore to keep the image small
+# Copy the rest of the application code
 COPY . .
 
-# Generate the Prisma Client tailored for the Linux container
+# Ensure prisma client is generated for the current platform
 RUN npx prisma generate
 
-# Expose the port Cloud Run will use
+# Expose port
 EXPOSE 5000
 
-# Start the Node backend natively
+# Start the application
 CMD ["npm", "start"]

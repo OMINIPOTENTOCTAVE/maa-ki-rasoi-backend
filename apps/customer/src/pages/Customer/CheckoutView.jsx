@@ -150,9 +150,12 @@ export default function CheckoutView({ onBack, onSuccessComplete, planConfig }) 
             };
 
             const rzp1 = new window.Razorpay(options);
+            rzp1.on('payment.failed', function (response) {
+                alert("Payment Failed: " + response.error.description);
+            });
             rzp1.open();
         } catch (error) {
-            
+
             alert("An error occurred");
         } finally {
             setIsProcessing(false);
