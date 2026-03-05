@@ -1,8 +1,8 @@
-# 🍛 Maa Ki Rasoi (MKR) PWA
+# 🍛 Maa Ki Rasoi (MKR) PWA v4.0
 
 **Premium Home-Style Meal Subscription Platform**
 
-Maa Ki Rasoi (MKR) is a state-of-the-art, mobile-first PWA designed to deliver healthy, "ghar jaisa khana" (home-cooked food) through a seamless subscription model. Built with a focus on consistency, premium aesthetics, and operational efficiency.
+Maa Ki Rasoi (MKR) is a state-of-the-art, mobile-first PWA designed to deliver healthy, "ghar jaisa khana" (home-cooked food) through a seamless hybrid model (Subscription + One-Time Orders). Built with a focus on consistency, premium aesthetics, and operational efficiency.
 
 [![Live Demo](https://img.shields.io/badge/Status-Live--On--Cloud-success?style=for-the-badge)](https://maakirasoi-customer-2026.web.app)
 [![Design](https://img.shields.io/badge/UI--UX-Premium--Refactor--v3.0-orange?style=for-the-badge)](#)
@@ -13,12 +13,14 @@ Maa Ki Rasoi (MKR) is a state-of-the-art, mobile-first PWA designed to deliver h
 
 ### 🍱 For Customers (PWA)
 - **1-Click Subscriptions**: Simple Weekly (5-day), Monthly (22 or 30-day) plans.
+- **One-Time Orders**: Instant meal bookings for non-subscribers with dynamic pricing.
 - **Pure Veg Guarantee**: 100% vegetarian meals curated from local home-kitchen networks.
 - **Smart Pause**: master pause toggle for subscribers (with 10 PM IST operational cutoff).
 - **Direct Support**: In-app ticketing system with WhatsApp escalation for urgent help.
 - **Live Order History**: Real-time tracking of past orders and meal credits.
 
 ### 🛠 For Operations (Admin & Delivery)
+- **AppSettings Service**: Real-time TTL-cached configuration for feature flags (COD, Pausing, Cutoffs).
 - **Dispatch Manifests**: Automated rider route optimization via address-clustered manifests.
 - **Subscription Engine**: Automated daily order generation from active subscription pools.
 - **Granular Logging**: Detailed system-level logs for audit-ready transaction tracking.
@@ -54,8 +56,9 @@ The application features a custom-built design system focused on "Warmth and Tru
 ```bash
 maakirasoi/
 ├── src/                  # Backend API (Standard SOP Compliant)
-│   ├── modules/          # Route & Controller logic (Sub, Order, Delivery)
-│   └── middleware/        # Auth & Admin protection
+│   ├── modules/          # Route & Controller logic (Sub, Order, Delivery, System)
+│   ├── middleware/        # Auth & Admin protection
+│   └── prisma.js          # Shared Prisma client instance
 ├── apps/
 │   ├── customer/         # Premium PWA (Refactored v3.0)
 │   ├── admin/            # Operational Dashboard
