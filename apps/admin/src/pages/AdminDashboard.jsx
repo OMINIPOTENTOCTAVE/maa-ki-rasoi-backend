@@ -76,6 +76,16 @@ export default function AdminDashboard() {
         }
     };
 
+    const handleDeleteMenu = async (id) => {
+        if (!window.confirm('Are you sure you want to delete this menu item?')) return;
+        try {
+            await axios.delete(`/menu/${id}`);
+            loadData();
+        } catch (err) {
+            alert('Error deleting menu item');
+        }
+    };
+
     const handleToggleSubscription = async (id, currentStatus) => {
         const newStatus = currentStatus === 'Active' ? 'Paused' : 'Active';
         try {
@@ -143,6 +153,7 @@ export default function AdminDashboard() {
                     setMenuForm={setMenuForm}
                     handleAddMenu={handleAddMenu}
                     handleToggleMenu={handleToggleMenu}
+                    handleDeleteMenu={handleDeleteMenu}
                 />
             )}
 

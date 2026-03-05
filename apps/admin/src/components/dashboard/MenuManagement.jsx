@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default function MenuManagement({ menuItems, menuForm, setMenuForm, handleAddMenu, handleToggleMenu }) {
+export default function MenuManagement({ menuItems, menuForm, setMenuForm, handleAddMenu, handleToggleMenu, handleDeleteMenu }) {
     return (
         <>
             <form className="card" onSubmit={handleAddMenu} style={{ marginBottom: '2rem' }}>
@@ -39,9 +39,14 @@ export default function MenuManagement({ menuItems, menuForm, setMenuForm, handl
                                     </span>
                                 </td>
                                 <td>
-                                    <button className="btn btn-secondary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }} onClick={() => handleToggleMenu(m.id)}>
-                                        Toggle
-                                    </button>
+                                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                        <button className="btn btn-secondary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }} onClick={() => handleToggleMenu(m.id)}>
+                                            Toggle
+                                        </button>
+                                        <button className="btn" style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem', background: '#fee2e2', color: '#dc2626', border: '1px solid #fca5a5' }} onClick={() => handleDeleteMenu(m.id)}>
+                                            Delete
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                         ))}
