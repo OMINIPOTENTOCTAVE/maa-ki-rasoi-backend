@@ -27,7 +27,19 @@ export default function Login() {
             if (err.code === 'auth/popup-closed-by-user') {
                 return;
             }
-            setErrorMsg(err.response?.data?.message || 'Google sign-in failed. Try again.');
+            console.error('[GOOGLE AUTH ERROR]', err.code, err.message);
+            const firebaseErrors = {
+                'auth/unauthorized-domain': 'This domain is not authorized for sign-in. Contact support.',
+                'auth/operation-not-allowed': 'Google Sign-In is not enabled. Contact support.',
+                'auth/popup-blocked': 'Popup was blocked. Please allow popups and try again.',
+                'auth/network-request-failed': 'Network error. Check your connection and try again.',
+                'auth/internal-error': 'An internal error occurred. Try again in a moment.',
+                'auth/cancelled-popup-request': 'Sign-in cancelled. Please try again.',
+            };
+            const message = firebaseErrors[err.code]
+                || err.response?.data?.message
+                || `Sign-in failed (${err.code || 'unknown'}). Try again.`;
+            setErrorMsg(message);
         } finally {
             setGoogleLoading(false);
         }
@@ -69,6 +81,7 @@ export default function Login() {
 
                 {/* Google Sign-In Button */}
                 <button
+                    data-testid="google-signin-btn"
                     onClick={handleGoogleLogin}
                     disabled={googleLoading}
                     className="w-full flex items-center justify-center gap-3 py-4 px-6 rounded-2xl border-2 border-border bg-white text-foreground font-bold text-lg hover:border-primary/50 hover:shadow-lg transition-all duration-300 mb-8 active:scale-95 group"

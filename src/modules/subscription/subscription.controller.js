@@ -361,4 +361,110 @@ const getDispatchManifest = async (req, res) => {
     }
 };
 
-module.exports = { createSubscription, getSubscriptions, toggleSubscriptionStatus, getDailyProduction, updateDeliveryStatus, getDispatchManifest };
+const getMySubscription = async (req, res) => {
+    try {
+        const customerId = req.user.id;
+        const subscription = await prisma.subscription.findFirst({
+            where: { customerId, status: { in: ['Active', 'Paused'] } },
+            orderBy: { createdAt: 'desc' },
+            include: {
+                deliveries: {
+                    where: { status: 'Pending' },
+                    orderBy: { deliveryDate: 'asc' },
+                    take: 1
+                }
+            }
+        });
+
+        if (!subscription) {
+            return res.json({ success: true, data: null, message: 'No active subscription found' });
+        }
+
+        const mealsRemaining = await prisma.subscriptionDelivery.count({
+            where: { subscriptionId: subscription.id, status: 'Pending' }
+        });
+
+        res.json({
+            success: true,
+            data: {
+                ...subscription,
+                mealsRemaining,
+                nextDeliveryDate: subscription.deliveries[0]?.deliveryDate || null
+            }
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+const pauseSubscription = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { paused } = req.body; // true = pause, false = resume
+
+        // Verify ownership
+        const subscription = await prisma.subscription.findUnique({ where: { id } });
+        if (!subscription) return res.status(404).json({ success: false, message: 'Subscription not found' });
+        if (subscription.customerId !== req.user.id && req.user.role !== 'admin') {
+            return res.status(403).json({ success: false, message: 'Access denied' });
+        }
+
+        // 10 PM IST Cutoff Logic
+        const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000;
+        const nowIST = new Date(Date.now() + IST_OFFSET_MS);
+        const hourIST = nowIST.getUTCHours();
+        const daysToSkip = hourIST >= 22 ? 2 : 1;
+
+        const effectiveDateIST = new Date(Date.UTC(
+            nowIST.getUTCFullYear(),
+            nowIST.getUTCMonth(),
+            nowIST.getUTCDate() + daysToSkip
+        ));
+        // Convert back to UTC for DB comparison
+        const effectiveDateUTC = new Date(effectiveDateIST.getTime() - IST_OFFSET_MS);
+
+        const newStatus = paused ? 'Paused' : 'Active';
+        const deliveryUpdateStatus = paused ? 'Paused' : 'Pending';
+
+        await prisma.subscription.update({
+            where: { id },
+            data: { paused, pausedAt: paused ? new Date() : null, status: newStatus }
+        });
+
+        await prisma.subscriptionDelivery.updateMany({
+            where: {
+                subscriptionId: id,
+                deliveryDate: { gte: effectiveDateUTC },
+                status: paused ? 'Pending' : 'Paused'
+            },
+            data: { status: deliveryUpdateStatus }
+        });
+
+        // Find next delivery date after resume
+        const nextDelivery = await prisma.subscriptionDelivery.findFirst({
+            where: { subscriptionId: id, status: 'Pending' },
+            orderBy: { deliveryDate: 'asc' }
+        });
+
+        const effectiveDateISO = effectiveDateIST.toISOString().split('T')[0];
+        const action = paused ? 'paused' : 'resumed';
+        const message = paused
+            ? `Deliveries paused from ${effectiveDateISO}. Meals resumed after you toggle back.`
+            : `Deliveries resumed from ${effectiveDateISO}.`;
+
+        res.json({
+            success: true,
+            message,
+            data: {
+                paused,
+                effectiveDate: effectiveDateISO,
+                nextDeliveryDate: nextDelivery?.deliveryDate || null,
+                cutoffNote: hourIST >= 22 ? 'Applied after 10 PM — effective from day after tomorrow' : 'Applied before 10 PM — effective from tomorrow'
+            }
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+module.exports = { createSubscription, getMySubscription, getSubscriptions, toggleSubscriptionStatus, getDailyProduction, updateDeliveryStatus, getDispatchManifest, pauseSubscription };

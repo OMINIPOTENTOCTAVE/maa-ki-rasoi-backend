@@ -70,7 +70,9 @@ model Customer {
   googleId      String?        @unique
   name          String?
   address       String?
+  tokenVersion  Int            @default(0)
   createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
   complaints    Complaint[]
   orders        Order[]
   subscriptions Subscription[]
@@ -85,8 +87,12 @@ model Subscription {
   startDate         DateTime
   endDate           DateTime
   status            String                 @default("Active")
+  paused            Boolean                @default(false)
+  pausedAt          DateTime?
+  mealsRemaining    Int                    @default(0)
   totalPrice        Float
   createdAt         DateTime               @default(now())
+  updatedAt         DateTime               @updatedAt
   paymentMethod     String                 @default("COD")
   paymentStatus     String                 @default("Pending")
   razorpayOrderId   String?
@@ -104,6 +110,7 @@ model SubscriptionDelivery {
   mealType          String
   status            String           @default("Pending")
   createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
   deliveryPartnerId String?
   deliveredAt       DateTime?
   confirmedAt       DateTime?
