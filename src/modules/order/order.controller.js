@@ -2,26 +2,16 @@ const prisma = require("../../prisma");
 
 const placeOrder = async (req, res) => {
     try {
-        const { customerName, customerPhone, customerId, address, items, paymentMethod } = req.body;
+        const { customerName, customerPhone, customerId, address, dailyMenuId, quantity = 1, paymentMethod, deliveryZoneId = "ZONE_1", mealSlot = "LUNCH" } = req.body;
 
-        if (!customerName || !customerPhone || !address || !items || !items.length) {
+        if (!customerName || !customerPhone || !address || !dailyMenuId) {
             return res.status(400).json({ success: false, message: "Missing required fields" });
         }
 
-        let totalAmount = 0;
-        const orderItemsData = [];
-
-        for (const item of items) {
-            const menuItem = await prisma.menuItem.findUnique({ where: { id: item.menuItemId } });
-            if (!menuItem) {
-                return res.status(400).json({ success: false, message: `Item ${item.menuItemId} not found` });
-            }
-            totalAmount += menuItem.price * item.quantity;
-            orderItemsData.push({
-                menuItemId: item.menuItemId,
-                quantity: item.quantity,
-                price: menuItem.price
-            });
+        // 1. Verify Daily Menu
+        const dailyMenu = await prisma.dailyMenu.findUnique({ where: { id: dailyMenuId } });
+        if (!dailyMenu || dailyMenu.status !== 'PUBLISHED') {
+            return res.status(400).json({ success: false, message: "Selected menu is not available for ordering." });
         }
 
         // 2. Identify or update customer
@@ -36,22 +26,33 @@ const placeOrder = async (req, res) => {
         }
 
         const isOnline = paymentMethod === 'ONLINE';
+        const totalAmount = quantity * 100; // V4 Rule: Flat 100 INR
 
+        // 3. Spawns physically actionable order
         const order = await prisma.order.create({
             data: {
                 customerName,
                 customerPhone,
                 customerId: customer.id,
                 address,
+                dailyMenuId,
                 paymentMethod: paymentMethod || 'COD',
-                paymentStatus: 'Pending', // Always starts as Pending
+                paymentStatus: 'Pending',
                 totalAmount,
-                status: isOnline ? "Payment Pending" : "Pending", // Distinction for kitchen
+                status: isOnline ? "Payment Pending" : "Pending", // Pending pushes to kitchen display instantly
+                deliveryType: 'IN_HOUSE',
+                deliveryZoneId,
+                mealSlot,
+                // We fake an OrderItem so legacy queries don't break if they count items, 
+                // but strictly we map via dailyMenuId now.
                 items: {
-                    create: orderItemsData
+                    create: [{
+                        menuItemId: dailyMenu.item1Id, // Represents the core menu proxy
+                        quantity,
+                        price: 100
+                    }]
                 }
-            },
-            include: { items: true }
+            }
         });
 
         res.json({ success: true, data: order });
