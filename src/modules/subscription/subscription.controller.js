@@ -1,18 +1,13 @@
 const prisma = require("../../prisma");
-
-// Helper to add days to a date
-const addDays = (date, days) => {
-    const result = new Date(date);
-    result.setDate(result.getDate() + days);
-    return result;
-}
+const subscriptionService = require("./subscription.service");
+const timeUtils = require("../../utils/timeUtils");
 
 const createSubscription = async (req, res) => {
     try {
-        const { customerId, customerPhone, customerName, address, planType, mealType, dietaryPreference = 'Veg', startDate, paymentMethod } = req.body;
+        const { customerId, customerPhone, customerName, address, planType, mealSlot, startDate, paymentMethod, deliveryZoneId } = req.body;
 
-        if (!planType || !mealType || !startDate) {
-            return res.status(400).json({ success: false, message: "Missing required fields" });
+        if (!planType || !startDate) {
+            return res.status(400).json({ success: false, message: "Missing required fields: planType, startDate" });
         }
 
         // 1. Find or create the customer
@@ -36,70 +31,20 @@ const createSubscription = async (req, res) => {
 
         // Update address if provided
         if (address) {
-            customer = await prisma.customer.update({
+            await prisma.customer.update({
                 where: { id: customer.id },
                 data: { address }
             });
         }
 
-        // 2. Calculate subscription duration & pricing
-        let durationDays = planType === 'Weekly' ? 5 : (planType === 'MonthlyFull' ? 30 : 22);
-
-        // MVP Pricing Logic (Matches PRD approximations)
-        let perMealPrice = 120; // Base price
-        if (planType === 'Monthly') perMealPrice = 110;
-        if (planType === 'MonthlyFull') perMealPrice = 100;
-
-        let mealsPerDay = mealType === 'Both' ? 2 : 1;
-        let comboDiscount = mealType === 'Both' ? 0.85 : 1; // 15% off for both meals
-
-        const totalPrice = (durationDays * mealsPerDay * perMealPrice) * comboDiscount;
-        const start = new Date(startDate);
-        const end = addDays(start, durationDays);
-
-        // 3. Create Subscription Record
-        const subscription = await prisma.subscription.create({
-            data: {
-                customerId: customer.id,
-                planType,
-                mealType,
-                dietaryPreference,
-                startDate: start,
-                endDate: end,
-                totalPrice,
-                status: paymentMethod === 'COD' ? "Active" : "Pending", // Pending until paid for ONLINE
-                paymentMethod,
-                paymentStatus: "Pending"
-            }
+        // 2. Delegate to the service
+        const subscription = await subscriptionService.createSubscription(customer.id, {
+            planType,
+            mealSlot,
+            startDate,
+            paymentMethod,
+            deliveryZoneId
         });
-
-        // 4. Generate Daily Execution Records (SubscriptionDeliveries) for Operations
-        const deliveryRecords = [];
-        let createdDays = 0;
-        let dayOffset = 0;
-
-        // Loop until we have scheduled operations for the required number of days
-        while (createdDays < durationDays) {
-            const deliveryDate = addDays(start, dayOffset);
-            const dayOfWeek = deliveryDate.getDay();
-            dayOffset++;
-
-            // Skip weekends if it's a 5-day or 22-day plan
-            if ((planType === 'Weekly' || planType === 'Monthly') && (dayOfWeek === 0 || dayOfWeek === 6)) {
-                continue;
-            }
-
-            if (mealType === 'Lunch' || mealType === 'Both') {
-                deliveryRecords.push({ subscriptionId: subscription.id, deliveryDate, mealType: 'Lunch' });
-            }
-            if (mealType === 'Dinner' || mealType === 'Both') {
-                deliveryRecords.push({ subscriptionId: subscription.id, deliveryDate, mealType: 'Dinner' });
-            }
-
-            createdDays++;
-        }
-
-        await prisma.subscriptionDelivery.createMany({ data: deliveryRecords });
 
         res.json({ success: true, subscription, message: "Subscription activated!" });
     } catch (error) {
@@ -107,48 +52,70 @@ const createSubscription = async (req, res) => {
     }
 };
 
+const getMySubscription = async (req, res) => {
+    try {
+        const customerId = req.user.id;
+        const subscriptions = await subscriptionService.getCustomerSubscriptions(customerId);
+        res.json({ success: true, data: subscriptions });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+const pauseSubscription = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const customerId = req.user.role === 'admin' ? null : req.user.id; // Admin can pause any
+
+        const updated = await subscriptionService.pauseSubscription(id, customerId);
+        res.json({ success: true, message: "Subscription paused successfully", data: updated });
+    } catch (error) {
+        res.status(400).json({ success: false, message: error.message });
+    }
+};
+
+const resumeSubscription = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const customerId = req.user.role === 'admin' ? null : req.user.id;
+
+        const updated = await subscriptionService.resumeSubscription(id, customerId);
+        res.json({ success: true, message: "Subscription resumed successfully", data: updated });
+    } catch (error) {
+        res.status(400).json({ success: false, message: error.message });
+    }
+};
+
+const cancelSubscription = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { reason } = req.body;
+        const cancelledBy = req.user.role; // customer or admin
+
+        const updated = await subscriptionService.cancelSubscription(id, reason, cancelledBy);
+        res.json({ success: true, message: "Subscription cancelled successfully", data: updated });
+    } catch (error) {
+        res.status(400).json({ success: false, message: error.message });
+    }
+};
+
+// --- Admin Endpoints ---
+
 const getSubscriptions = async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 50;
         const skip = (page - 1) * limit;
 
-        const query = {
-            include: {
-                customer: true,
-                deliveries: {
-                    where: {
-                        status: 'Pending'
-                    },
-                    orderBy: { deliveryDate: 'asc' },
-                    take: 1
-                }
-            },
-            orderBy: { createdAt: 'desc' },
-            skip,
-            take: limit
-        };
-
-        // If it's a customer, only fetch their subscriptions
-        if (req.user && req.user.role === 'customer') {
-            query.where = { customerId: req.user.id };
-        }
-
-        const [subscriptionsRaw, totalCount] = await Promise.all([
-            prisma.subscription.findMany(query),
-            prisma.subscription.count({ where: query.where })
+        const [subscriptions, totalCount] = await Promise.all([
+            prisma.subscription.findMany({
+                include: { customer: true },
+                orderBy: { createdAt: 'desc' },
+                skip,
+                take: limit
+            }),
+            prisma.subscription.count()
         ]);
-
-        // Enrich with mealsRemaining count
-        const subscriptions = await Promise.all(subscriptionsRaw.map(async (s) => {
-            const pendingCount = await prisma.subscriptionDelivery.count({
-                where: {
-                    subscriptionId: s.id,
-                    status: 'Pending'
-                }
-            });
-            return { ...s, mealsRemaining: pendingCount };
-        }));
 
         res.json({
             success: true,
@@ -168,84 +135,12 @@ const getSubscriptions = async (req, res) => {
 const toggleSubscriptionStatus = async (req, res) => {
     try {
         const { id } = req.params;
-        const { status } = req.body; // 'Active', 'Paused', 'Cancelled'
+        const sub = await prisma.subscription.findUnique({ where: { id } });
+        if (!sub) return res.status(404).json({ success: false, message: "Not found" });
 
         const updated = await prisma.subscription.update({
             where: { id },
-            data: { status }
-        });
-
-        // 10 PM IST Cutoff Logic (SOP Section 4)
-        // If before 10 PM IST, change starts from Tomorrow.
-        // If after 10 PM IST, change starts from Day-after-Tomorrow.
-        const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000;
-        const nowUTC = Date.now();
-        const nowIST = new Date(nowUTC + IST_OFFSET_MS);
-
-        const hourIST = nowIST.getUTCHours();
-        let daysToSkip = 1; // Default: start from tomorrow
-        if (hourIST >= 22) { // 10 PM or later
-            daysToSkip = 2; // Start from day after tomorrow
-        }
-
-        const startOfEffectiveDayIST = new Date(Date.UTC(
-            nowIST.getUTCFullYear(),
-            nowIST.getUTCMonth(),
-            nowIST.getUTCDate() + daysToSkip
-        ));
-        const effectiveDate = new Date(startOfEffectiveDayIST.getTime() - IST_OFFSET_MS);
-
-        if (status === 'Paused' || status === 'Cancelled') {
-            await prisma.subscriptionDelivery.updateMany({
-                where: {
-                    subscriptionId: id,
-                    deliveryDate: { gte: effectiveDate },
-                    status: 'Pending'
-                },
-                data: { status }
-            });
-        }
-
-        if (status === 'Active') {
-            await prisma.subscriptionDelivery.updateMany({
-                where: {
-                    subscriptionId: id,
-                    deliveryDate: { gte: effectiveDate },
-                    status: 'Paused'
-                },
-                data: { status: 'Pending' }
-            });
-        }
-
-        res.json({
-            success: true,
-            data: updated,
-            message: `Status updated to ${status}. Changes effective from ${startOfEffectiveDayIST.toISOString().split('T')[0]}`
-        });
-    } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
-    }
-};
-
-const updateDeliveryStatus = async (req, res) => {
-    try {
-        const { deliveryId } = req.params;
-        const { status, rating, feedback } = req.body;
-
-        const data = { status };
-        const now = new Date();
-
-        if (status === 'Confirmed') data.confirmedAt = now;
-        if (status === 'Preparing') data.preparingAt = now;
-        if (status === 'Out for Delivery') data.dispatchedAt = now;
-        if (status === 'Delivered') data.deliveredAt = now;
-
-        if (rating !== undefined) data.rating = rating;
-        if (feedback !== undefined) data.feedback = feedback;
-
-        const updated = await prisma.subscriptionDelivery.update({
-            where: { id: deliveryId },
-            data
+            data: { status: sub.status === 'Active' ? 'Inactive' : 'Active' }
         });
 
         res.json({ success: true, data: updated });
@@ -254,217 +149,106 @@ const updateDeliveryStatus = async (req, res) => {
     }
 };
 
+// Production & Dispatch uses Orders now (V4)
 const getDailyProduction = async (req, res) => {
     try {
-        // Find all pending deliveries for TODAY
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-
-        const tomorrow = new Date(today);
-        tomorrow.setDate(tomorrow.getDate() + 1);
-
-        const deliveries = await prisma.subscriptionDelivery.findMany({
+        const todayIST = timeUtils.startOfISTDay(timeUtils.getISTTimestamp());
+        const orders = await prisma.order.findMany({
             where: {
-                deliveryDate: {
-                    gte: today,
-                    lt: tomorrow
-                },
-                status: 'Pending',
-                subscription: {
-                    status: 'Active'
-                }
+                dailyMenu: { date: todayIST }
             },
             include: {
-                subscription: {
-                    include: { customer: true }
-                }
+                dailyMenu: { include: { item1: true, item2: true } }
             }
         });
 
-        // Aggregate counts for the Kitchen Dashboard
-        const stats = {
-            lunchSummary: { veg: 0, total: 0 },
-            dinnerSummary: { veg: 0, total: 0 }
-        };
+        // Calculate aggregates based on orders
+        let totalOrders = orders.length;
+        // In real app we might sum specific item quantities if people could customize, 
+        // but for V4.0 it's 1 standard tiffin = 4 containers.
 
-        deliveries.forEach(d => {
-            if (d.mealType === 'Lunch') {
-                stats.lunchSummary.total++;
-                stats.lunchSummary.veg++;
-            } else {
-                stats.dinnerSummary.total++;
-                stats.dinnerSummary.veg++;
+        res.json({
+            success: true,
+            date: todayIST.toISOString(),
+            metrics: {
+                totalTiffinsToPrepare: totalOrders,
+                totalGravy: `${totalOrders} bowls`,
+                totalPaneer: `${totalOrders} bowls`,
+                totalRice: `${totalOrders} portions`,
+                totalRoti: `${totalOrders * 4} pieces`
             }
         });
-
-        res.json({ success: true, data: deliveries, stats });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
-}
+};
 
 const getDispatchManifest = async (req, res) => {
     try {
-        const { date } = req.query;
-        const targetDate = date ? new Date(date) : new Date();
-
-        // If no date provided, default to Tomorrow (as per SOP prep)
-        if (!date) {
-            targetDate.setDate(targetDate.getDate() + 1);
-        }
-        targetDate.setHours(0, 0, 0, 0);
-
-        const nextDay = new Date(targetDate);
-        nextDay.setDate(nextDay.getDate() + 1);
-
-        const deliveries = await prisma.subscriptionDelivery.findMany({
+        const todayIST = timeUtils.startOfISTDay(timeUtils.getISTTimestamp());
+        const orders = await prisma.order.findMany({
             where: {
-                deliveryDate: {
-                    gte: targetDate,
-                    lt: nextDay
-                },
-                status: 'Pending',
-                subscription: {
-                    status: 'Active'
-                }
+                dailyMenu: { date: todayIST }
             },
             include: {
-                subscription: {
-                    include: { customer: true }
-                }
+                customer: true,
+                deliveryPartner: true
+            },
+            orderBy: { deliveryZoneId: 'asc' }
+        });
+
+        res.json({ success: true, data: orders });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+const updateDeliveryStatus = async (req, res) => {
+    try {
+        const { deliveryId } = req.params; // This is now an Order ID
+        const { status } = req.body;
+
+        const validStatuses = ['Pending', 'Preparing', 'OutForDelivery', 'Delivered', 'Failed'];
+        if (!validStatuses.includes(status)) {
+            return res.status(400).json({ success: false, message: "Invalid status" });
+        }
+
+        const order = await prisma.order.update({
+            where: { id: deliveryId },
+            data: {
+                status,
+                ...(status === 'Delivered' && { deliveredAt: timeUtils.getISTTimestamp() }),
+                ...(status === 'OutForDelivery' && { dispatchedAt: timeUtils.getISTTimestamp() }),
+                ...(status === 'Preparing' && { preparingAt: timeUtils.getISTTimestamp() })
             }
         });
 
-        // SOP Section 9: Clustering & Manifest Preparation
-        // Grouping by Address (Basic Clustering)
-        const manifest = deliveries.reduce((acc, d) => {
-            const addr = d.subscription.customer.address || "Unknown Address";
-            if (!acc[addr]) acc[addr] = [];
-            acc[addr].push({
-                deliveryId: d.id,
-                customerName: d.subscription.customer.name,
-                customerPhone: d.subscription.customer.phone,
-                mealType: d.mealType,
-                planType: d.subscription.planType
+        // If delivered and linked to a subscription, we must accurately decrement remaining tiffins
+        if (status === 'Delivered' && order.subscriptionId) {
+            await prisma.subscription.update({
+                where: { id: order.subscriptionId },
+                data: {
+                    tiffinsDelivered: { increment: 1 },
+                    tiffinsRemaining: { decrement: 1 }
+                }
             });
-            return acc;
-        }, {});
-
-        res.json({
-            success: true,
-            date: targetDate.toISOString().split('T')[0],
-            totalDeliveries: deliveries.length,
-            manifest
-        });
-    } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
-    }
-};
-
-const getMySubscription = async (req, res) => {
-    try {
-        const customerId = req.user.id;
-        const subscription = await prisma.subscription.findFirst({
-            where: { customerId, status: { in: ['Active', 'Paused'] } },
-            orderBy: { createdAt: 'desc' },
-            include: {
-                deliveries: {
-                    where: { status: 'Pending' },
-                    orderBy: { deliveryDate: 'asc' },
-                    take: 1
-                }
-            }
-        });
-
-        if (!subscription) {
-            return res.json({ success: true, data: null, message: 'No active subscription found' });
         }
 
-        const mealsRemaining = await prisma.subscriptionDelivery.count({
-            where: { subscriptionId: subscription.id, status: 'Pending' }
-        });
-
-        res.json({
-            success: true,
-            data: {
-                ...subscription,
-                mealsRemaining,
-                nextDeliveryDate: subscription.deliveries[0]?.deliveryDate || null
-            }
-        });
+        res.json({ success: true, data: order });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
 };
 
-const pauseSubscription = async (req, res) => {
-    try {
-        const { id } = req.params;
-        const { paused } = req.body; // true = pause, false = resume
-
-        // Verify ownership
-        const subscription = await prisma.subscription.findUnique({ where: { id } });
-        if (!subscription) return res.status(404).json({ success: false, message: 'Subscription not found' });
-        if (subscription.customerId !== req.user.id && req.user.role !== 'admin') {
-            return res.status(403).json({ success: false, message: 'Access denied' });
-        }
-
-        // 10 PM IST Cutoff Logic
-        const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000;
-        const nowIST = new Date(Date.now() + IST_OFFSET_MS);
-        const hourIST = nowIST.getUTCHours();
-        const daysToSkip = hourIST >= 22 ? 2 : 1;
-
-        const effectiveDateIST = new Date(Date.UTC(
-            nowIST.getUTCFullYear(),
-            nowIST.getUTCMonth(),
-            nowIST.getUTCDate() + daysToSkip
-        ));
-        // Convert back to UTC for DB comparison
-        const effectiveDateUTC = new Date(effectiveDateIST.getTime() - IST_OFFSET_MS);
-
-        const newStatus = paused ? 'Paused' : 'Active';
-        const deliveryUpdateStatus = paused ? 'Paused' : 'Pending';
-
-        await prisma.subscription.update({
-            where: { id },
-            data: { paused, pausedAt: paused ? new Date() : null, status: newStatus }
-        });
-
-        await prisma.subscriptionDelivery.updateMany({
-            where: {
-                subscriptionId: id,
-                deliveryDate: { gte: effectiveDateUTC },
-                status: paused ? 'Pending' : 'Paused'
-            },
-            data: { status: deliveryUpdateStatus }
-        });
-
-        // Find next delivery date after resume
-        const nextDelivery = await prisma.subscriptionDelivery.findFirst({
-            where: { subscriptionId: id, status: 'Pending' },
-            orderBy: { deliveryDate: 'asc' }
-        });
-
-        const effectiveDateISO = effectiveDateIST.toISOString().split('T')[0];
-        const action = paused ? 'paused' : 'resumed';
-        const message = paused
-            ? `Deliveries paused from ${effectiveDateISO}. Meals resumed after you toggle back.`
-            : `Deliveries resumed from ${effectiveDateISO}.`;
-
-        res.json({
-            success: true,
-            message,
-            data: {
-                paused,
-                effectiveDate: effectiveDateISO,
-                nextDeliveryDate: nextDelivery?.deliveryDate || null,
-                cutoffNote: hourIST >= 22 ? 'Applied after 10 PM — effective from day after tomorrow' : 'Applied before 10 PM — effective from tomorrow'
-            }
-        });
-    } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
-    }
+module.exports = {
+    createSubscription,
+    getMySubscription,
+    pauseSubscription,
+    resumeSubscription,
+    cancelSubscription,
+    getSubscriptions,
+    toggleSubscriptionStatus,
+    getDailyProduction,
+    getDispatchManifest,
+    updateDeliveryStatus
 };
-
-module.exports = { createSubscription, getMySubscription, getSubscriptions, toggleSubscriptionStatus, getDailyProduction, updateDeliveryStatus, getDispatchManifest, pauseSubscription };

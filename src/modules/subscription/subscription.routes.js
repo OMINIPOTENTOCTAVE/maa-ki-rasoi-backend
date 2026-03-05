@@ -7,6 +7,8 @@ const { authMiddleware, isAdmin } = require('../../middleware/auth');
 router.post('/', authMiddleware, subscriptionController.createSubscription);
 router.get('/mine', authMiddleware, subscriptionController.getMySubscription);
 router.patch('/:id/pause', authMiddleware, subscriptionController.pauseSubscription);
+router.patch('/:id/resume', authMiddleware, subscriptionController.resumeSubscription);
+router.patch('/:id/cancel', authMiddleware, subscriptionController.cancelSubscription);
 
 // Admin protected routes
 router.get('/', authMiddleware, isAdmin, subscriptionController.getSubscriptions);
