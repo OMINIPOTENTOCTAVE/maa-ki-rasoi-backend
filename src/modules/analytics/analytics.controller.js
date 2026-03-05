@@ -1,14 +1,14 @@
 const prisma = require("../../prisma");
 
+const timeUtils = require("../../utils/timeUtils");
+
 const getKPIs = async (req, res) => {
     try {
-        const now = new Date();
-        const startOfDay = new Date(now);
-        startOfDay.setHours(0, 0, 0, 0);
+        const nowIST = timeUtils.getISTTimestamp();
+        const startOfDayIST = timeUtils.startOfISTDay(nowIST);
 
-        const startOfWeek = new Date(now);
-        startOfWeek.setDate(now.getDate() - 7);
-        startOfWeek.setHours(0, 0, 0, 0);
+        const startOfWeekIST = new Date(startOfDayIST);
+        startOfWeekIST.setDate(startOfDayIST.getDate() - 7);
 
         // 1. Active Subscribers
         const activeSubscribers = await prisma.subscription.count({
@@ -16,11 +16,10 @@ const getKPIs = async (req, res) => {
         });
 
         // 2. Weekly Churn %
-        // Simplified: (No. of cancellations in last 7 days) / (Total active at start of week, approx as current + cancelled)
         const cancelledThisWeek = await prisma.subscription.count({
             where: {
                 status: 'Cancelled',
-                cancelledAt: { gte: startOfWeek }
+                cancelledAt: { gte: startOfWeekIST }
             }
         });
 
@@ -29,29 +28,30 @@ const getKPIs = async (req, res) => {
             : 0;
 
         // 3. On-Time Delivery % (Rule 2)
-        // Standard window: Before 1:30 PM (for Lunch) or 8:30 PM (for Dinner)
-        // For simplicity, let's track the last 100 deliveries
-        const recentDeliveries = await prisma.subscriptionDelivery.findMany({
+        // V4: All physical deliveries are governed by Order
+        const recentDeliveries = await prisma.order.findMany({
             where: {
                 status: 'Delivered',
                 deliveredAt: { not: null }
             },
             take: 100,
-            orderBy: { deliveredAt: 'desc' }
+            orderBy: { deliveredAt: 'desc' },
+            include: { dailyMenu: true }
         });
 
         let onTimeCount = 0;
         recentDeliveries.forEach(d => {
-            const deliveryTime = new Date(d.deliveredAt);
+            const deliveryTime = timeUtils.toIST(d.deliveredAt);
             const hours = deliveryTime.getHours();
             const minutes = deliveryTime.getMinutes();
             const totalMinutes = hours * 60 + minutes;
 
-            if (d.mealType === 'Lunch') {
-                // Lunch sacred time: 1:30 PM = 13*60 + 30 = 810 mins
-                if (totalMinutes <= 810 + 15) onTimeCount++; // 15 mins grace (Rule 2.3)
-            } else if (d.mealType === 'Dinner') {
-                // Dinner sacred time: 8:30 PM = 20*60 + 30 = 1230 mins
+            // V4 uses mealSlot instead of mealType
+            if (d.mealSlot === 'LUNCH') {
+                // Lunch sacred time: Cutoff is strictly 1:30 PM (810 mins). Rule 2.3 logic with 15m grace = 825
+                if (totalMinutes <= 810 + 15) onTimeCount++;
+            } else if (d.mealSlot === 'DINNER') {
+                // Dinner sacred time: 8:30 PM = 1230 mins + 15m grace = 1245
                 if (totalMinutes <= 1230 + 15) onTimeCount++;
             }
         });
@@ -62,15 +62,15 @@ const getKPIs = async (req, res) => {
 
         // 4. Complaint Rate (Last 7 Days)
         const complaintsThisWeek = await prisma.complaint.count({
-            where: { createdAt: { gte: startOfWeek } }
+            where: { createdAt: { gte: startOfWeekIST } }
         });
 
-        const totalTouchpoints = recentDeliveries.length; // Approximate
+        const totalTouchpoints = recentDeliveries.length; // Approximate from sample
         const complaintRate = totalTouchpoints > 0
             ? (complaintsThisWeek / totalTouchpoints) * 100
             : 0;
 
-        // 5. Avg Revenue Per User (ARPU) - SOP Section 24
+        // 5. Avg Revenue Per User (ARPU) 
         const totalActiveRevenue = await prisma.subscription.aggregate({
             where: { status: 'Active' },
             _sum: { totalPrice: true }
@@ -79,11 +79,24 @@ const getKPIs = async (req, res) => {
             ? (totalActiveRevenue._sum.totalPrice || 0) / activeSubscribers
             : 0;
 
-        // 6. Revenue Today (Direct Orders)
+        // 6. Revenue Today (Direct Orders AND Delivered Subscription Orders)
+        // Note: Subscription value is deferred until delivery per SOP. 
+        // Here we sum totalAmount attached to delivered Orders today.
         const ordersToday = await prisma.order.findMany({
-            where: { createdAt: { gte: startOfDay }, status: 'Delivered' }
+            where: {
+                deliveredAt: { gte: startOfDayIST },
+                status: 'Delivered'
+            }
         });
         const revenueToday = ordersToday.reduce((acc, o) => acc + o.totalAmount, 0);
+
+        // 7. Missing Tiffins Queue 
+        const pendingCount = await prisma.order.count({
+            where: {
+                dailyMenu: { date: startOfDayIST },
+                status: { in: ['Pending', 'Preparing', 'OutForDelivery'] }
+            }
+        });
 
         res.json({
             success: true,
@@ -95,6 +108,7 @@ const getKPIs = async (req, res) => {
                 arpu: Math.round(arpu),
                 revenueToday,
                 complaintsThisWeek,
+                pendingOrdersToday: pendingCount,
                 criticalAlert: (complaintRate > 5 || onTimeRate < 90) // Rule 10: Pause expansion signal
             }
         });
