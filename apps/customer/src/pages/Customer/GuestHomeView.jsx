@@ -67,8 +67,7 @@ export default function GuestHomeView({ onExploreClick }) {
         <div className="page-transition -mt-8">
 
             {/* ── HERO ────────────────────────────────────── */}
-            <section className="relative flex items-center pt-8 md:pt-16 pb-24 overflow-hidden">
-                <div className="absolute inset-0 gradient-warm z-0 opacity-60" />
+            <section className="relative flex items-center pt-8 md:pt-16 pb-24 overflow-hidden bg-[#FDF8F3]">
                 {/* Decorative blobs */}
                 <div className="absolute top-10 right-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
                 <div className="absolute bottom-0 left-0 w-48 h-48 bg-secondary/40 rounded-full blur-2xl pointer-events-none" />
@@ -77,19 +76,19 @@ export default function GuestHomeView({ onExploreClick }) {
                     <div className="grid lg:grid-cols-2 gap-16 items-center">
                         {/* Left: Copy */}
                         <div className="space-y-8">
-                            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/80 rounded-full shadow-sm border border-border backdrop-blur-sm">
+                            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-full shadow-sm border border-border">
                                 <span className="w-2 h-2 bg-primary rounded-full animate-pulse" />
-                                <span className="text-sm font-bold text-muted-foreground tracking-wider uppercase">Authentic · Pure Veg · Daily</span>
+                                <span className="text-sm font-bold text-slate-700 tracking-wider uppercase">Authentic · Pure Veg · Daily</span>
                             </div>
 
-                            <h1 className="text-5xl md:text-7xl font-heading font-bold text-foreground leading-[1.05] tracking-tight">
+                            <h1 className="text-5xl md:text-7xl font-heading font-bold text-[#2D2418] leading-[1.05] tracking-tight">
                                 Ghar Ka Khana,<br />
-                                <span className="text-primary italic">Har Din.</span>
+                                <span className="text-[#C05621] italic">Har Din.</span>
                             </h1>
 
-                            <p className="text-xl text-muted-foreground max-w-lg leading-relaxed">
+                            <p className="text-xl text-slate-600 max-w-lg leading-relaxed">
                                 Fresh, wholesome meals made with love — delivered to your doorstep daily.
-                                Starting at just <strong className="text-foreground font-bold">₹100/meal</strong>.
+                                Starting at just <strong className="text-[#2D2418] font-bold">₹100/meal</strong>.
                             </p>
 
                             <div className="flex flex-col sm:flex-row gap-4">
