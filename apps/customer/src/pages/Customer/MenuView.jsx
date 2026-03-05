@@ -20,11 +20,12 @@ function MenuCard({ item, index, onAdd, isFeatured = false }) {
     return (
         <div
             data-testid={`menu-card-${item.id || index}`}
-            className={`bg-white rounded-3xl overflow-hidden border border-border card-hover flex flex-col group ${isFeatured ? 'row-span-2 md:col-span-2' : ''
+            className={`bg-white rounded-3xl overflow-hidden border border-border shadow-sm card-hover flex flex-col group ${isFeatured ? 'md:col-span-2 md:row-span-2 flex-row md:flex-col' : 'col-span-1 row-span-1'
                 }`}
         >
             {/* Image */}
-            <div className={`relative bg-primary/5 overflow-hidden img-zoom ${isFeatured ? 'h-64 md:h-80' : 'h-48'}`}>
+            <div className={`relative bg-primary/5 overflow-hidden img-zoom ${isFeatured ? 'h-48 md:h-[60%] w-1/3 md:w-full flex-shrink-0 md:flex-shrink' : 'h-[55%]'
+                }`}>
                 <img
                     src={item.image_url || FALLBACK_MENU_IMG}
                     alt={item.name}
@@ -59,16 +60,18 @@ function MenuCard({ item, index, onAdd, isFeatured = false }) {
             </div>
 
             {/* Content */}
-            <div className="p-5 flex-1 flex flex-col">
-                <h3 className={`font-heading font-bold text-foreground mb-1.5 line-clamp-1 ${isFeatured ? 'text-2xl' : 'text-lg'}`}>
-                    {item.name}
-                </h3>
-                <p className={`text-muted-foreground mb-4 flex-1 line-clamp-2 ${isFeatured ? 'text-base' : 'text-sm'}`}>
-                    {item.description || 'Delicious home-cooked meal, made fresh daily with love.'}
-                </p>
+            <div className="p-6 flex-1 flex flex-col justify-between">
+                <div>
+                    <h3 className={`font-heading font-bold text-[#2D2418] mb-2 line-clamp-1 ${isFeatured ? 'text-2xl md:text-3xl' : 'text-xl'}`}>
+                        {item.name}
+                    </h3>
+                    <p className={`text-slate-600 mb-6 line-clamp-2 ${isFeatured ? 'text-base md:text-lg' : 'text-sm'}`}>
+                        {item.description || 'Delicious home-cooked meal, made fresh daily with love.'}
+                    </p>
+                </div>
 
-                <div className="flex items-center justify-between">
-                    <span className={`font-heading font-bold text-primary ${isFeatured ? 'text-3xl' : 'text-2xl'}`}>
+                <div className="flex items-center justify-between mt-auto pt-4 border-t border-slate-100">
+                    <span className={`font-heading font-bold text-[#C05621] ${isFeatured ? 'text-3xl lg:text-4xl' : 'text-2xl'}`}>
                         ₹{item.price}
                     </span>
                     <button
@@ -145,8 +148,8 @@ export default function MenuView({ cart, addToCart }) {
                             data-testid={`filter-${f}`}
                             onClick={() => setFilter(f)}
                             className={`px-7 py-3 rounded-full font-bold transition-all active:scale-95 ${filter === f
-                                    ? 'bg-primary text-white shadow-xl shadow-primary/30 ring-4 ring-primary/10'
-                                    : 'bg-white text-foreground border border-border hover:border-primary/30 hover:shadow-md shadow-sm'
+                                ? 'bg-primary text-white shadow-xl shadow-primary/30 ring-4 ring-primary/10'
+                                : 'bg-white text-foreground border border-border hover:border-primary/30 hover:shadow-md shadow-sm'
                                 }`}
                         >
                             {f.charAt(0).toUpperCase() + f.slice(1)}
@@ -168,8 +171,8 @@ export default function MenuView({ cart, addToCart }) {
                         </button>
                     </div>
                 ) : (
-                    // Bento grid: first item is featured (wide), rest are standard
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 auto-rows-auto gap-6">
+                    // Bento grid: dense packing with standard row height
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 auto-rows-[24rem] gap-6 grid-flow-row-dense">
                         {filteredItems.map((item, i) => (
                             <MenuCard
                                 key={item.id || i}

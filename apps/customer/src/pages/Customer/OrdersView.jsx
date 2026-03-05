@@ -4,10 +4,12 @@ import { History, CheckCircle2, Star, Banknote, UtensilsCrossed, Receipt, HeartH
 export default function OrdersView({ orders = [], subscriptions = [], onExtendPlan }) {
     const totalOrders = orders.length;
     const totalSpent = orders.reduce((sum, o) => sum + (o.totalAmount || 0), 0);
-    const activeSubs = subscriptions.filter(s => s.status === 'Active').length;
+    const totalActiveMeals = subscriptions
+        .filter(s => s.status === 'Active')
+        .reduce((sum, s) => sum + (s.mealsRemaining || 0), 0);
 
     return (
-        <div className="space-y-10 animate-fade-in pb-12">
+        <div className="space-y-10 animate-[fade-in_0.3s_ease-out] pb-12">
             <div className="bg-primary/5 p-8 rounded-[2rem] border border-primary/10 flex flex-col md:flex-row md:items-end justify-between gap-6">
                 <div>
                     <h1 className="text-4xl font-heading font-bold text-foreground mb-2">Order History</h1>
@@ -20,7 +22,7 @@ export default function OrdersView({ orders = [], subscriptions = [], onExtendPl
                 {[
                     { label: 'Total Orders', value: totalOrders, icon: <History className="w-6 h-6" />, color: 'text-primary', bg: 'bg-primary/10' },
                     { label: 'Active Plans', value: activeSubs, icon: <CheckCircle2 className="w-6 h-6" />, color: 'text-success', bg: 'bg-success/10' },
-                    { label: 'Avg Rating', value: totalOrders > 0 ? '4.9' : '--', icon: <Star className="w-6 h-6" />, color: 'text-warning', bg: 'bg-warning/10' },
+                    { label: 'Meal Credits', value: totalActiveMeals, icon: <UtensilsCrossed className="w-6 h-6" />, color: 'text-warning', bg: 'bg-warning/10' },
                     { label: 'Total Spent', value: `₹${totalSpent}`, icon: <Banknote className="w-6 h-6" />, color: 'text-foreground', bg: 'bg-background' },
                 ].map((stat, i) => (
                     <div key={i} className="bg-white p-6 rounded-[1.5rem] border border-border shadow-sm text-center flex flex-col items-center">
@@ -87,8 +89,8 @@ export default function OrdersView({ orders = [], subscriptions = [], onExtendPl
                                         </div>
                                     </div>
                                     <span className={`text-[10px] px-3 py-1.5 rounded-full font-bold uppercase tracking-wider ${order.status === 'Delivered'
-                                            ? 'bg-success/10 text-success border border-success/20'
-                                            : 'bg-primary/10 text-primary border border-primary/20'
+                                        ? 'bg-success/10 text-success border border-success/20'
+                                        : 'bg-primary/10 text-primary border border-primary/20'
                                         }`}>
                                         {order.status}
                                     </span>
