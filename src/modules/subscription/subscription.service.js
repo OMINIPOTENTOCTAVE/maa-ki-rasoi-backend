@@ -15,6 +15,12 @@ async function createSubscription(customerId, data) {
     const start = timeUtils.startOfISTDay(new Date(startDate));
     if (isNaN(start.getTime())) throw new Error("Invalid start date");
 
+    // UNBREAKABLE RULE 7: NEVER allow two ACTIVE subscriptions for same userId + mealSlot
+    const existingActive = await prisma.subscription.findFirst({
+        where: { customerId, mealSlot, status: 'Active' }
+    });
+    if (existingActive) throw new Error(`You already have an active ${mealSlot} subscription.`);
+
     const totalPrice = totalTiffins * 100; // Flat ₹100 per tiffin per PRD rule
     const endDate = await timeUtils.calculateEndDate(start, totalTiffins);
 
