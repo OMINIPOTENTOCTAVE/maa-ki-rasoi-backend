@@ -29,7 +29,7 @@ body,
   --brand-orange: #C8550A;
   --brand-orange-light: #E8712A;
   --brand-orange-dark: #A03F05;
-    --brand-white: #FFFFFF;
+  --brand-white: #FFFFFF;
 
   /* UI Colors */
   --primary: var(--brand-orange);
@@ -524,3 +524,121 @@ h3 {
   }
 }
 
+@layer base {
+  :root {
+    --background: 40 20% 97%;
+    --foreground: 30 25% 14%;
+    --card: 0 0% 100%;
+    --card-foreground: 30 25% 14%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 30 25% 14%;
+    --secondary-foreground: 30 25% 14%;
+    --muted-foreground: 30 15% 37%;
+    --accent-foreground: 30 25% 14%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 35 20% 88%;
+    --input: 35 20% 88%;
+    --ring: 22 90% 41%;
+    --radius: 0.75rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #F4E4BC;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #C8550A;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #A04408;
+}
+
+/* Selection */
+::selection {
+  background: #C8550A;
+  color: white;
+}
+
+/* Noise texture overlay */
+.noise-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0.02;
+  z-index: 9999;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+}
+
+/* Smooth transitions */
+.page-transition {
+  animation: fade-in 0.4s ease-out;
+}
+
+/* Card hover effects */
+.card-hover {
+  transition: all 0.3s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(45, 36, 24, 0.1);
+}
+
+/* Button ripple effect */
+.btn-ripple {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-ripple::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  background-image: radial-gradient(circle, #fff 10%, transparent 10.01%);
+  background-repeat: no-repeat;
+  background-position: 50%;
+  transform: scale(10, 10);
+  opacity: 0;
+  transition: transform 0.5s, opacity 1s;
+}
+
+.btn-ripple:active::after {
+  transform: scale(0, 0);
+  opacity: 0.3;
+  transition: 0s;
+}
+
+/* Gradient text */
+.gradient-text {
+  background: linear-gradient(135deg, #C8550A 0%, #E8A87C 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}

@@ -1,10 +1,10 @@
 /** @type {import('tailwindcss').Config} */
-export default {
+module.exports = {
+    darkMode: ["class"],
     content: [
-        "./index.html",
-        "./src/**/*.{js,ts,jsx,tsx}",
+        "./src/**/*.{js,jsx,ts,tsx}",
+        "./public/index.html"
     ],
-    darkMode: "class",
     theme: {
         extend: {
             fontFamily: {
@@ -14,28 +14,9 @@ export default {
             borderRadius: {
                 lg: 'var(--radius)',
                 md: 'calc(var(--radius) - 2px)',
-                sm: 'calc(var(--radius) - 4px)',
-                'tiffin': '2rem',
-                "DEFAULT": "0.5rem",
-                "xl": "1.5rem",
-                "2xl": "2rem",
-                "full": "9999px"
+                sm: 'calc(var(--radius) - 4px)'
             },
             colors: {
-                brand: {
-                    saffron: '#C8550A',
-                    orange: '#C8550A',
-                    'orange-light': '#E8712A',
-                    'saffron-dark': '#A03F05',
-                    'saffron-light': '#E8712A',
-                    cream: '#F9F4EE',
-                    'warm-white': '#FDF9F5',
-                    dark: '#1A1008',
-                    green: '#2E7D4F',
-                    'green-bg': '#EBF5EE',
-                    error: '#C0392B',
-                    warning: '#E67E22',
-                },
                 background: '#F8F7F5',
                 foreground: '#2D2418',
                 card: {
@@ -110,11 +91,7 @@ export default {
                 'slide-up': 'slide-up 0.6s ease-out',
                 'float': 'float 3s ease-in-out infinite'
             }
-        },
+        }
     },
-    plugins: [
-        require('@tailwindcss/forms'),
-        require('@tailwindcss/container-queries'),
-        require("tailwindcss-animate")
-    ],
-}
+    plugins: [require("tailwindcss-animate")],
+};

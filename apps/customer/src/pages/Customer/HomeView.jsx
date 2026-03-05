@@ -1,6 +1,7 @@
 import React from 'react';
 import MealCard from '../../components/ui/MealCard';
 import StatusBanner from '../../components/ui/StatusBanner';
+import { Settings, CalendarRange, UtensilsCrossed, Gift, ChevronRight } from 'lucide-react';
 
 export default function HomeView({ subscriptions = [], onManageClick, onExploreClick }) {
     const customer = JSON.parse(localStorage.getItem('customer_data') || '{}');
@@ -10,15 +11,15 @@ export default function HomeView({ subscriptions = [], onManageClick, onExploreC
     const greetingName = customer.name?.split(' ')[0] || 'Customer';
 
     return (
-        <div className="space-y-8 animate-fade-in">
-            <header className="flex items-center justify-between">
+        <div className="space-y-8 animate-fade-in pb-12">
+            <header className="flex items-center justify-between mb-4">
                 <div>
-                    <h1 className="text-3xl font-bold mb-1">Namaste, {greetingName}! 👋</h1>
-                    <p className="text-brand-dark flex items-center gap-2">
+                    <h1 className="text-4xl font-heading font-bold mb-2 text-foreground">Namaste, {greetingName}! 👋</h1>
+                    <p className="text-muted-foreground flex items-center gap-2 text-lg">
                         {activeSub ? (
                             <>
-                                <span className="w-2 h-2 rounded-full bg-success"></span>
-                                <span className="capitalize">{activeSub.planType}</span> Pure Veg Plan • Active
+                                <span className="w-2.5 h-2.5 rounded-full bg-success animate-pulse"></span>
+                                <span className="capitalize font-bold text-foreground">{activeSub.planType}</span> Pure Veg Plan • Active
                             </>
                         ) : (
                             "No active subscription"
@@ -29,12 +30,12 @@ export default function HomeView({ subscriptions = [], onManageClick, onExploreC
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Main Content Area */}
-                <div className="lg:col-span-2 space-y-6">
+                <div className="lg:col-span-2 space-y-8">
                     <section>
-                        <div className="flex items-center justify-between mb-4">
-                            <h2 className="text-xl font-bold">Your Next Meal</h2>
+                        <div className="flex items-center justify-between mb-6">
+                            <h2 className="text-2xl font-heading font-bold text-foreground pl-2">Your Next Meal</h2>
                             {nextDelivery && (
-                                <span className="text-xs font-bold text-brand-orange bg-[#fffaf4] border border-brand-orange/10 px-3 py-1 rounded-full uppercase tracking-wider">
+                                <span className="text-xs font-bold text-primary bg-primary/10 border border-primary/20 px-4 py-1.5 rounded-full uppercase tracking-wider">
                                     {new Date(nextDelivery.deliveryDate).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
                                 </span>
                             )}
@@ -49,11 +50,13 @@ export default function HomeView({ subscriptions = [], onManageClick, onExploreC
                                 onAction={() => { }}
                             />
                         ) : (
-                            <div className="card text-center py-10">
-                                <span className="material-symbols-outlined text-5xl text-brand-orange/20 mb-4">restaurant</span>
-                                <h3 className="text-xl font-bold mb-2">Ready to eat healthy?</h3>
-                                <p className="text-brand-dark mb-6 max-w-xs mx-auto text-sm">You don't have any meals scheduled. Subscribe to start receiving home-cooked food.</p>
-                                <button onClick={onExploreClick} className="btn py-3 px-8">
+                            <div className="bg-white border border-border rounded-[2rem] text-center p-12 shadow-sm card-hover">
+                                <div className="w-24 h-24 mx-auto bg-primary/10 text-primary rounded-full flex items-center justify-center mb-6">
+                                    <UtensilsCrossed className="w-10 h-10" />
+                                </div>
+                                <h3 className="text-2xl font-heading font-bold mb-3 text-foreground">Ready to eat healthy?</h3>
+                                <p className="text-muted-foreground mb-8 max-w-sm mx-auto">You don't have any meals scheduled. Subscribe to start receiving home-cooked food.</p>
+                                <button onClick={onExploreClick} className="px-8 py-4 bg-primary text-white rounded-full font-bold hover:bg-primary/90 transition-all shadow-md shadow-primary/20">
                                     Browse Plans
                                 </button>
                             </div>
@@ -61,16 +64,20 @@ export default function HomeView({ subscriptions = [], onManageClick, onExploreC
                     </section>
 
                     {activeSub && (
-                        <div className="grid grid-cols-2 gap-4">
-                            <button onClick={onManageClick} className="card !p-6 flex flex-col items-center hover:scale-[1.02] transition-transform">
-                                <span className="material-symbols-outlined text-brand-orange mb-2 text-3xl">settings</span>
-                                <span className="font-bold">Manage Plan</span>
-                                <span className="text-[10px] text-text-muted">Pause or Renew</span>
+                        <div className="grid grid-cols-2 gap-6">
+                            <button onClick={onManageClick} className="bg-white border border-border p-6 rounded-[2rem] flex flex-col items-center hover:scale-[1.02] hover:border-primary/30 transition-all shadow-sm group">
+                                <div className="w-14 h-14 rounded-2xl bg-secondary mb-4 flex items-center justify-center text-foreground group-hover:bg-primary group-hover:text-white transition-colors">
+                                    <Settings className="w-6 h-6" />
+                                </div>
+                                <span className="font-heading font-bold text-lg text-foreground mb-1">Manage Plan</span>
+                                <span className="text-xs text-muted-foreground font-medium">Pause or Renew</span>
                             </button>
-                            <button onClick={onManageClick} className="card !p-6 flex flex-col items-center hover:scale-[1.02] transition-transform">
-                                <span className="material-symbols-outlined text-brand-orange mb-2 text-3xl">calendar_month</span>
-                                <span className="font-bold">Schedule</span>
-                                <span className="text-[10px] text-text-muted">View Calendar</span>
+                            <button onClick={onManageClick} className="bg-white border border-border p-6 rounded-[2rem] flex flex-col items-center hover:scale-[1.02] hover:border-primary/30 transition-all shadow-sm group">
+                                <div className="w-14 h-14 rounded-2xl bg-secondary mb-4 flex items-center justify-center text-foreground group-hover:bg-primary group-hover:text-white transition-colors">
+                                    <CalendarRange className="w-6 h-6" />
+                                </div>
+                                <span className="font-heading font-bold text-lg text-foreground mb-1">Schedule</span>
+                                <span className="text-xs text-muted-foreground font-medium">View Calendar</span>
                             </button>
                         </div>
                     )}
@@ -80,16 +87,20 @@ export default function HomeView({ subscriptions = [], onManageClick, onExploreC
                 <div className="space-y-6">
                     <StatusBanner
                         type="info"
-                        icon="redeem"
+                        icon={<Gift className="w-5 h-5" />}
                         message="Refer a friend and get 3 free meals added to your current plan!"
                     />
 
-                    <div className="card bg-brand-dark text-white">
-                        <h3 className="text-lg font-bold mb-2 text-brand-orange-light">Chef's Choice</h3>
-                        <p className="text-brand-dark/60 text-sm mb-6">Our chefs recommend the Monthly Premium plan for consistent nutrition.</p>
-                        <button onClick={onExploreClick} className="btn btn-block">
-                            Explore All Plans
-                        </button>
+                    <div className="bg-foreground text-white rounded-[2rem] p-8 relative overflow-hidden group">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-primary/20 rounded-bl-[100px] -z-0"></div>
+                        <div className="relative z-10">
+                            <h3 className="text-xl font-heading font-bold mb-2 text-primary">Chef's Choice</h3>
+                            <p className="text-white/70 text-sm mb-8 font-medium leading-relaxed">Our chefs recommend the Monthly Premium plan for consistent nutrition.</p>
+                            <button onClick={onExploreClick} className="w-full px-6 py-4 bg-primary text-white rounded-full font-bold hover:bg-primary/90 transition-all flex items-center justify-center gap-2">
+                                Explore All Plans
+                                <ChevronRight className="w-5 h-5 relative top-[1px]" />
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>

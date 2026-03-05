@@ -1,40 +1,42 @@
-import React, { lazy, Suspense } from 'react';
-
-const allNavItems = [
-    { id: 'home', icon: 'home', label: 'Home', guestVisible: true },
-    { id: 'menu', icon: 'restaurant_menu', label: 'Menu', guestVisible: true },
-    { id: 'orders', icon: 'receipt_long', label: 'Orders', guestVisible: false },
-    { id: 'profile', icon: 'person', label: 'Profile', guestVisible: false },
-];
+import React from 'react';
+import { Home, UtensilsCrossed, Receipt, User, HeadphonesIcon, LogOut, LogIn } from 'lucide-react';
 
 export default function DesktopLayout({ children, activeTab, onTabChange, rightPanel, isLoggedIn }) {
+    const allNavItems = [
+        { id: 'home', icon: <Home className="w-5 h-5" />, label: 'Home', guestVisible: true },
+        { id: 'menu', icon: <UtensilsCrossed className="w-5 h-5" />, label: 'Menu', guestVisible: true },
+        { id: 'orders', icon: <Receipt className="w-5 h-5" />, label: 'Orders', guestVisible: false },
+        { id: 'profile', icon: <User className="w-5 h-5" />, label: 'Profile', guestVisible: false },
+    ];
+
     const navItems = allNavItems.filter(item => isLoggedIn || item.guestVisible);
+
     return (
-        <div className="flex h-screen w-full bg-transparent dark:bg-brand-dark overflow-hidden">
+        <div className="flex h-screen w-full bg-background overflow-hidden selection:bg-primary/20">
             {/* ── Skip to Content (A11y) ── */}
             <a
                 href="#main-content"
-                className="sr-only focus:not-sr-only focus:absolute focus:z-[200] focus:top-4 focus:left-4 focus:bg-brand-saffron focus:text-white focus:px-4 focus:py-2 focus:rounded-lg focus:font-bold focus:shadow-lg"
+                className="sr-only focus:not-sr-only focus:absolute focus:z-[200] focus:top-4 focus:left-4 focus:bg-primary focus:text-white focus:px-4 focus:py-2 focus:rounded-lg focus:font-bold focus:shadow-lg"
             >
                 Skip to content
             </a>
 
             {/* ── Fixed Left Sidebar ── */}
             <aside
-                className="hidden md:flex flex-col w-[250px] shrink-0 bg-white dark:bg-[#1e1710] border-r border-gray-200 dark:border-gray-800 h-screen sticky top-0"
+                className="hidden md:flex flex-col w-[260px] shrink-0 bg-white border-r border-border h-screen sticky top-0"
                 role="navigation"
                 aria-label="Main navigation"
             >
                 {/* Logo */}
-                <div className="px-6 pt-6 pb-4 border-b border-gray-100 dark:border-gray-800">
-                    <h1 className="font-heading text-xl font-bold text-brand-saffron leading-tight">
+                <div className="px-8 pt-8 pb-6 border-b border-border/50">
+                    <h1 className="font-heading text-3xl font-bold text-primary leading-tight">
                         Maa Ki<br /><span className="italic opacity-80">Rasoi</span>
                     </h1>
-                    <p className="text-[10px] uppercase tracking-widest text-slate-400 dark:text-slate-500 mt-1 font-medium">Daily Tiffin Service</p>
+                    <p className="text-[10px] uppercase tracking-widest text-muted-foreground mt-2 font-bold">Daily Tiffin Service</p>
                 </div>
 
                 {/* Nav Items */}
-                <nav className="flex-1 flex flex-col gap-1 px-3 py-4 overflow-y-auto" aria-label="Sidebar navigation">
+                <nav className="flex-1 flex flex-col gap-2 px-4 py-6 overflow-y-auto" aria-label="Sidebar navigation">
                     {navItems.map(item => {
                         const isActive = activeTab === item.id;
                         return (
@@ -43,18 +45,18 @@ export default function DesktopLayout({ children, activeTab, onTabChange, rightP
                                 onClick={() => onTabChange(item.id)}
                                 aria-current={isActive ? 'page' : undefined}
                                 aria-label={`Navigate to ${item.label}`}
-                                className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all group outline-none
-                                    focus-visible:ring-2 focus-visible:ring-brand-saffron focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-[#1e1710]
+                                className={`flex items-center gap-4 px-4 py-3.5 rounded-[1rem] text-sm font-bold transition-all group outline-none
+                                    focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2
                                     ${isActive
-                                        ? 'bg-brand-saffron/10 text-brand-saffron shadow-sm'
-                                        : 'text-slate-600 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white'
+                                        ? 'bg-primary text-white shadow-md shadow-primary/20 translate-x-1'
+                                        : 'text-muted-foreground hover:bg-background hover:text-foreground'
                                     }`}
                             >
-                                <span className={`material-symbols-outlined text-xl transition-transform group-hover:scale-110 ${isActive ? 'text-brand-saffron' : ''}`}>
+                                <span className={`transition-transform group-hover:scale-110 ${isActive ? 'text-white' : ''}`}>
                                     {item.icon}
                                 </span>
                                 {item.label}
-                                {isActive && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-brand-saffron"></span>}
+                                {isActive && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-white"></span>}
                             </button>
                         );
                     })}
@@ -62,16 +64,16 @@ export default function DesktopLayout({ children, activeTab, onTabChange, rightP
                     <button
                         onClick={() => onTabChange('support')}
                         aria-label="Navigate to Support"
-                        className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-slate-600 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white transition-all group outline-none
-                            focus-visible:ring-2 focus-visible:ring-brand-saffron focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-[#1e1710]"
+                        className="flex items-center gap-4 px-4 py-3.5 rounded-[1rem] text-sm font-bold text-muted-foreground hover:bg-background hover:text-foreground transition-all group outline-none mt-2
+                            focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                     >
-                        <span className="material-symbols-outlined text-xl transition-transform group-hover:scale-110">support_agent</span>
+                        <span className="transition-transform group-hover:scale-110"><HeadphonesIcon className="w-5 h-5" /></span>
                         Support
                     </button>
                 </nav>
 
                 {/* Auth — pinned to bottom */}
-                <div className="px-3 pb-4 border-t border-gray-100 dark:border-gray-800 pt-3">
+                <div className="p-6 border-t border-border/50 bg-background/50">
                     {isLoggedIn ? (
                         <button
                             onClick={() => {
@@ -80,20 +82,20 @@ export default function DesktopLayout({ children, activeTab, onTabChange, rightP
                                 window.location.href = '/';
                             }}
                             aria-label="Log out"
-                            className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-slate-500 dark:text-slate-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 dark:hover:text-red-400 transition-all w-full group outline-none
-                                focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-[#1e1710]"
+                            className="flex items-center justify-center gap-3 px-4 py-3.5 rounded-[1.5rem] text-sm font-bold text-destructive hover:bg-destructive/10 transition-all w-full group outline-none
+                                focus-visible:ring-2 focus-visible:ring-destructive focus-visible:ring-offset-2"
                         >
-                            <span className="material-symbols-outlined text-xl transition-transform group-hover:scale-110">logout</span>
+                            <span className="transition-transform group-hover:scale-110"><LogOut className="w-5 h-5" /></span>
                             Logout
                         </button>
                     ) : (
                         <button
                             onClick={() => { window.location.href = '/login'; }}
                             aria-label="Log in"
-                            className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-white bg-brand-saffron hover:bg-[#D97706] transition-all w-full group outline-none shadow-md
-                                focus-visible:ring-2 focus-visible:ring-brand-saffron focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-[#1e1710]"
+                            className="flex items-center justify-center gap-3 px-4 py-3.5 rounded-full text-sm font-bold text-white bg-primary hover:bg-primary/90 transition-all w-full group outline-none shadow-md shadow-primary/20
+                                focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                         >
-                            <span className="material-symbols-outlined text-xl transition-transform group-hover:scale-110">login</span>
+                            <span className="transition-transform group-hover:scale-110"><LogIn className="w-5 h-5" /></span>
                             Login / Sign Up
                         </button>
                     )}
@@ -102,7 +104,7 @@ export default function DesktopLayout({ children, activeTab, onTabChange, rightP
 
             {/* ── Main Content Area ── */}
             <main id="main-content" className="flex-1 overflow-y-auto h-screen" role="main">
-                <div className="max-w-5xl mx-auto">
+                <div className="max-w-5xl mx-auto px-6 py-8">
                     {children}
                 </div>
             </main>
@@ -110,7 +112,7 @@ export default function DesktopLayout({ children, activeTab, onTabChange, rightP
             {/* ── Optional Right Panel (wide screens only) ── */}
             {rightPanel && (
                 <aside
-                    className="hidden 2xl:flex flex-col w-[300px] shrink-0 bg-white dark:bg-[#1e1710] border-l border-gray-200 dark:border-gray-800 h-screen sticky top-0 overflow-y-auto p-5 gap-5"
+                    className="hidden lg:flex flex-col w-[320px] shrink-0 bg-white border-l border-border h-screen sticky top-0 overflow-y-auto p-6 gap-6"
                     aria-label="Context panel"
                 >
                     {rightPanel}

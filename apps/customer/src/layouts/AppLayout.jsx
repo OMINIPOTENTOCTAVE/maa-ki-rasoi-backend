@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
+import { Home, UtensilsCrossed, Receipt, User, LogOut, LogIn } from 'lucide-react';
 
 const AppLayout = ({ children }) => {
     const navigate = useNavigate();
@@ -14,10 +15,10 @@ const AppLayout = ({ children }) => {
     }, []);
 
     const navItems = [
-        { id: 'home', path: '/', icon: 'home', label: 'Home' },
-        { id: 'menu', path: '/menu', icon: 'restaurant_menu', label: 'Menu' },
-        { id: 'orders', path: '/orders', icon: 'receipt_long', label: 'Orders', protected: true },
-        { id: 'profile', path: '/profile', icon: 'person', label: 'Profile', protected: true },
+        { id: 'home', path: '/', icon: <Home className="w-6 h-6" />, label: 'Home' },
+        { id: 'menu', path: '/menu', icon: <UtensilsCrossed className="w-6 h-6" />, label: 'Menu' },
+        { id: 'orders', path: '/orders', icon: <Receipt className="w-6 h-6" />, label: 'Orders', protected: true },
+        { id: 'profile', path: '/profile', icon: <User className="w-6 h-6" />, label: 'Profile', protected: true },
     ];
 
     const visibleItems = navItems.filter(item => !item.protected || isLoggedIn);
@@ -27,28 +28,29 @@ const AppLayout = ({ children }) => {
     };
 
     return (
-        <div className="min-h-screen bg-[var(--brand-cream)] dark:bg-[#121212] flex flex-col md:flex-row overflow-x-hidden">
+        <div className="min-h-screen bg-background text-foreground flex flex-col md:flex-row overflow-x-hidden selection:bg-primary/20">
             {/* Desktop Sidebar */}
             {isDesktop && (
-                <aside className="sidebar fixed left-0 top-0 h-screen bg-[var(--brand-cream)] border-r border-brand-orange/5 flex flex-col p-8 z-50">
+                <aside className="sidebar fixed left-0 top-0 h-screen bg-background border-r border-border flex flex-col p-8 z-50 w-[280px]">
                     <div className="mb-12">
-                        <h1 className="text-2xl font-bold bg-gradient-to-r from-brand-orange to-brand-orange-light bg-clip-text text-transparent">
+                        <h1 className="text-3xl font-heading font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
                             Maa Ki Rasoi
                         </h1>
+                        <p className="text-[10px] uppercase tracking-widest text-muted-foreground mt-1 font-bold">Daily Tiffin Service</p>
                     </div>
 
-                    <nav className="flex flex-col gap-4 flex-1">
+                    <nav className="flex flex-col gap-3 flex-1">
                         {visibleItems.map(item => (
                             <button
                                 key={item.id}
                                 onClick={() => handleNav(item.path)}
-                                className={`flex items-center gap-4 p-4 rounded-xl transition-all ${location.pathname === item.path
-                                    ? 'bg-brand-orange text-white shadow-lg'
-                                    : 'text-brand-dark hover:bg-transparent'
+                                className={`flex items-center gap-4 px-5 py-4 rounded-[1.5rem] transition-all outline-none font-bold ${location.pathname === item.path
+                                        ? 'bg-primary text-white shadow-md shadow-primary/20 translate-x-2'
+                                        : 'text-muted-foreground hover:bg-white hover:text-foreground hover:shadow-sm border border-transparent hover:border-border'
                                     }`}
                             >
-                                <span className="material-symbols-outlined">{item.icon}</span>
-                                <span className="font-semibold">{item.label}</span>
+                                {item.icon}
+                                <span className="text-base">{item.label}</span>
                             </button>
                         ))}
                     </nav>
@@ -56,9 +58,9 @@ const AppLayout = ({ children }) => {
                     {!isLoggedIn ? (
                         <button
                             onClick={() => navigate('/login')}
-                            className="btn btn-secondary mt-auto"
+                            className="w-full flex justify-center items-center gap-2 px-6 py-4 bg-primary text-white rounded-full font-bold hover:bg-primary/90 transition-all shadow-md shadow-primary/20 mt-auto"
                         >
-                            <span className="material-symbols-outlined">login</span>
+                            <LogIn className="w-5 h-5" />
                             Login
                         </button>
                     ) : (
@@ -67,9 +69,9 @@ const AppLayout = ({ children }) => {
                                 localStorage.removeItem('customer_token');
                                 window.location.reload();
                             }}
-                            className="text-error font-semibold flex items-center gap-2 mt-auto p-4"
+                            className="text-destructive font-bold flex items-center justify-center gap-2 mt-auto p-4 hover:bg-destructive/10 rounded-full transition-colors w-full"
                         >
-                            <span className="material-symbols-outlined">logout</span>
+                            <LogOut className="w-5 h-5" />
                             Logout
                         </button>
                     )}
@@ -77,14 +79,14 @@ const AppLayout = ({ children }) => {
             )}
 
             {/* Main Content Area */}
-            <main className={`flex-1 transition-all flex flex-col ${isDesktop ? 'ml-[280px]' : 'pb-[80px]'}`}>
+            <main className={`flex-1 transition-all flex flex-col min-h-screen ${isDesktop ? 'ml-[280px]' : 'pb-[80px]'}`}>
                 {/* Mobile Header */}
                 {!isDesktop && location.pathname !== '/login' && (
-                    <header className="header px-4 flex justify-between items-center shadow-sm">
-                        <h1 className="text-xl font-bold text-brand-orange mb-0 font-heading">Maa Ki Rasoi</h1>
+                    <header className="px-6 py-4 flex justify-between items-center bg-white/80 backdrop-blur-md border-b border-border sticky top-0 z-40">
+                        <h1 className="text-2xl font-bold text-primary font-heading">MKR.</h1>
                         {!isLoggedIn && (
-                            <Link to="/login" className="text-brand-orange font-semibold flex items-center gap-1">
-                                <span className="material-symbols-outlined text-xl">login</span>
+                            <Link to="/login" className="px-5 py-2 bg-primary/10 text-primary rounded-full font-bold text-sm flex items-center gap-2 active:scale-95 transition-transform">
+                                <LogIn className="w-4 h-4" />
                                 Login
                             </Link>
                         )}
@@ -98,20 +100,25 @@ const AppLayout = ({ children }) => {
 
             {/* Mobile Bottom Navigation */}
             {!isDesktop && location.pathname !== '/login' && (
-                <nav className="bottom-nav">
-                    {visibleItems.map(item => (
-                        <button
-                            key={item.id}
-                            onClick={() => handleNav(item.path)}
-                            className={`flex flex-col items-center gap-1 transition-colors ${location.pathname === item.path ? 'text-brand-orange' : 'text-text-muted'
-                                }`}
-                        >
-                            <span className={`material-symbols-outlined ${location.pathname === item.path ? 'fill-current' : ''}`}>
-                                {item.icon}
-                            </span>
-                            <span className="text-[10px] font-bold uppercase tracking-wider">{item.label}</span>
-                        </button>
-                    ))}
+                <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-t border-border shadow-2xl rounded-t-[2rem] px-6 py-4 pb-safe flex justify-between items-center max-w-md mx-auto">
+                    {visibleItems.map(item => {
+                        const isActive = location.pathname === item.path;
+                        return (
+                            <button
+                                key={item.id}
+                                onClick={() => handleNav(item.path)}
+                                className={`flex flex-col items-center gap-1.5 transition-all relative ${isActive ? 'text-primary scale-110' : 'text-muted-foreground hover:text-foreground'
+                                    }`}
+                            >
+                                <div className={`p-2 rounded-2xl transition-colors ${isActive ? 'bg-primary/10' : ''}`}>
+                                    {item.icon}
+                                </div>
+                                <span className={`text-[10px] uppercase tracking-wider ${isActive ? 'font-bold' : 'font-medium'}`}>
+                                    {item.label}
+                                </span>
+                            </button>
+                        );
+                    })}
                 </nav>
             )}
         </div>

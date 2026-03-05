@@ -4,11 +4,17 @@ export default function StatusBanner({ message, type = 'info', icon }) {
     const isSuccess = type === 'success';
 
     return (
-        <div className={`flex items-center gap-2 mb-3 px-3 py-2 rounded-lg text-sm font-bold ${isSuccess
-                ? 'bg-brand-green/10 text-brand-green border border-brand-green/20'
-                : 'bg-brand-saffron/10 text-brand-saffron border border-brand-saffron/20'
+        <div className={`flex items-center gap-3 mb-4 px-4 py-3 rounded-2xl text-sm font-bold shadow-sm ${isSuccess
+                ? 'bg-success/10 text-success border border-success/20'
+                : 'bg-primary/10 text-primary border border-primary/20'
             }`}>
-            {icon && <span className="material-symbols-outlined text-[18px]">{icon}</span>}
+            {icon && (
+                typeof icon === 'string' ? (
+                    <span className="material-symbols-outlined text-[20px]">{icon}</span>
+                ) : (
+                    icon
+                )
+            )}
             <span>{message}</span>
         </div>
     );
