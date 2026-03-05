@@ -314,16 +314,16 @@ export default function GuestHomeView({ onExploreClick }) {
                                     alt={t.name}
                                     className="w-12 h-12 rounded-full object-cover border-2 border-border"
                                     onError={(e) => {
-                                        e.target.onerror = null;
                                         e.target.style.display = 'none';
-                                        e.target.nextSibling.style.display = 'flex';
+                                        const fallback = e.target.parentElement.querySelector('.avatar-placeholder');
+                                        if (fallback) fallback.style.display = 'flex';
                                     }}
                                 />
                                 <div
-                                    className="w-12 h-12 bg-primary/10 rounded-full items-center justify-center text-primary font-heading font-bold text-xl hidden"
+                                    className="avatar-placeholder w-12 h-12 bg-primary/10 rounded-full items-center justify-center text-primary font-heading font-bold text-xl hidden"
                                     aria-hidden="true"
                                 >
-                                    {t.name[0]}
+                                    {t.name ? t.name[0] : '?'}
                                 </div>
                                 <div>
                                     <p className="font-bold text-foreground">{t.name}</p>

@@ -2,11 +2,24 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { Home, UtensilsCrossed, Receipt, User, LogOut, LogIn } from 'lucide-react';
 
+const getStoredData = (key) => {
+    try {
+        const data = localStorage.getItem(key);
+        if (!data || data === 'undefined' || data === 'null') return {};
+        return JSON.parse(data);
+    } catch (e) {
+        console.error(`Error parsing stored data for key "${key}":`, e);
+        return {};
+    }
+};
+
 const AppLayout = ({ children }) => {
     const navigate = useNavigate();
     const location = useLocation();
+
     const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('customer_token'));
     const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 1025);
+    const [customer, setCustomer] = useState(getStoredData('customer_data'));
 
     useEffect(() => {
         const handleResize = () => setIsDesktop(window.innerWidth >= 1025);
@@ -46,10 +59,10 @@ const AppLayout = ({ children }) => {
                             <button
                                 key={item.id}
                                 onClick={() => handleNav(item.path)}
-                                className={`flex items-center gap-4 px-5 py-4 rounded-[1.5rem] transition-all outline-none font-bold ${location.pathname === item.path
-                                    ? 'bg-primary text-white shadow-md shadow-primary/20 translate-x-2'
-                                    : 'text-muted-foreground hover:bg-white hover:text-foreground hover:shadow-sm border border-transparent hover:border-border'
-                                    }`}
+                                className={`flex items - center gap - 4 px - 5 py - 4 rounded - [1.5rem] transition - all outline - none font - bold ${location.pathname === item.path
+                                        ? 'bg-primary text-white shadow-md shadow-primary/20 translate-x-2'
+                                        : 'text-muted-foreground hover:bg-white hover:text-foreground hover:shadow-sm border border-transparent hover:border-border'
+                                    } `}
                             >
                                 {item.icon}
                                 <span className="text-base">{item.label}</span>
@@ -81,7 +94,7 @@ const AppLayout = ({ children }) => {
             )}
 
             {/* Main Content Area */}
-            <main className={`flex-1 transition-all flex flex-col min-h-screen ${isDesktop ? 'ml-[280px]' : 'pb-[80px]'}`}>
+            <main className={`flex - 1 transition - all flex flex - col min - h - screen ${isDesktop ? 'ml-[280px]' : 'pb-[80px]'} `}>
                 {/* Mobile Header */}
                 {!isDesktop && location.pathname !== '/login' && (
                     <header className="px-6 py-4 flex justify-between items-center bg-white/80 backdrop-blur-md border-b border-border sticky top-0 z-40">
@@ -109,13 +122,13 @@ const AppLayout = ({ children }) => {
                             <button
                                 key={item.id}
                                 onClick={() => handleNav(item.path)}
-                                className={`flex flex-col items-center gap-1.5 transition-all relative ${isActive ? 'text-primary scale-110' : 'text-muted-foreground hover:text-foreground'
-                                    }`}
+                                className={`flex flex - col items - center gap - 1.5 transition - all relative ${isActive ? 'text-primary scale-110' : 'text-muted-foreground hover:text-foreground'
+                                    } `}
                             >
-                                <div className={`p-2 rounded-2xl transition-colors ${isActive ? 'bg-primary/10' : ''}`}>
+                                <div className={`p - 2 rounded - 2xl transition - colors ${isActive ? 'bg-primary/10' : ''} `}>
                                     {item.icon}
                                 </div>
-                                <span className={`text-[10px] uppercase tracking-wider ${isActive ? 'font-bold' : 'font-medium'}`}>
+                                <span className={`text - [10px] uppercase tracking - wider ${isActive ? 'font-bold' : 'font-medium'} `}>
                                     {item.label}
                                 </span>
                             </button>

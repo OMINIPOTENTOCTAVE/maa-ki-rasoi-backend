@@ -37,14 +37,12 @@ export default function App() {
         (response) => response,
         async (error) => {
             const originalRequest = error.config;
-            if (error.response?.status === 401 && !originalRequest._retry) {
-                originalRequest._retry = true;
-                try {
-                    localStorage.removeItem('customer_token');
-                    window.location.href = '/login';
-                } catch (refreshError) {
-                    return Promise.reject(refreshError);
-                }
+            // Handle 401 (Unauthorized) and 403 (Forbidden) errors by logging out
+            if (error.response?.status === 403 || error.response?.status === 401) {
+                localStorage.removeItem('customer_token');
+                localStorage.removeItem('customer_data'); // Also remove customer data
+                delete axios.defaults.headers.common['Authorization']; // Clear auth header
+                window.location.href = '/login'; // Redirect to login page
             }
             return Promise.reject(error);
         }

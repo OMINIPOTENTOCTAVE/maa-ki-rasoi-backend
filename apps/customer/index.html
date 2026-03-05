@@ -6,15 +6,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <link href="https://fonts.googleapis.com" rel="preconnect" />
   <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,700;1,9..144,400&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap"
+  <link
+    href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,700;1,9..144,400&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap"
     rel="stylesheet" />
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
   <title>Maa Ki Rasoi - Home Style Food</title>
   <meta name="description" content="Order fresh, home-style meals with just a few taps." />
   <style>
     #initial-loader {
       position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100vh;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100vh;
       background-color: #FAF9F6;
       display: flex;
       flex-direction: column;
@@ -23,18 +28,22 @@
       z-index: 99999;
       transition: opacity 0.4s ease, visibility 0.4s ease;
     }
+
     #initial-loader.hidden {
       opacity: 0;
       visibility: hidden;
       pointer-events: none;
     }
+
     #loader-spinner {
-      width: 72px; height: 72px;
+      width: 72px;
+      height: 72px;
       border-radius: 50%;
       border: 4px solid #F5DEB3;
       border-top-color: #C8550A;
       animation: loader-spin 0.9s linear infinite;
     }
+
     #loader-title {
       font-family: Georgia, 'Times New Roman', serif;
       color: #C8550A;
@@ -42,14 +51,18 @@
       font-weight: 700;
       font-size: 22px;
     }
+
     #loader-sub {
       font-family: system-ui, sans-serif;
       color: #9a8478;
       font-size: 13px;
       margin-top: 6px;
     }
+
     @keyframes loader-spin {
-      to { transform: rotate(360deg); }
+      to {
+        transform: rotate(360deg);
+      }
     }
   </style>
 </head>
@@ -69,7 +82,7 @@
 
   <!-- Safety net: hide loader after 5s even if React is slow -->
   <script>
-    setTimeout(function() {
+    setTimeout(function () {
       var loader = document.getElementById('initial-loader');
       if (loader) loader.classList.add('hidden');
     }, 5000);
