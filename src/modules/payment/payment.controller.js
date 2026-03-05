@@ -115,4 +115,40 @@ const verifyPayment = async (req, res, next) => {
     }
 };
 
-module.exports = { createOrder, verifyPayment };
+const processRefund = async (req, res, next) => {
+    try {
+        const { subscriptionId } = req.body;
+        const sub = await prisma.subscription.findUnique({ where: { id: subscriptionId } });
+
+        if (!sub) return res.status(404).json({ success: false, message: 'Subscription not found' });
+        if (sub.status !== 'Cancelled') return res.status(400).json({ success: false, message: 'Only cancelled subscriptions can be refunded via this endpoint' });
+        if (sub.paymentMethod !== 'ONLINE' || !sub.razorpayPaymentId) {
+            return res.status(400).json({ success: false, message: 'Refund only applicable for online payments with a valid Razorpay Payment ID' });
+        }
+
+        const refundAmount = sub.tiffinsRemaining * 100 * 100; // exact paise based on remaining tiffins
+
+        // Prevent refunding 0
+        if (refundAmount <= 0) {
+            return res.status(400).json({ success: false, message: 'No refundable amount left' });
+        }
+
+        const isDummy = (process.env.RAZORPAY_KEY_SECRET || 'dummysecret1234').includes('dummy');
+        let refund;
+
+        if (isDummy) {
+            refund = { id: `rfnd_dummy_${Date.now()}`, amount: refundAmount, status: 'processed' };
+        } else {
+            refund = await razorpay.payments.refund(sub.razorpayPaymentId, {
+                amount: refundAmount
+            });
+        }
+
+        res.json({ success: true, refund, message: "Refund initiated successfully." });
+    } catch (error) {
+        // Razorpay often embeds errors in error.error
+        res.status(500).json({ success: false, message: error.error?.description || error.message });
+    }
+};
+
+module.exports = { createOrder, verifyPayment, processRefund };
