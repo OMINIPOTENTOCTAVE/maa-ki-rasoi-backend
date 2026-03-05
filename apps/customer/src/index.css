@@ -66,7 +66,44 @@ body,
   --radius-md: 12px;
   --radius-lg: 20px;
   --radius-full: 9999px;
+
+  /* ── shadcn/ui CSS variable system (HSL format) ── */
+  /* These are required by the copied shadcn components  */
+  --background: 36 33% 97%;
+  /* #F8F7F5 Antique Cream */
+  --foreground: 28 28% 14%;
+  /* #2D2418 Kitchen Brown */
+  --card: 0 0% 100%;
+  --card-foreground: 28 28% 14%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 28 28% 14%;
+  --primary: 20 90% 42%;
+  /* #C8550A Brand Saffron */
+  --primary-foreground: 0 0% 100%;
+  --secondary: 37 76% 86%;
+  /* #F4E4BC warm cream */
+  --secondary-foreground: 28 28% 14%;
+  --muted: 30 20% 93%;
+  --muted-foreground: 28 20% 40%;
+  --accent: 25 65% 70%;
+  /* #E8A87C warm accent */
+  --accent-foreground: 28 28% 14%;
+  --destructive: 0 84% 60%;
+  /* #EF4444 */
+  --destructive-foreground: 0 0% 100%;
+  --border: 30 18% 88%;
+  /* #E5E0D8 */
+  --input: 30 18% 88%;
+  --ring: 20 90% 42%;
+  /* saffron focus ring */
+  --radius: 0.75rem;
+  --chart-1: 20 90% 42%;
+  --chart-2: 25 65% 70%;
+  --chart-3: 104 45% 32%;
+  --chart-4: 37 76% 86%;
+  --chart-5: 28 28% 14%;
 }
+
 
 /* Dark Mode Tokens */
 .dark {
@@ -691,6 +728,7 @@ h3 {
     opacity: 0;
     transform: translateY(-10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -703,8 +741,15 @@ h3 {
 
 /* Float animation */
 @keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
 }
 
 .animate-float {
@@ -742,6 +787,7 @@ select:focus-visible {
 }
 
 /* Tap highlight disable */
-button, a {
+button,
+a {
   -webkit-tap-highlight-color: transparent;
 }

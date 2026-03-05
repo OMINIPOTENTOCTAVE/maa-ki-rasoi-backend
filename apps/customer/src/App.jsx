@@ -4,6 +4,7 @@ import axios from 'axios';
 
 // Layout & UI
 import AppLayout from './layouts/AppLayout';
+import { Toaster } from './components/ui/sonner';
 
 // Pages
 import CustomerDashboard from './pages/CustomerDashboard';
@@ -78,34 +79,37 @@ export default function App() {
     };
 
     return (
-        <AppLayout>
-            {isOffline && (
-                <div className="fixed top-0 left-0 right-0 z-[2000] bg-error text-white text-center py-2 text-xs font-bold animate-fade-in">
-                    Working Offline — Changes will sync when reconnected
-                </div>
-            )}
+        <div className="texture-overlay">
+            <AppLayout>
+                {isOffline && (
+                    <div className="fixed top-0 left-0 right-0 z-[2000] bg-error text-white text-center py-2 text-xs font-bold animate-fade-in">
+                        Working Offline — Changes will sync when reconnected
+                    </div>
+                )}
 
-            <Routes>
-                <Route path="/" element={<CustomerDashboard activeView="home" cart={cart} addToCart={addToCart} />} />
-                <Route path="/menu" element={<CustomerDashboard activeView="menu" cart={cart} addToCart={addToCart} />} />
-                <Route path="/orders" element={
-                    <ProtectedRoute>
-                        <CustomerDashboard activeView="orders" cart={cart} addToCart={addToCart} />
-                    </ProtectedRoute>
-                } />
-                <Route path="/profile" element={
-                    <ProtectedRoute>
-                        <CustomerDashboard activeView="profile" cart={cart} addToCart={addToCart} />
-                    </ProtectedRoute>
-                } />
-                <Route path="/login" element={<Login />} />
-                <Route path="/checkout" element={
-                    <ProtectedRoute>
-                        <CheckoutPage cart={cart} updateQty={updateQty} clearCart={clearCart} />
-                    </ProtectedRoute>
-                } />
-                <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-        </AppLayout>
+                <Routes>
+                    <Route path="/" element={<CustomerDashboard activeView="home" cart={cart} addToCart={addToCart} />} />
+                    <Route path="/menu" element={<CustomerDashboard activeView="menu" cart={cart} addToCart={addToCart} />} />
+                    <Route path="/orders" element={
+                        <ProtectedRoute>
+                            <CustomerDashboard activeView="orders" cart={cart} addToCart={addToCart} />
+                        </ProtectedRoute>
+                    } />
+                    <Route path="/profile" element={
+                        <ProtectedRoute>
+                            <CustomerDashboard activeView="profile" cart={cart} addToCart={addToCart} />
+                        </ProtectedRoute>
+                    } />
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/checkout" element={
+                        <ProtectedRoute>
+                            <CheckoutPage cart={cart} updateQty={updateQty} clearCart={clearCart} />
+                        </ProtectedRoute>
+                    } />
+                    <Route path="*" element={<Navigate to="/" replace />} />
+                </Routes>
+            </AppLayout>
+            <Toaster position="top-center" richColors />
+        </div>
     );
 }
