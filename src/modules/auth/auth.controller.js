@@ -1,7 +1,77 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const axios = require("axios");
 const prisma = require("../../prisma");
 const authService = require("./auth.service");
+
+const googleLogin = async (req, res) => {
+    try {
+        const { idToken } = req.body;
+        if (!idToken) {
+            return res.status(400).json({ success: false, message: "Google ID token is required" });
+        }
+
+        // Verify the Firebase ID token with Google
+        const googleRes = await axios.get(`https://oauth2.googleapis.com/tokeninfo?id_token=${idToken}`);
+        const { sub: googleId, email, name, picture } = googleRes.data;
+
+        if (!googleId || !email) {
+            return res.status(401).json({ success: false, message: "Invalid Google token" });
+        }
+
+        // Find existing customer by googleId or email
+        let customer = await prisma.customer.findFirst({
+            where: {
+                OR: [
+                    { googleId },
+                    { email }
+                ]
+            }
+        });
+
+        if (!customer) {
+            // Create new customer from Google profile
+            customer = await prisma.customer.create({
+                data: {
+                    googleId,
+                    email,
+                    name: name || "Customer",
+                }
+            });
+        } else if (!customer.googleId) {
+            // Link Google account to existing email-based customer
+            customer = await prisma.customer.update({
+                where: { id: customer.id },
+                data: { googleId, name: customer.name || name }
+            });
+        }
+
+        // Generate JWT tokens
+        const accessToken = jwt.sign(
+            { id: customer.id, email: customer.email, role: 'customer' },
+            process.env.JWT_SECRET,
+            { expiresIn: "15m" }
+        );
+
+        const refreshToken = jwt.sign(
+            { id: customer.id, version: customer.tokenVersion || 0 },
+            process.env.JWT_SECRET,
+            { expiresIn: "30d" }
+        );
+
+        res.cookie('customer_refresh_token', refreshToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            maxAge: 30 * 24 * 60 * 60 * 1000
+        });
+
+        res.json({ success: true, token: accessToken, customer });
+    } catch (error) {
+        console.error("[GOOGLE AUTH ERROR]", error.response?.data || error.message);
+        res.status(401).json({ success: false, message: "Google authentication failed" });
+    }
+};
 
 const login = async (req, res) => {
     try {
@@ -181,4 +251,4 @@ const logout = async (req, res) => {
     res.json({ success: true, message: "Logged out successfully" });
 };
 
-module.exports = { login, createAdmin, requestOTP, verifyOTP, refreshToken, logout, updateProfile };
+module.exports = { login, createAdmin, requestOTP, verifyOTP, refreshToken, logout, updateProfile, googleLogin };

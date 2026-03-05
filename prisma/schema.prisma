@@ -65,7 +65,9 @@ model OrderItem {
 
 model Customer {
   id            String         @id @default(uuid())
-  phone         String         @unique
+  phone         String?        @unique
+  email         String?        @unique
+  googleId      String?        @unique
   name          String?
   address       String?
   createdAt     DateTime       @default(now())
