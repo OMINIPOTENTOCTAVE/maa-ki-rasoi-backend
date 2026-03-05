@@ -1,4 +1,5 @@
 const prisma = require("../../prisma");
+const menuService = require("./menu.service");
 
 const getMenuItems = async (req, res) => {
     try {
@@ -76,4 +77,68 @@ const deleteMenuItem = async (req, res) => {
     }
 };
 
-module.exports = { getMenuItems, createMenuItem, updateMenuItem, toggleAvailability, deleteMenuItem };
+// V4.0 Daily Menu API Routes
+const getDailyMenus = async (req, res) => {
+    try {
+        // default to fetching a month of menus if dates not provided
+        const startDate = req.query.start ? new Date(req.query.start) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+        const endDate = req.query.end ? new Date(req.query.end) : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+        const menus = await menuService.getDailyMenus(startDate, endDate);
+        res.json({ success: true, data: menus });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+const createDraftMenu = async (req, res) => {
+    try {
+        const { date, item1Id, item2Id, saladNote } = req.body;
+        const menu = await menuService.createDraftMenu(date, item1Id, item2Id, saladNote);
+        res.json({ success: true, data: menu });
+    } catch (error) {
+        res.status(400).json({ success: false, message: error.message });
+    }
+};
+
+const updateDailyMenu = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const updated = await menuService.updateDailyMenu(id, req.body);
+        res.json({ success: true, data: updated });
+    } catch (error) {
+        res.status(400).json({ success: false, message: error.message });
+    }
+};
+
+const publishMenu = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const adminId = req.user.id; // assumed passed by auth middleware
+        const published = await menuService.publishMenu(id, adminId);
+        res.json({ success: true, data: published });
+    } catch (error) {
+        res.status(400).json({ success: false, message: error.message });
+    }
+};
+
+const getUnpublishedDates = async (req, res) => {
+    try {
+        const dates = await menuService.getUnpublishedDates();
+        res.json({ success: true, data: dates });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+module.exports = {
+    getMenuItems,
+    createMenuItem,
+    updateMenuItem,
+    toggleAvailability,
+    deleteMenuItem,
+    getDailyMenus,
+    createDraftMenu,
+    updateDailyMenu,
+    publishMenu,
+    getUnpublishedDates
+};

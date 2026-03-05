@@ -1,13 +1,14 @@
 const prisma = require('../../prisma');
+const menuService = require('../menu/menu.service');
 
-// GET /content/menu — Today's available menu items
-const getMenu = async (req, res) => {
+// GET /content/menu/today — Today's published DailyMenu
+const getTodayMenu = async (req, res) => {
     try {
-        const items = await prisma.menuItem.findMany({
-            where: { isAvailable: true, isArchived: false },
-            orderBy: { category: 'asc' }
-        });
-        res.json({ success: true, data: items });
+        const todayMenu = await menuService.getTodayMenu();
+        if (!todayMenu) {
+            return res.json({ success: true, data: null, message: "Today's menu will be updated soon 🍱" });
+        }
+        res.json({ success: true, data: todayMenu });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
@@ -34,4 +35,4 @@ const getFAQs = async (req, res) => {
     res.json({ success: true, data: faqs });
 };
 
-module.exports = { getMenu, getTestimonials, getFAQs };
+module.exports = { getTodayMenu, getTestimonials, getFAQs };
