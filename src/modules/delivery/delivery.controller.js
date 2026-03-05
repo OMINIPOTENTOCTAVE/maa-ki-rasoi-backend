@@ -33,44 +33,28 @@ exports.login = async (req, res, next) => {
     }
 };
 
+const timeUtils = require("../../utils/timeUtils");
+
 exports.getTasks = async (req, res, next) => {
     try {
-        // Today range
-        const startOfDay = new Date();
-        startOfDay.setHours(0, 0, 0, 0);
+        const todayIST = timeUtils.startOfISTDay(timeUtils.getISTTimestamp());
 
-        const endOfDay = new Date();
-        endOfDay.setHours(23, 59, 59, 999);
-
-        const subscriptions = await prisma.subscriptionDelivery.findMany({
+        const tasks = await prisma.order.findMany({
             where: {
                 deliveryPartnerId: req.user.id,
-                deliveryDate: {
-                    gte: startOfDay,
-                    lte: endOfDay
-                }
-            },
-            include: {
-                subscription: {
-                    include: { customer: true }
-                }
-            }
-        });
-
-        const instantOrders = await prisma.order.findMany({
-            where: {
-                deliveryPartnerId: req.user.id,
+                dailyMenu: { date: todayIST }, // Fetch orders targeting today's specific V4 menu
                 status: {
-                    in: ["Preparing", "Confirmed"]
+                    in: ["Pending", "Preparing", "OutForDelivery", "Delivered", "Failed"]
                 }
             },
             include: {
                 customer: true,
-                items: true
-            }
+                dailyMenu: { include: { item1: true, item2: true } }
+            },
+            orderBy: { deliveryZoneId: 'asc' }
         });
 
-        res.status(200).json({ success: true, tasks: { subscriptions, instantOrders } });
+        res.status(200).json({ success: true, tasks });
     } catch (error) {
         next(error);
     }
@@ -78,29 +62,33 @@ exports.getTasks = async (req, res, next) => {
 
 exports.updateStatus = async (req, res, next) => {
     try {
-        const { taskId, type, status } = req.body;
+        const { taskId, status } = req.body; // type param is deprecated in V4
 
-        if (type === "subscription") {
-            const result = await prisma.subscriptionDelivery.update({
-                where: { id: taskId },
+        const order = await prisma.order.findUnique({ where: { id: taskId } });
+        if (!order) return res.status(404).json({ success: false, message: "Task not found" });
+
+        const result = await prisma.order.update({
+            where: { id: taskId },
+            data: {
+                status,
+                ...(status === 'Delivered' && { deliveredAt: timeUtils.getISTTimestamp() }),
+                ...(status === 'OutForDelivery' && { dispatchedAt: timeUtils.getISTTimestamp() }),
+                ...(status === 'Preparing' && { preparingAt: timeUtils.getISTTimestamp() })
+            }
+        });
+
+        // V4 Business Logic: Accurately decrement tiffins via physical verification event
+        if (status === 'Delivered' && order.subscriptionId && order.status !== 'Delivered') { // Prevent double count
+            await prisma.subscription.update({
+                where: { id: order.subscriptionId },
                 data: {
-                    status,
-                    ...(status === 'Delivered' && { deliveredAt: new Date() })
+                    tiffinsDelivered: { increment: 1 },
+                    tiffinsRemaining: { decrement: 1 }
                 }
             });
-            return res.status(200).json({ success: true, result });
-        } else if (type === "instant") {
-            const result = await prisma.order.update({
-                where: { id: taskId },
-                data: {
-                    status,
-                    ...(status === 'Delivered' && { deliveredAt: new Date() })
-                }
-            });
-            return res.status(200).json({ success: true, result });
-        } else {
-            return res.status(400).json({ success: false, message: "Invalid type." });
         }
+
+        return res.status(200).json({ success: true, result });
     } catch (error) {
         next(error);
     }
@@ -129,28 +117,18 @@ exports.getPartners = async (req, res, next) => {
 
 exports.assignTask = async (req, res, next) => {
     try {
-        const { partnerId, taskId, type } = req.body;
+        const { partnerId, taskId } = req.body; // type param is deprecated in V4
 
-        // Fix: Missing Delivery Partner Assignment Fallback
         const partner = await prisma.deliveryPartner.findUnique({ where: { id: partnerId } });
         if (!partner || partner.status !== 'Active') {
             return res.status(400).json({ success: false, message: "Cannot assign task. Delivery partner is inactive or not found." });
         }
 
-        if (type === "subscription") {
-            const result = await prisma.subscriptionDelivery.update({
-                where: { id: taskId },
-                data: { deliveryPartnerId: partnerId }
-            });
-            return res.status(200).json({ success: true, result });
-        } else if (type === "instant") {
-            const result = await prisma.order.update({
-                where: { id: taskId },
-                data: { deliveryPartnerId: partnerId }
-            });
-            return res.status(200).json({ success: true, result });
-        }
-        res.status(400).json({ success: false, message: "Invalid type" });
+        const result = await prisma.order.update({
+            where: { id: taskId },
+            data: { deliveryPartnerId: partnerId }
+        });
+        return res.status(200).json({ success: true, result });
     } catch (error) {
         next(error);
     }
