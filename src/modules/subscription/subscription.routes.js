@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const subscriptionController = require('./subscription.controller');
-const { authMiddleware, isAdmin } = require('../../middleware/auth');
+const { authMiddleware, authenticateAdmin } = require('../../middleware/auth');
+const { auditLog } = require('../../middleware/audit');
 
 // Customer routes
 router.post('/', authMiddleware, subscriptionController.createSubscription);
@@ -11,10 +12,10 @@ router.patch('/:id/resume', authMiddleware, subscriptionController.resumeSubscri
 router.patch('/:id/cancel', authMiddleware, subscriptionController.cancelSubscription);
 
 // Admin protected routes
-router.get('/', authMiddleware, isAdmin, subscriptionController.getSubscriptions);
-router.patch('/:id/status', authMiddleware, subscriptionController.toggleSubscriptionStatus);
-router.patch('/deliveries/:deliveryId', authMiddleware, subscriptionController.updateDeliveryStatus);
-router.get('/production/today', authMiddleware, isAdmin, subscriptionController.getDailyProduction);
-router.get('/manifest', authMiddleware, isAdmin, subscriptionController.getDispatchManifest);
+router.get('/', authenticateAdmin, subscriptionController.getSubscriptions);
+router.patch('/:id/status', authenticateAdmin, auditLog("Subscription"), subscriptionController.toggleSubscriptionStatus);
+router.patch('/deliveries/:deliveryId', authenticateAdmin, auditLog("Order"), subscriptionController.updateDeliveryStatus);
+router.get('/production/today', authenticateAdmin, subscriptionController.getDailyProduction);
+router.get('/manifest', authenticateAdmin, subscriptionController.getDispatchManifest);
 
 module.exports = router;

@@ -1,14 +1,15 @@
 const express = require("express");
 const router = express.Router();
 const orderController = require("./order.controller");
-const { authMiddleware, isAdmin } = require("../../middleware/auth");
+const { authMiddleware, authenticateAdmin } = require("../../middleware/auth");
+const { auditLog } = require("../../middleware/audit");
 
 // Protected
 router.post("/", authMiddleware, orderController.placeOrder);
 
 // Protected (Admin)
-router.get("/", authMiddleware, isAdmin, orderController.getOrders);
-router.patch("/:id/status", authMiddleware, isAdmin, orderController.changeStatus);
-router.get("/stats", authMiddleware, isAdmin, orderController.getDashboardStats);
+router.get("/", authenticateAdmin, orderController.getOrders);
+router.patch("/:id/status", authenticateAdmin, auditLog("Order"), orderController.changeStatus);
+router.get("/stats", authenticateAdmin, orderController.getDashboardStats);
 
 module.exports = router;
