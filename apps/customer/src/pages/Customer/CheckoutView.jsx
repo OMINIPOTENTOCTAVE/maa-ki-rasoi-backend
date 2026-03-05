@@ -22,6 +22,9 @@ export default function CheckoutView({ onBack, onSuccessComplete, planConfig }) 
     const [showSuccess, setShowSuccess] = useState(false);
     const [paymentMethod, setPaymentMethod] = useState('ONLINE');
     const [address, setAddress] = useState('');
+    const storedUser = JSON.parse(localStorage.getItem('customer_data') || '{}');
+    const [name, setName] = useState(storedUser.name || '');
+    const [phone, setPhone] = useState(storedUser.phone || '');
     const payDebounceRef = useRef(false);
 
     const mealLabel = planConfig?.mealType === 'Both' ? 'Lunch + Dinner' : (planConfig?.mealType || 'Lunch');
@@ -34,12 +37,12 @@ export default function CheckoutView({ onBack, onSuccessComplete, planConfig }) 
     const totalPayable = uiPrice + gstAmount;
 
     const getSubscriptionPayload = () => {
-        const storedUser = JSON.parse(localStorage.getItem('customer_data') || '{}');
+        const currentUser = JSON.parse(localStorage.getItem('customer_data') || '{}');
         return {
-            customerName: storedUser.name || "Customer",
-            customerPhone: storedUser.phone || "9999999999",
-            customerId: storedUser.id,
-            address: address || storedUser.address || "Address not provided",
+            customerName: name || "Customer",
+            customerPhone: phone || currentUser.phone || "9999999999",
+            customerId: currentUser.id,
+            address: address || currentUser.address || "Address not provided",
             planType: planConfig?.planType || "Monthly",
             mealType: planConfig?.mealType || "Lunch",
             dietaryPreference: DIETARY_PREFERENCE,
@@ -69,6 +72,20 @@ export default function CheckoutView({ onBack, onSuccessComplete, planConfig }) 
 
     const handlePay = useCallback(async () => {
         if (payDebounceRef.current || isProcessing) return;
+
+        if (!name || name.length < 2) {
+            alert("Please provide a valid Name.");
+            return;
+        }
+        if (!phone || phone.length < 10) {
+            alert("Please provide a 10-digit Phone Number.");
+            return;
+        }
+        if (!address || address.length < 5) {
+            alert("Please provide a complete Delivery Address.");
+            return;
+        }
+
         payDebounceRef.current = true;
         setIsProcessing(true);
         const subscriptionPayload = getSubscriptionPayload();
@@ -216,16 +233,44 @@ export default function CheckoutView({ onBack, onSuccessComplete, planConfig }) 
                     <div className="card">
                         <h4 className="text-sm font-bold uppercase tracking-widest text-text-muted mb-4 flex items-center gap-2">
                             <span className="material-symbols-outlined text-brand-orange">location_on</span>
-                            Delivery Address
+                            Delivery Details
                         </h4>
-                        <textarea
-                            value={address}
-                            onChange={(e) => setAddress(e.target.value)}
-                            className="input-field"
-                            placeholder="Enter your flat/house no, street, landmark..."
-                            rows={3}
-                        />
-                        {!address && <p className="text-[10px] text-error font-bold">* Exact address required for deliveries</p>}
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-bold text-text-main mb-2">Name</label>
+                                <input
+                                    type="text"
+                                    className="input-field"
+                                    placeholder="Your Full Name"
+                                    required
+                                    value={name}
+                                    onChange={e => setName(e.target.value)}
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-bold text-text-main mb-2">Phone Number</label>
+                                <input
+                                    type="tel"
+                                    className="input-field"
+                                    placeholder="10-digit Mobile Number"
+                                    required
+                                    maxLength={10}
+                                    value={phone}
+                                    onChange={e => setPhone(e.target.value.replace(/\D/g, ''))}
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-bold text-text-main mb-2">Address</label>
+                                <textarea
+                                    value={address}
+                                    onChange={(e) => setAddress(e.target.value)}
+                                    className="input-field"
+                                    placeholder="Enter your flat/house no, street, landmark..."
+                                    rows={3}
+                                />
+                                {!address && <p className="text-[10px] text-error font-bold mt-1">* Exact address required for deliveries</p>}
+                            </div>
+                        </div>
                     </div>
 
                     {/* Payment Section */}

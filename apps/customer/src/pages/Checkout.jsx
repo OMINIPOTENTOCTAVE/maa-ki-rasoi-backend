@@ -40,7 +40,7 @@ export default function Checkout({ cart, updateQty, clearCart }) {
                 address: storedUser.address || ''
             }));
         } catch (e) {
-            
+
         }
     }, []);
 
@@ -241,12 +241,35 @@ export default function Checkout({ cart, updateQty, clearCart }) {
                         </h3>
                         <div className="space-y-4">
                             <div>
+                                <label className="block text-sm font-bold text-text-main mb-2">Name</label>
+                                <input
+                                    type="text"
+                                    className="input-field"
+                                    placeholder="Your Full Name"
+                                    required
+                                    value={formData.name}
+                                    onChange={e => setFormData({ ...formData, name: e.target.value })}
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-bold text-text-main mb-2">Phone Number</label>
+                                <input
+                                    type="tel"
+                                    className="input-field"
+                                    placeholder="10-digit Mobile Number"
+                                    required
+                                    maxLength={10}
+                                    value={formData.phone}
+                                    onChange={e => setFormData({ ...formData, phone: e.target.value.replace(/\D/g, '') })}
+                                />
+                            </div>
+                            <div>
                                 <label className="block text-sm font-bold text-text-main mb-2">Delivery Address</label>
                                 <textarea
                                     className="input-field"
                                     placeholder="House No, Building, Street, Landmark"
                                     required
-                                    rows="4"
+                                    rows="3"
                                     value={formData.address}
                                     onChange={e => setFormData({ ...formData, address: e.target.value })}
                                 />
