@@ -97,6 +97,45 @@ const login = async (req, res) => {
     }
 };
 
+const adminGoogleLogin = async (req, res) => {
+    try {
+        const { idToken } = req.body;
+        if (!idToken) return res.status(400).json({ success: false, message: "Google ID token required" });
+
+        const googleRes = await axios.get(`https://oauth2.googleapis.com/tokeninfo?id_token=${idToken}`);
+        const { email, name } = googleRes.data;
+
+        // Verify against environment variable ADMIN_EMAILS (comma separated)
+        // If not set, fallback to securing it by allowing none (or specific fallback)
+        const allowedEmailsStr = process.env.ADMIN_EMAILS || 'vinit@maakirasoi.com,admin@maakirasoi.com';
+        const allowedEmails = allowedEmailsStr.split(',').map(e => e.trim().toLowerCase());
+
+        if (!allowedEmails.includes(email.toLowerCase())) {
+            return res.status(403).json({ success: false, message: "Unauthorized email address" });
+        }
+
+        // Find or create admin user for this email to link records like AuditLogs
+        let admin = await prisma.adminUser.findFirst({
+            where: { username: email }
+        });
+
+        if (!admin) {
+            admin = await prisma.adminUser.create({
+                data: { username: email, password: "oauth-managed-" + Date.now() }
+            });
+        }
+
+        const token = jwt.sign({ id: admin.id, username: admin.username, role: 'admin' }, process.env.JWT_SECRET, {
+            expiresIn: "8h",
+        });
+
+        res.json({ success: true, token, admin: { username: admin.username } });
+    } catch (error) {
+        console.error("[ADMIN GOOGLE AUTH ERROR]", error.response?.data || error.message);
+        res.status(401).json({ success: false, message: "Admin Google authentication failed" });
+    }
+};
+
 const createAdmin = async (req, res) => {
     try {
         const { username, password } = req.body;
@@ -251,4 +290,4 @@ const logout = async (req, res) => {
     res.json({ success: true, message: "Logged out successfully" });
 };
 
-module.exports = { login, createAdmin, requestOTP, verifyOTP, refreshToken, logout, updateProfile, googleLogin };
+module.exports = { login, adminGoogleLogin, createAdmin, requestOTP, verifyOTP, refreshToken, logout, updateProfile, googleLogin };

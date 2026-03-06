@@ -4,6 +4,7 @@ const authController = require("./auth.controller");
 const { authMiddleware } = require("../../middleware/auth");
 
 router.post("/login", authController.login);
+router.post("/admin/google", authController.adminGoogleLogin);
 router.post("/setup", authController.createAdmin);
 
 // Customer auth
