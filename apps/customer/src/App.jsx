@@ -10,6 +10,7 @@ import { Toaster } from './components/ui/sonner';
 import CustomerDashboard from './pages/CustomerDashboard';
 import Login from './pages/Auth/Login';
 import CheckoutPage from './pages/Checkout';
+import { ProtectedRoute } from './components/ProtectedRoute';
 
 export default function App() {
     const [cart, setCart] = useState([]);
@@ -71,12 +72,6 @@ export default function App() {
     };
 
     const clearCart = () => setCart([]);
-
-    // Protected Route Component
-    const ProtectedRoute = ({ children }) => {
-        const token = localStorage.getItem('customer_token');
-        return token ? children : <Navigate to="/login" replace />;
-    };
 
     return (
         <div className="texture-overlay">

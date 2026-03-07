@@ -3,46 +3,62 @@ const jwt = require("jsonwebtoken");
 const axios = require("axios");
 const prisma = require("../../prisma");
 const authService = require("./auth.service");
+const admin = require("firebase-admin");
 
-const googleLogin = async (req, res) => {
+if (!admin.apps.length) {
+    admin.initializeApp({
+        credential: admin.credential.applicationDefault()
+    });
+}
+const firebaseLogin = async (req, res) => {
     try {
         const { idToken } = req.body;
         if (!idToken) {
-            return res.status(400).json({ success: false, message: "Google ID token is required" });
+            return res.status(400).json({ success: false, message: "Firebase ID token is required" });
         }
 
-        // Verify the Firebase ID token with Google
-        const googleRes = await axios.get(`https://oauth2.googleapis.com/tokeninfo?id_token=${idToken}`);
-        const { sub: googleId, email, name, picture } = googleRes.data;
-
-        if (!googleId || !email) {
-            return res.status(401).json({ success: false, message: "Invalid Google token" });
+        // Verify the Firebase ID token
+        let decodedToken;
+        try {
+            decodedToken = await admin.auth().verifyIdToken(idToken);
+        } catch (err) {
+            console.error(err);
+            return res.status(401).json({ success: false, message: "Invalid Firebase token" });
         }
 
-        // Find existing customer by googleId or email
+        const { uid, email, name, picture, phone_number } = decodedToken;
+
+        // Find existing customer by firebaseUid, email, or phone
         let customer = await prisma.customer.findFirst({
             where: {
                 OR: [
-                    { googleId },
-                    { email }
+                    { firebaseUid: uid },
+                    ...(email ? [{ email }] : []),
+                    ...(phone_number ? [{ phone: phone_number }] : [])
                 ]
             }
         });
 
         if (!customer) {
-            // Create new customer from Google profile
+            // Create new customer
             customer = await prisma.customer.create({
                 data: {
-                    googleId,
-                    email,
-                    name: name || "Customer",
+                    firebaseUid: uid,
+                    email: email || null,
+                    phone: phone_number || null,
+                    name: name || email || phone_number || "Customer",
                 }
             });
-        } else if (!customer.googleId) {
-            // Link Google account to existing email-based customer
+        } else {
+            // Link account if needed
             customer = await prisma.customer.update({
                 where: { id: customer.id },
-                data: { googleId, name: customer.name || name }
+                data: {
+                    firebaseUid: uid,
+                    email: customer.email || email,
+                    name: customer.name || name,
+                    phone: customer.phone || phone_number
+                }
             });
         }
 
@@ -68,8 +84,8 @@ const googleLogin = async (req, res) => {
 
         res.json({ success: true, token: accessToken, customer });
     } catch (error) {
-        console.error("[GOOGLE AUTH ERROR]", error.response?.data || error.message);
-        res.status(401).json({ success: false, message: "Google authentication failed" });
+        console.error("[FIREBASE AUTH ERROR]", error.message);
+        res.status(500).json({ success: false, message: "Firebase authentication failed" });
     }
 };
 
@@ -290,4 +306,4 @@ const logout = async (req, res) => {
     res.json({ success: true, message: "Logged out successfully" });
 };
 
-module.exports = { login, adminGoogleLogin, createAdmin, requestOTP, verifyOTP, refreshToken, logout, updateProfile, googleLogin };
+module.exports = { login, adminGoogleLogin, createAdmin, requestOTP, verifyOTP, refreshToken, logout, updateProfile, firebaseLogin };

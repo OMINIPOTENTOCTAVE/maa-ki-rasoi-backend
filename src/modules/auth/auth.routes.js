@@ -11,7 +11,7 @@ router.post("/setup", authController.createAdmin);
 router.post("/otp/request", authController.requestOTP);
 router.post("/otp/verify", authController.verifyOTP);
 router.post("/otp/logout", authController.logout);
-router.post("/google", authController.googleLogin);
+router.post("/firebase", authController.firebaseLogin);
 router.patch("/profile", authMiddleware, authController.updateProfile);
 
 module.exports = router;

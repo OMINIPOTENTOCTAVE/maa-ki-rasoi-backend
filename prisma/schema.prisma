@@ -98,6 +98,7 @@ model Customer {
   phone         String?        @unique
   email         String?        @unique
   googleId      String?        @unique
+  firebaseUid   String?        @unique
   name          String?
   address       String?
   tokenVersion  Int            @default(0)

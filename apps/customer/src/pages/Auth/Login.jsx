@@ -1,47 +1,71 @@
-import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import { auth, googleProvider } from '../../config/firebase';
-import { signInWithPopup } from 'firebase/auth';
+import { useAuthContext } from '../../contexts/AuthContext';
+import { useEffect, useState } from 'react';
 
 export default function Login() {
     const navigate = useNavigate();
+    const { signInWithGoogle, signInWithPhone, verifyOtp, user, authToken } = useAuthContext();
     const [googleLoading, setGoogleLoading] = useState(false);
+    const [phoneLoading, setPhoneLoading] = useState(false);
+    const [otpLoading, setOtpLoading] = useState(false);
+    const [phone, setPhone] = useState('');
+    const [otp, setOtp] = useState('');
+    const [isOtpSent, setIsOtpSent] = useState(false);
     const [errorMsg, setErrorMsg] = useState('');
+
+    useEffect(() => {
+        if (user && authToken) {
+            navigate('/dashboard');
+        }
+    }, [user, authToken, navigate]);
 
     const handleGoogleLogin = async () => {
         setErrorMsg('');
         setGoogleLoading(true);
         try {
-            const result = await signInWithPopup(auth, googleProvider);
-            const idToken = await result.user.getIdToken();
-
-            const res = await axios.post('/auth/google', { idToken });
-            if (res.data.success) {
-                localStorage.setItem('customer_token', res.data.token);
-                localStorage.setItem('customer_data', JSON.stringify(res.data.customer));
-                axios.defaults.headers.common['Authorization'] = `Bearer ${res.data.token}`;
-                navigate('/');
-            }
+            await signInWithGoogle();
         } catch (err) {
-            if (err.code === 'auth/popup-closed-by-user') {
-                return;
-            }
-            console.error('[GOOGLE AUTH ERROR]', err.code, err.message);
-            const firebaseErrors = {
-                'auth/unauthorized-domain': 'This domain is not authorized for sign-in. Contact support.',
-                'auth/operation-not-allowed': 'Google Sign-In is not enabled. Contact support.',
-                'auth/popup-blocked': 'Popup was blocked. Please allow popups and try again.',
-                'auth/network-request-failed': 'Network error. Check your connection and try again.',
-                'auth/internal-error': 'An internal error occurred. Try again in a moment.',
-                'auth/cancelled-popup-request': 'Sign-in cancelled. Please try again.',
-            };
-            const message = firebaseErrors[err.code]
-                || err.response?.data?.message
-                || `Sign-in failed (${err.code || 'unknown'}). Try again.`;
-            setErrorMsg(message);
+            setErrorMsg(err.message || 'Google sign-in failed. Try again.');
         } finally {
             setGoogleLoading(false);
+        }
+    };
+
+    const handlePhoneSubmit = async (e) => {
+        e.preventDefault();
+        setErrorMsg('');
+        if (!phone || phone.length < 10) {
+            setErrorMsg('Please enter a valid phone number.');
+            return;
+        }
+
+        setPhoneLoading(true);
+        try {
+            const phoneNumber = phone.length === 10 ? `+91${phone}` : phone;
+            await signInWithPhone(phoneNumber, 'request-otp-btn');
+            setIsOtpSent(true);
+        } catch (err) {
+            setErrorMsg(err.message || 'Failed to send OTP. Try again.');
+        } finally {
+            setPhoneLoading(false);
+        }
+    };
+
+    const handleOtpSubmit = async (e) => {
+        e.preventDefault();
+        setErrorMsg('');
+        if (!otp || otp.length < 6) {
+            setErrorMsg('Please enter a valid OTP.');
+            return;
+        }
+
+        setOtpLoading(true);
+        try {
+            await verifyOtp(otp);
+        } catch (err) {
+            setErrorMsg(err.message || 'Invalid OTP. Try again.');
+        } finally {
+            setOtpLoading(false);
         }
     };
 
@@ -52,13 +76,13 @@ export default function Login() {
                 <div className="w-full flex items-center justify-between mb-8">
                     <button
                         onClick={() => navigate('/')}
-                        className="p-2 -ml-2 rounded-full hover:bg-transparent text-primary transition-colors flex items-center gap-2"
+                        className="p-2 -ml-2 rounded-full hover:bg-transparent transition-colors flex items-center gap-2"
                         title="Back to Home"
                     >
-                        <span className="material-symbols-outlined text-xl">arrow_back</span>
+                        <span className="text-[#C8550A] text-xl">← Back</span>
                     </button>
                     <div className="text-right">
-                        <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Secure Login</span>
+                        <span className="text-xs font-bold uppercase tracking-widest text-[#2D2418]/60">Secure Login</span>
                     </div>
                 </div>
 
@@ -103,6 +127,52 @@ export default function Login() {
                         </>
                     )}
                 </button>
+
+                <div className="relative flex items-center py-5 w-full">
+                    <div className="flex-grow border-t border-border"></div>
+                    <span className="flex-shrink-0 mx-4 text-muted-foreground text-sm font-medium">Or</span>
+                    <div className="flex-grow border-t border-border"></div>
+                </div>
+
+                {!isOtpSent ? (
+                    <form onSubmit={handlePhoneSubmit} className="w-full space-y-4 mb-4">
+                        <input
+                            type="tel"
+                            placeholder="Mobile Number (e.g. 9876543210)"
+                            value={phone}
+                            onChange={(e) => setPhone(e.target.value)}
+                            className="w-full px-4 py-4 rounded-xl border border-border bg-white text-foreground focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
+                            disabled={phoneLoading}
+                        />
+                        <button
+                            id="request-otp-btn"
+                            type="submit"
+                            disabled={phoneLoading || !phone}
+                            className="w-full bg-[#C8550A] text-white font-bold py-4 px-6 rounded-xl hover:bg-[#C8550A]/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            {phoneLoading ? 'Sending OTP...' : 'Login with Mobile'}
+                        </button>
+                    </form>
+                ) : (
+                    <form onSubmit={handleOtpSubmit} className="w-full space-y-4 mb-4">
+                        <input
+                            type="text"
+                            placeholder="Enter 6-digit OTP"
+                            value={otp}
+                            onChange={(e) => setOtp(e.target.value)}
+                            className="w-full px-4 py-4 rounded-xl border border-border bg-white text-foreground focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all text-center tracking-widest text-lg font-bold"
+                            disabled={otpLoading}
+                            maxLength={6}
+                        />
+                        <button
+                            type="submit"
+                            disabled={otpLoading || !otp}
+                            className="w-full bg-[#C8550A] text-white font-bold py-4 px-6 rounded-xl hover:bg-[#C8550A]/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            {otpLoading ? 'Verifying...' : 'Verify OTP'}
+                        </button>
+                    </form>
+                )}
 
                 <div className="mt-4 text-center space-y-4 w-full">
                     <button
