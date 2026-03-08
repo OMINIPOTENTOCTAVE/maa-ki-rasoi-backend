@@ -107,5 +107,3 @@ export default function HomeView({ subscriptions = [], onManageClick, onExploreC
         </div>
     );
 }
-
-

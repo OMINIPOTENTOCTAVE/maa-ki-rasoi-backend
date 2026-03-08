@@ -187,6 +187,15 @@ const requestOTP = async (req, res) => {
 
         try {
             const result = await authService.sendSMS(phone, otp);
+
+            // Send WhatsApp Mock OTP
+            try {
+                const whatsappService = require('../system/whatsapp.service');
+                await whatsappService.sendOTP(phone, otp);
+            } catch (waError) {
+                console.warn("[WHATSAPP MOCK ERROR]", waError.message);
+            }
+
             res.json({ success: true, message: "OTP sent successfully", ...result });
         } catch (error) {
             res.status(500).json({ success: false, message: error.message });
