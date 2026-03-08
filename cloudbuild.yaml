@@ -48,8 +48,8 @@ steps:
       - '--max-instances=10'
       - '--memory=512Mi'
       - '--cpu=1'
-      - '--port=8080'
-      - '--set-secrets=DATABASE_URL=DATABASE_URL:latest,JWT_SECRET=JWT_SECRET:latest,FAST2SMS_API_KEY=FAST2SMS_API_KEY:latest,RAZORPAY_KEY_ID=RAZORPAY_KEY_ID:latest,RAZORPAY_KEY_SECRET=RAZORPAY_KEY_SECRET:latest,CORS_ORIGIN=CORS_ORIGIN:latest'
+      - '--set-secrets=DATABASE_URL=DATABASE_URL:latest,JWT_SECRET=JWT_SECRET:latest,FAST2SMS_API_KEY=FAST2SMS_API_KEY:latest,RAZORPAY_KEY_ID=RAZORPAY_KEY_ID:latest,RAZORPAY_KEY_SECRET=RAZORPAY_KEY_SECRET:latest,CORS_ORIGIN=CORS_ORIGIN:latest,ADMIN_EMAILS=ADMIN_EMAILS:latest'
+      - '--set-env-vars=NODE_ENV=production,PORT=8080'
     waitFor: ['push-image']
 
   # ── FRONTEND: CUSTOMER ───────────────────────────────────────────────────
@@ -62,7 +62,14 @@ steps:
       - -c
       - 'cd apps/customer && npm ci && npm run build'
     env:
-      - 'VITE_API_URL=https://${_SERVICE}-${_PROJECT_ID}.run.app'
+      - 'VITE_API_URL=https://maakirasoi-api-213402009735.asia-south1.run.app'
+      - 'VITE_FIREBASE_API_KEY=AIzaSyDoPY3tC3pbC4CudtxE9F9Sa_QO3iwzI2E'
+      - 'VITE_FIREBASE_AUTH_DOMAIN=maa-ki-rasoi-app-2026.firebaseapp.com'
+      - 'VITE_FIREBASE_PROJECT_ID=maa-ki-rasoi-app-2026'
+      - 'VITE_FIREBASE_STORAGE_BUCKET=maa-ki-rasoi-app-2026.firebasestorage.app'
+      - 'VITE_FIREBASE_MESSAGING_SENDER_ID=213402009735'
+      - 'VITE_FIREBASE_APP_ID=1:213402009735:web:177f103c36119db6063822'
+      - 'VITE_RAZORPAY_KEY_ID=rzp_live_SNV09guKii08AS'
     waitFor: ['-']  # Run in parallel with backend
 
   # Step 5: Deploy customer to Firebase
@@ -85,7 +92,13 @@ steps:
       - -c
       - 'cd apps/admin && npm ci && npm run build'
     env:
-      - 'VITE_API_URL=https://${_SERVICE}-${_PROJECT_ID}.run.app'
+      - 'VITE_API_URL=https://maakirasoi-api-213402009735.asia-south1.run.app'
+      - 'VITE_FIREBASE_API_KEY=AIzaSyDoPY3tC3pbC4CudtxE9F9Sa_QO3iwzI2E'
+      - 'VITE_FIREBASE_AUTH_DOMAIN=maa-ki-rasoi-app-2026.firebaseapp.com'
+      - 'VITE_FIREBASE_PROJECT_ID=maa-ki-rasoi-app-2026'
+      - 'VITE_FIREBASE_STORAGE_BUCKET=maa-ki-rasoi-app-2026.firebasestorage.app'
+      - 'VITE_FIREBASE_MESSAGING_SENDER_ID=213402009735'
+      - 'VITE_FIREBASE_APP_ID=1:213402009735:web:177f103c36119db6063822'
     waitFor: ['-']
 
   # Step 7: Deploy admin to Firebase
@@ -108,7 +121,13 @@ steps:
       - -c
       - 'cd apps/delivery && npm ci && npm run build'
     env:
-      - 'VITE_API_URL=https://${_SERVICE}-${_PROJECT_ID}.run.app'
+      - 'VITE_API_URL=https://maakirasoi-api-213402009735.asia-south1.run.app'
+      - 'VITE_FIREBASE_API_KEY=AIzaSyDoPY3tC3pbC4CudtxE9F9Sa_QO3iwzI2E'
+      - 'VITE_FIREBASE_AUTH_DOMAIN=maa-ki-rasoi-app-2026.firebaseapp.com'
+      - 'VITE_FIREBASE_PROJECT_ID=maa-ki-rasoi-app-2026'
+      - 'VITE_FIREBASE_STORAGE_BUCKET=maa-ki-rasoi-app-2026.firebasestorage.app'
+      - 'VITE_FIREBASE_MESSAGING_SENDER_ID=213402009735'
+      - 'VITE_FIREBASE_APP_ID=1:213402009735:web:177f103c36119db6063822'
     waitFor: ['-']
 
   # Step 9: Deploy delivery to Firebase
