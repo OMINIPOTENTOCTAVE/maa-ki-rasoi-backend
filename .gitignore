@@ -2,9 +2,10 @@
 node_modules
 
 # Environment
-.env
+.env*
 .env.local
-.env.*.local
+.env.production
+.env.development
 
 # Prisma generated
 /src/generated/prisma
