@@ -15,10 +15,11 @@ async function generateOrdersForNextDelivery() {
 
     // 1. Validate a menu was published
     const dailyMenu = await prisma.dailyMenu.findUnique({
-        where: { date: targetDate }
+        where: { date: targetDate },
+        include: { item1: true }
     });
 
-    if (!dailyMenu || dailyMenu.status !== 'PUBLISHED') {
+    if (!dailyMenu || dailyMenu.status !== 'PUBLISHED' || !dailyMenu.item1) {
         console.error(`[ORDER-CRON] FATAL: No PUBLISHED menu found for ${targetDate.toISOString()}. Skipping. Admin action required.`);
         return;
     }

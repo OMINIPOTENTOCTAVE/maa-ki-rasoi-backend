@@ -169,4 +169,77 @@ const processRefund = async (req, res, next) => {
     }
 };
 
-module.exports = { createOrder, verifyPayment, processRefund };
+const handleRazorpayWebhook = async (req, res, next) => {
+    try {
+        const secret = process.env.RAZORPAY_WEBHOOK_SECRET || 'mkrwebhooksecret2026';
+        const signature = req.headers['x-razorpay-signature'];
+        const body = req.body;
+
+        // Verify authenticity
+        const expectedSignature = crypto.createHmac('sha256', secret)
+            .update(JSON.stringify(body))
+            .digest('hex');
+
+        if (expectedSignature !== signature && process.env.NODE_ENV === 'production') {
+            return res.status(400).json({ success: false, message: 'Invalid webhook signature' });
+        }
+
+        const event = body.event;
+        const paymentEntity = body.payload.payment.entity;
+        const orderId = paymentEntity.order_id;
+        const paymentId = paymentEntity.id;
+
+        // The single source of truth for payment success
+        if (event === 'payment.captured') {
+            // First, check if this Razorpay Order ID belongs to an Instant Order
+            let order = await prisma.order.findFirst({ where: { razorpayOrderId: orderId } });
+
+            if (order && order.paymentStatus !== 'Paid') {
+                await prisma.order.update({
+                    where: { id: order.id },
+                    data: {
+                        paymentStatus: 'Paid',
+                        status: 'Pending', // Release to kitchen display
+                        confirmedAt: new Date(),
+                        paymentMethod: 'ONLINE',
+                        razorpayPaymentId: paymentId
+                    }
+                });
+                console.log(`[WEBHOOK] Verified instant order ${order.id}`);
+                return res.json({ status: "ok" });
+            }
+
+            // Next, check if it belongs to a Subscription
+            let sub = await prisma.subscription.findFirst({ where: { razorpayOrderId: orderId } });
+
+            if (sub && sub.paymentStatus !== 'Paid') {
+                const updateData = {
+                    securityDepositPaid: true,
+                    status: 'Active',
+                    razorpayPaymentId: paymentId
+                };
+
+                // If it isn't COD, flip the actual payment status too
+                if (sub.paymentMethod !== 'COD') {
+                    updateData.paymentStatus = 'Paid';
+                    updateData.paymentMethod = 'ONLINE';
+                }
+
+                await prisma.subscription.update({
+                    where: { id: sub.id },
+                    data: updateData
+                });
+                console.log(`[WEBHOOK] Activated subscription ${sub.id}`);
+                return res.json({ status: "ok" });
+            }
+        }
+
+        // Always return 200 OK so Razorpay doesn't aggressively retry on irrelevant events
+        res.status(200).json({ status: "ignored" });
+    } catch (error) {
+        console.error('[WEBHOOK ERROR]', error);
+        res.status(500).json({ success: false, message: 'Internal Server Error' });
+    }
+};
+
+module.exports = { createOrder, verifyPayment, processRefund, handleRazorpayWebhook };

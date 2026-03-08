@@ -1,5 +1,29 @@
 const prisma = require("../../prisma");
+const { generateOrdersForNextDelivery } = require("./order.generator");
 
+const executeNightlyCronWebhook = async (req, res) => {
+    const CRON_SECRET = process.env.CRON_SECRET || "local-dev-secret-key-for-cron";
+    const token = req.headers['x-cron-secret'];
+
+    if (!token || token !== CRON_SECRET) {
+        console.warn('Unauthorized cron attempt from IP:', req.ip);
+        return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    console.log('[CRON] Order generation triggered via Webhook at', new Date().toISOString());
+
+    try {
+        // Respond IMMEDIATELY — Cloud Scheduler has a timeout
+        res.status(202).json({ message: 'Order generation started.' });
+
+        // Heavy work asynchronously
+        await generateOrdersForNextDelivery();
+
+        console.log('[CRON] Order generation via Webhook complete.');
+    } catch (err) {
+        console.error('[CRON] Order generation via Webhook failed:', err);
+    }
+};
 const placeOrder = async (req, res) => {
     try {
         const { customerName, customerPhone, customerId, address, dailyMenuId, quantity = 1, paymentMethod, deliveryZoneId = "ZONE_1", mealSlot = "LUNCH" } = req.body;
@@ -43,13 +67,14 @@ const placeOrder = async (req, res) => {
                 deliveryType: 'IN_HOUSE',
                 deliveryZoneId,
                 mealSlot,
-                // We fake an OrderItem so legacy queries don't break if they count items, 
-                // but strictly we map via dailyMenuId now.
+                // Snapshot core menu proxy explicitly
                 items: {
                     create: [{
-                        menuItemId: dailyMenu.item1Id, // Represents the core menu proxy
+                        menuItemId: dailyMenu.item1Id,
+                        menuItemName: "Daily Thali Snapshot",
                         quantity,
-                        price: 100
+                        price: 100,
+                        snapshotPrice: 100
                     }]
                 }
             }
@@ -154,4 +179,4 @@ const getDashboardStats = async (req, res) => {
     }
 }
 
-module.exports = { placeOrder, getOrders, changeStatus, getDashboardStats };
+module.exports = { placeOrder, getOrders, changeStatus, getDashboardStats, executeNightlyCronWebhook };

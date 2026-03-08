@@ -13,4 +13,7 @@ router.post('/verify', authMiddleware, paymentController.verifyPayment);
 // Admin Action: Process Refund via Razorpay Gateway
 router.post('/admin/refund', authenticateAdmin, auditLog("PaymentRefund"), paymentController.processRefund);
 
+// Razorpay Asynchronous Webhook Receiver
+router.post('/webhook', paymentController.handleRazorpayWebhook);
+
 module.exports = router;

@@ -87,8 +87,10 @@ model OrderItem {
   id         String   @id @default(uuid())
   orderId    String
   menuItemId String
+  menuItemName String
   quantity   Int
   price      Float
+  snapshotPrice Float
   menuItem   MenuItem @relation(fields: [menuItemId], references: [id])
   order      Order    @relation(fields: [orderId], references: [id])
 }

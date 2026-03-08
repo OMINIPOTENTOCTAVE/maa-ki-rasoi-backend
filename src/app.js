@@ -19,6 +19,12 @@ const systemRoutes = require("./modules/system/system.routes");
 const app = express();
 
 // Security and Hardening
+app.use((req, res, next) => {
+  if (req.app.get('isShuttingDown')) {
+    return res.status(503).json({ error: 'Server is shutting down. Please retry.' });
+  }
+  next();
+});
 app.use(helmet());
 
 // CORS: Support multiple frontend origins (comma-separated in CORS_ORIGIN)

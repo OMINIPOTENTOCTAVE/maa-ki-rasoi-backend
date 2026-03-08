@@ -12,4 +12,7 @@ router.get("/", authenticateAdmin, orderController.getOrders);
 router.patch("/:id/status", authenticateAdmin, auditLog("Order"), orderController.changeStatus);
 router.get("/stats", authenticateAdmin, orderController.getDashboardStats);
 
+// Cloud Scheduler Webhook (Auth via Secret Header in Controller)
+router.post("/cron/generate-orders", orderController.executeNightlyCronWebhook);
+
 module.exports = router;
