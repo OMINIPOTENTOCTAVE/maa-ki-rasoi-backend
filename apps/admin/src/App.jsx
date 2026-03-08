@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 
 import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
+import DesignSystem from './pages/DesignSystem';
 import axios from 'axios';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
@@ -25,6 +26,7 @@ function App() {
                         <main className="w-full max-w-sm"><AdminLogin /></main>
                     </div>
                 } />
+                <Route path="/admin/design-system" element={<DesignSystem />} />
                 <Route path="/admin/*" element={<AdminDashboard />} />
                 <Route path="*" element={<Navigate to="/admin" replace />} />
             </Routes>
