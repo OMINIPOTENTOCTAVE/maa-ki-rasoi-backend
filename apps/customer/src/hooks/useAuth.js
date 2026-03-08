@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { onAuthStateChanged, signInWithPopup, signInWithPhoneNumber, RecaptchaVerifier, signOut as firebaseSignOut } from 'firebase/auth';
+import { onAuthStateChanged, signInWithPopup, signOut as firebaseSignOut } from 'firebase/auth';
 import { auth, googleProvider } from '../config/firebase';
 import { toast } from 'sonner';
 
@@ -8,17 +8,6 @@ export function useAuth() {
     const [authToken, setAuthToken] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    // Initialize Recaptcha (only called if phone auth is used)
-    const setupRecaptcha = (buttonId) => {
-        if (!window.recaptchaVerifier) {
-            window.recaptchaVerifier = new RecaptchaVerifier(auth, buttonId, {
-                size: 'invisible',
-                callback: () => {
-                    // reCAPTCHA solved
-                }
-            });
-        }
-    };
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
@@ -83,32 +72,51 @@ export function useAuth() {
 
     const signInWithPhone = async (phoneNumber, buttonId) => {
         try {
-            setupRecaptcha(buttonId);
-            const appVerifier = window.recaptchaVerifier;
-            const confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, appVerifier);
-            window.confirmationResult = confirmationResult;
+            setLoading(true);
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/otp/request`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phone: phoneNumber })
+            });
+
+            if (!res.ok) throw new Error("Failed to send OTP");
+            window.pendingPhoneNumber = phoneNumber;
             return true;
         } catch (error) {
             console.error("Phone sign-in error:", error);
             toast.error('Failed to send OTP. Try again.');
-            if (window.recaptchaVerifier) {
-                window.recaptchaVerifier.clear();
-                window.recaptchaVerifier = null;
-            }
             throw error;
+        } finally {
+            setLoading(false);
         }
     };
 
     const verifyOtp = async (otp) => {
         try {
-            const confirmationResult = window.confirmationResult;
-            await confirmationResult.confirm(otp);
-            // onAuthStateChanged takes over
+            setLoading(true);
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/otp/verify`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phone: window.pendingPhoneNumber, otp }),
+                credentials: 'include'
+            });
+
+            if (!res.ok) {
+                const errorText = await res.text();
+                throw new Error(`Failed to verify OTP`);
+            }
+
+            const data = await res.json();
+            setUser(data.customer);
+            setAuthToken(data.token);
+            localStorage.setItem('customer_token', data.token);
             return true;
         } catch (error) {
             console.error("OTP verification error:", error);
             toast.error('Invalid OTP. Please try again.');
             throw error;
+        } finally {
+            setLoading(false);
         }
     };
 
