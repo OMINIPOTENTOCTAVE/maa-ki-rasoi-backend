@@ -10,6 +10,7 @@ router.post("/", authMiddleware, orderController.placeOrder);
 // Protected (Admin)
 router.get("/", authenticateAdmin, orderController.getOrders);
 router.patch("/:id/status", authenticateAdmin, auditLog("Order"), orderController.changeStatus);
+router.patch("/:id/assign", authenticateAdmin, auditLog("OrderAssign"), orderController.assignDeliveryPartner);
 router.get("/stats", authenticateAdmin, orderController.getDashboardStats);
 
 // Cloud Scheduler Webhook (Auth via Secret Header in Controller)

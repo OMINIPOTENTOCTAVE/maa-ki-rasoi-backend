@@ -63,6 +63,8 @@ const placeOrder = async (req, res) => {
                 paymentMethod: paymentMethod || 'COD',
                 paymentStatus: 'Pending',
                 totalAmount,
+                menuItemName: "Daily Thali Snapshot",
+                snapshotPrice: 100,
                 status: isOnline ? "Payment Pending" : "Pending", // Pending pushes to kitchen display instantly
                 deliveryType: 'IN_HOUSE',
                 deliveryZoneId,
@@ -179,4 +181,58 @@ const getDashboardStats = async (req, res) => {
     }
 }
 
-module.exports = { placeOrder, getOrders, changeStatus, getDashboardStats, executeNightlyCronWebhook };
+const assignDeliveryPartner = async (req, res) => {
+    const { id } = req.params;
+    const { deliveryPartnerId } = req.body;
+
+    if (!deliveryPartnerId) {
+        return res.status(400).json({ success: false, message: 'deliveryPartnerId is required.' });
+    }
+
+    try {
+        const partner = await prisma.deliveryPartner.findUnique({
+            where: { id: deliveryPartnerId },
+        });
+
+        if (!partner || partner.status !== 'Active') {
+            return res.status(404).json({ success: false, message: 'Delivery partner not found or inactive.' });
+        }
+
+        const order = await prisma.order.findUnique({
+            where: { id },
+        });
+
+        if (!order) {
+            return res.status(404).json({ success: false, message: 'Order not found.' });
+        }
+
+        if (!['Pending', 'Assigned'].includes(order.status)) {
+            return res.status(409).json({
+                success: false, message: `Cannot assign order in status: ${order.status}.`,
+            });
+        }
+
+        const updated = await prisma.order.update({
+            where: { id },
+            data: {
+                deliveryPartnerId,
+                status: 'Assigned',
+                assignedAt: new Date(),
+            },
+        });
+
+        console.log(`[ASSIGN] Order ${id} assigned to partner ${deliveryPartnerId}`);
+
+        return res.status(200).json({
+            success: true,
+            message: 'Delivery partner assigned successfully.',
+            data: updated,
+        });
+
+    } catch (err) {
+        console.error('[ASSIGN] Error:', err);
+        return res.status(500).json({ success: false, message: 'Internal server error.' });
+    }
+};
+
+module.exports = { placeOrder, getOrders, changeStatus, getDashboardStats, executeNightlyCronWebhook, assignDeliveryPartner };

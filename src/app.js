@@ -36,6 +36,10 @@ app.use(cors({
   origin: allowedOrigins || "*",
   credentials: true
 }));
+
+// Route for Razorpay Webhook using raw body for signature verification
+app.use('/payments/webhook', express.raw({ type: 'application/json' }));
+
 app.use(express.json({ limit: "1mb" })); // Prevent large payload attacks
 app.use(cookieParser());
 

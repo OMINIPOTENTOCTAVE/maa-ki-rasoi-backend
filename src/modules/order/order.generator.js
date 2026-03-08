@@ -63,6 +63,8 @@ async function generateOrdersForNextDelivery() {
                 customerPhone: sub.customer.phone || '',
                 address: sub.customer.address || '',
                 totalAmount: 100, // Fixed 100 INR Rule 2
+                menuItemName: dailyMenu.item1.name, // SNAPSHOT — frozen at this moment
+                snapshotPrice: dailyMenu.item1.price, // SNAPSHOT — frozen at this moment
                 status: 'Pending', // Spawns directly onto the Kitchen Display
                 customerId: sub.customerId,
                 subscriptionId: sub.id,

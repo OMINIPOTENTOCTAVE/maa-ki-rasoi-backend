@@ -57,6 +57,9 @@ model Order {
   totalAmount       Float
   status            String           @default("Pending")
   createdAt         DateTime         @default(now())
+  menuItemName      String?
+  snapshotPrice     Float?
+  assignedAt        DateTime?
   customerId        String?
   deliveryPartnerId String?
   dailyMenuId       String?

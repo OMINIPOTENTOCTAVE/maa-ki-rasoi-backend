@@ -105,7 +105,7 @@ const verifyPayment = async (req, res, next) => {
                             where: { id: referenceId },
                             data: {
                                 securityDepositPaid: true,
-                                status: 'Active',
+                                status: 'Active', // COD deposit activates synchronously
                                 razorpayPaymentId: razorpay_payment_id
                             }
                         });
@@ -116,7 +116,7 @@ const verifyPayment = async (req, res, next) => {
                             data: {
                                 paymentStatus: 'Paid',
                                 securityDepositPaid: true,
-                                status: 'Active',
+                                // status: 'Active' removed — handled by webhook source of truth
                                 paymentMethod: 'ONLINE',
                                 razorpayPaymentId: razorpay_payment_id
                             }
@@ -173,17 +173,34 @@ const handleRazorpayWebhook = async (req, res, next) => {
     try {
         const secret = process.env.RAZORPAY_WEBHOOK_SECRET || 'mkrwebhooksecret2026';
         const signature = req.headers['x-razorpay-signature'];
-        const body = req.body;
+        const rawBody = req.body; // express.raw makes this a Buffer
 
-        // Verify authenticity
+        if (!signature || !rawBody) {
+            return res.status(400).json({ error: 'Missing signature or body' });
+        }
+
+        // Verify authenticity using raw buffer
         const expectedSignature = crypto.createHmac('sha256', secret)
-            .update(JSON.stringify(body))
+            .update(rawBody)
             .digest('hex');
 
-        if (expectedSignature !== signature && process.env.NODE_ENV === 'production') {
+        // Secure timeline-safe evaluation
+        let isValid = false;
+        try {
+            isValid = crypto.timingSafeEqual(
+                Buffer.from(expectedSignature),
+                Buffer.from(signature)
+            );
+        } catch (e) {
+            isValid = false;
+        }
+
+        if (!isValid && process.env.NODE_ENV === 'production') {
+            console.warn('[WEBHOOK] Invalid Razorpay signature. Rejected.');
             return res.status(400).json({ success: false, message: 'Invalid webhook signature' });
         }
 
+        const body = JSON.parse(rawBody.toString('utf8'));
         const event = body.event;
         const paymentEntity = body.payload.payment.entity;
         const orderId = paymentEntity.order_id;
@@ -232,6 +249,21 @@ const handleRazorpayWebhook = async (req, res, next) => {
                 console.log(`[WEBHOOK] Activated subscription ${sub.id}`);
                 return res.json({ status: "ok" });
             }
+        } else if (event === 'payment.failed') {
+            const orderId = paymentEntity.order_id;
+
+            await prisma.subscription.updateMany({
+                where: { razorpayOrderId: orderId },
+                data: {
+                    paymentStatus: 'Failed',
+                    status: 'PaymentFailed',
+                },
+            });
+
+            console.log(`[WEBHOOK] Payment failed for order: ${orderId}`);
+        } else if (event === 'subscription.cancelled') {
+            // Added for safety
+            console.log(`[WEBHOOK] Razorpay Subscription cancelled event safely ignored in MKR logic.`);
         }
 
         // Always return 200 OK so Razorpay doesn't aggressively retry on irrelevant events
