@@ -118,16 +118,42 @@ const adminGoogleLogin = async (req, res) => {
         const { idToken } = req.body;
         if (!idToken) return res.status(400).json({ success: false, message: "Google ID token required" });
 
-        const googleRes = await axios.get(`https://oauth2.googleapis.com/tokeninfo?id_token=${idToken}`);
-        const { email, name } = googleRes.data;
+        // Log for debugging
+        console.log(`[ADMIN LOGIN ATTEMPT] Received ID Token. Length: ${idToken.length}`);
+
+        // Verify the Firebase ID token
+        let decodedToken;
+        try {
+            decodedToken = await admin.auth().verifyIdToken(idToken);
+        } catch (err) {
+            console.error("[FIREBASE ADMIN VERIFY FAIL]", err.message);
+
+            // DEV FALLBACK: If service account is missing and we're in dev, 
+            // at least check if the token payload matches an authorized email.
+            if (process.env.NODE_ENV === 'development') {
+                console.warn("[DEV MODE] Verification failed, attempting payload fallback...");
+                const payload = jwt.decode(idToken);
+                if (payload && payload.email) {
+                    console.log(`[DEV MODE] Decoded email from payload: ${payload.email}`);
+                    decodedToken = payload;
+                } else {
+                    return res.status(401).json({ success: false, message: "Invalid Admin token and payload decode failed." });
+                }
+            } else {
+                return res.status(401).json({ success: false, message: "Invalid Admin token or service account not configured." });
+            }
+        }
+
+        const { email, name } = decodedToken;
+        console.log(`[ADMIN AUTH SUCCESS] Email decoded: ${email}`);
 
         // Verify against environment variable ADMIN_EMAILS (comma separated)
-        // If not set, fallback to securing it by allowing none (or specific fallback)
         const allowedEmailsStr = process.env.ADMIN_EMAILS || 'vinit@maakirasoi.com,admin@maakirasoi.com';
         const allowedEmails = allowedEmailsStr.split(',').map(e => e.trim().toLowerCase());
 
         if (!allowedEmails.includes(email.toLowerCase())) {
-            return res.status(403).json({ success: false, message: "Unauthorized email address" });
+            console.warn(`[UNAUTHORIZED LOGIN ATTEMPT] Email: ${email}`);
+            return res.status(403).json({ success: false, message: `Access Denied: ${email} is not authorized.` });
         }
 
         // Find or create admin user for this email to link records like AuditLogs

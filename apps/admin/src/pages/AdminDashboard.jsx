@@ -12,6 +12,7 @@ import SubscriptionList from '../components/dashboard/SubscriptionList';
 import MenuManagement from '../components/dashboard/MenuManagement';
 import OrderQueue from '../components/dashboard/OrderQueue';
 import ComplaintManager from '../components/dashboard/ComplaintManager';
+import NotificationManager from '../components/dashboard/NotificationManager';
 
 export default function AdminDashboard() {
     const [activeTab, setActiveTab] = useState('subscriptions');
@@ -167,6 +168,8 @@ export default function AdminDashboard() {
             )}
 
             {activeTab === 'complaints' && <ComplaintManager />}
+
+            {activeTab === 'notifications' && <NotificationManager />}
         </div>
     );
 

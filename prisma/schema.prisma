@@ -234,3 +234,16 @@ model AppSetting {
   type      String   @default("STRING") // "BOOLEAN" | "NUMBER" | "STRING" | "JSON"
   updatedAt DateTime @updatedAt
 }
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String?
+  phone     String?
+  title     String?
+  content   String
+  type      String   @default("INDIVIDUAL") // "ALL" | "INDIVIDUAL" | "SUB_ONLY"
+  channel   String   @default("SMS")        // "SMS" | "WHATSAPP" | "IN_APP"
+  sentAt    DateTime @default(now())
+  status    String   @default("SENT")       // "PENDING" | "SENT" | "FAILED"
+  adminId   String?  // Reference to admin who sent it
+}

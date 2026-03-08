@@ -18,6 +18,7 @@ const AppLayout = ({ children, activeTab, onTabChange, onLogout }) => {
         { id: 'team', icon: 'local_shipping', label: 'Team' },
         { id: 'menu', icon: 'restaurant_menu', label: 'Menu' },
         { id: 'complaints', icon: 'report_problem', label: 'Complaints' },
+        { id: 'notifications', icon: 'send', label: 'Notifications' },
         { id: 'stats', icon: 'bar_chart', label: 'Stats' },
     ];
 

@@ -1,0 +1,12 @@
+﻿--- DATABASE STATUS ---
+Total Subscriptions: 1
+Active Subscriptions: 1
+Total Orders: 1
+Last Order ID: d4b6e18c-fd70-4350-bb96-5f52dae8da33
+      Status: Pending
+      Meal Name: Seasonal Veg
+      Customer: Beta User
+      Address: Beta Street, House 1
+Active Delivery Partners: 1
+      Partner: Test Partner (4fe0ca3f-7602-4116-87e6-3fd3fb7f9189)
+-----------------------
