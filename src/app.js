@@ -27,13 +27,30 @@ app.use((req, res, next) => {
 });
 app.use(helmet());
 
-// CORS: Support multiple frontend origins (comma-separated in CORS_ORIGIN)
-const allowedOrigins = process.env.CORS_ORIGIN
-  ? process.env.CORS_ORIGIN.split(',').map(o => o.trim())
-  : null;
+// CORS: Support multiple frontend origins
+const allowedOrigins = [
+  "https://maakirasoi-customer-2026.web.app",
+  "https://maakirasoi-admin-2026.web.app",
+  "https://maakirasoi-delivery-2026.web.app",
+  "http://localhost:5173",
+  "http://localhost:5174",
+  "http://localhost:5000"
+];
+
+if (process.env.CORS_ORIGIN) {
+  allowedOrigins.push(...process.env.CORS_ORIGIN.split(',').map(o => o.trim()));
+}
 
 app.use(cors({
-  origin: allowedOrigins || "*",
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps or curl)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) !== -1 || origin.includes("maakirasoi") || origin.includes("web.app")) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true
 }));
 
