@@ -96,15 +96,33 @@ const verifyPayment = async (req, res, next) => {
                     }
                 });
             } else if (orderType === 'Subscription' && referenceId) {
-                await prisma.subscription.update({
-                    where: { id: referenceId },
-                    data: {
-                        paymentStatus: 'Paid',
-                        status: 'Active',
-                        paymentMethod: 'ONLINE',
-                        razorpayPaymentId: razorpay_payment_id
+                const existingSub = await prisma.subscription.findUnique({ where: { id: referenceId } });
+
+                if (existingSub) {
+                    if (existingSub.paymentMethod === 'COD') {
+                        // They paid the 500 deposit for a COD subscription
+                        await prisma.subscription.update({
+                            where: { id: referenceId },
+                            data: {
+                                securityDepositPaid: true,
+                                status: 'Active',
+                                razorpayPaymentId: razorpay_payment_id
+                            }
+                        });
+                    } else {
+                        // Full online payment
+                        await prisma.subscription.update({
+                            where: { id: referenceId },
+                            data: {
+                                paymentStatus: 'Paid',
+                                securityDepositPaid: true,
+                                status: 'Active',
+                                paymentMethod: 'ONLINE',
+                                razorpayPaymentId: razorpay_payment_id
+                            }
+                        });
                     }
-                });
+                }
             }
             res.json({ success: true, message: 'Payment verified successfully' });
         } else {

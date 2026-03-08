@@ -37,9 +37,11 @@ async function createSubscription(customerId, data) {
             tiffinsDelivered: 0,
             totalPrice,
             paymentMethod,
-            paymentStatus: paymentMethod === 'COD' ? 'Pending' : 'Pending', // Online triggers webhook
+            paymentStatus: 'Pending',
+            securityDepositAmt: paymentMethod === 'COD' ? 500 : 0,
+            securityDepositPaid: false,
             deliveryZoneId,
-            status: 'Active'
+            status: 'Payment Pending'
         }
     });
 }

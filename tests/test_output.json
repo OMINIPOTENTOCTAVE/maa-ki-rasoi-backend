@@ -1,0 +1,19 @@
+[
+  "[MOCKED] UTC: 2026-03-09T16:00:00.000Z -> IST: Monday, March 9, 2026 at 9:30:00 PM GMT+5:30",
+  "Is after cutoff? false",
+  "Effective Pause Date (Expects Tuesday): Tuesday, March 10, 2026 at 12:00:00 AM GMT+5:30",
+  "---",
+  "[MOCKED] UTC: 2026-03-09T17:00:00.000Z -> IST: Monday, March 9, 2026 at 10:30:00 PM GMT+5:30",
+  "Is after cutoff? true",
+  "Effective Pause Date (Expects Wednesday): Wednesday, March 11, 2026 at 12:00:00 AM GMT+5:30",
+  "---",
+  "[MOCKED] UTC: 2026-03-14T16:00:00.000Z -> IST: Saturday, March 14, 2026 at 9:30:00 PM GMT+5:30",
+  "Is after cutoff? false",
+  "Effective Pause Date (Expects Monday): Monday, March 16, 2026 at 12:00:00 AM GMT+5:30",
+  "---",
+  "[MOCKED] UTC: 2026-03-13T17:00:00.000Z -> IST: Friday, March 13, 2026 at 10:30:00 PM GMT+5:30",
+  "Is after cutoff? true",
+  "Effective Pause Date (Expects Monday): Monday, March 16, 2026 at 12:00:00 AM GMT+5:30",
+  "---",
+  "=== Date Logic Simulation Complete ==="
+]
