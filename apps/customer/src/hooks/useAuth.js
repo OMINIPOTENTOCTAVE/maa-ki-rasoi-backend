@@ -35,6 +35,7 @@ export function useAuth() {
 
                     // Also set in localStorage for axios interceptors as per rulebook
                     localStorage.setItem('customer_token', data.token);
+                    localStorage.setItem('customer_data', JSON.stringify(data.customer));
 
                 } catch (err) {
                     console.error('[AUTH ERROR]', err);
@@ -42,12 +43,14 @@ export function useAuth() {
                     setUser(null);
                     setAuthToken(null);
                     localStorage.removeItem('customer_token');
+                    localStorage.removeItem('customer_data');
                     await firebaseSignOut(auth);
                 }
             } else {
                 setUser(null);
                 setAuthToken(null);
                 localStorage.removeItem('customer_token');
+                localStorage.removeItem('customer_data');
             }
             setLoading(false);
         });
@@ -110,6 +113,7 @@ export function useAuth() {
             setUser(data.customer);
             setAuthToken(data.token);
             localStorage.setItem('customer_token', data.token);
+            localStorage.setItem('customer_data', JSON.stringify(data.customer));
             return true;
         } catch (error) {
             console.error("OTP verification error:", error);
@@ -134,6 +138,7 @@ export function useAuth() {
             setUser(null);
             setAuthToken(null);
             localStorage.removeItem('customer_token');
+            localStorage.removeItem('customer_data');
         } catch (error) {
             console.error("Error signing out:", error);
         } finally {

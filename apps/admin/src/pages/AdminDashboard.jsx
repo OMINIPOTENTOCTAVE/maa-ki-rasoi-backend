@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
+import api from '../config/api';
 import { useNavigate } from 'react-router-dom';
 import useMediaQuery from '../hooks/useMediaQuery';
 import AppLayout from '../layouts/AppLayout';
@@ -13,6 +13,9 @@ import MenuManagement from '../components/dashboard/MenuManagement';
 import OrderQueue from '../components/dashboard/OrderQueue';
 import ComplaintManager from '../components/dashboard/ComplaintManager';
 import NotificationManager from '../components/dashboard/NotificationManager';
+import ForecastCard from '../components/dashboard/ForecastCard';
+import SettingsPanel from '../components/dashboard/SettingsPanel';
+import LaunchConsole from '../components/dashboard/LaunchConsole';
 
 export default function AdminDashboard() {
     const [activeTab, setActiveTab] = useState('subscriptions');
@@ -21,7 +24,7 @@ export default function AdminDashboard() {
     const token = localStorage.getItem('adminToken');
 
     const {
-        orders, menuItems, stats, subscriptions, dailyProduction, partners, fetchData
+        orders, menuItems, stats, subscriptions, dailyProduction, partners, forecast, fetchData
     } = useAdminData();
 
     // Form states remain local
@@ -37,12 +40,12 @@ export default function AdminDashboard() {
             navigate('/admin/login');
             return;
         }
-        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
         loadData();
 
-        // Auto-refresh every 30 seconds
+        // Auto-refresh every 30 seconds - with safety catch
         const interval = setInterval(() => {
-            fetchData(activeTab, token);
+            fetchData(activeTab, token).catch(err => console.error("Auto-fetch error", err));
         }, 30000);
 
         return () => clearInterval(interval);
@@ -50,7 +53,7 @@ export default function AdminDashboard() {
 
     const handleStatusChange = async (orderId, newStatus) => {
         try {
-            await axios.patch(`/orders/${orderId}/status`, { status: newStatus });
+            await api.patch(`/orders/${orderId}/status`, { status: newStatus });
             loadData();
         } catch (err) {
             alert('Error updating status');
@@ -60,7 +63,7 @@ export default function AdminDashboard() {
     const handleAddMenu = async (e) => {
         e.preventDefault();
         try {
-            await axios.post('/menu', { ...menuForm, isAvailable: true });
+            await api.post('/menu', { ...menuForm, isAvailable: true });
             setMenuForm({ name: '', description: '', price: '', category: '' });
             loadData();
         } catch (err) {
@@ -70,7 +73,7 @@ export default function AdminDashboard() {
 
     const handleToggleMenu = async (id) => {
         try {
-            await axios.patch(`/menu/${id}/toggle`);
+            await api.patch(`/menu/${id}/toggle`);
             loadData();
         } catch (err) {
             alert('Error toggling status');
@@ -80,7 +83,7 @@ export default function AdminDashboard() {
     const handleDeleteMenu = async (id) => {
         if (!window.confirm('Are you sure you want to delete this menu item?')) return;
         try {
-            await axios.delete(`/menu/${id}`);
+            await api.delete(`/menu/${id}`);
             loadData();
         } catch (err) {
             alert('Error deleting menu item');
@@ -90,7 +93,7 @@ export default function AdminDashboard() {
     const handleToggleSubscription = async (id, currentStatus) => {
         const newStatus = currentStatus === 'Active' ? 'Paused' : 'Active';
         try {
-            await axios.patch(`/subscriptions/${id}/status`, { status: newStatus });
+            await api.patch(`/subscriptions/${id}/status`, { status: newStatus });
             loadData();
         } catch (err) {
             alert('Error toggling subscription status');
@@ -100,7 +103,7 @@ export default function AdminDashboard() {
     const handleAddPartner = async (e) => {
         e.preventDefault();
         try {
-            await axios.post('/delivery/partners', partnerForm);
+            await api.post('/delivery/partners', partnerForm);
             setPartnerForm({ name: '', phone: '', vehicleDetails: '' });
             loadData();
         } catch (err) {
@@ -111,7 +114,7 @@ export default function AdminDashboard() {
     const handleAssignDriver = async (taskId, partnerId, type) => {
         if (!partnerId) return;
         try {
-            await axios.post('/delivery/assign', { partnerId, taskId, type });
+            await api.post('/delivery/assign', { partnerId, taskId, type });
             loadData();
         } catch (err) {
             alert('Error assigning driver');
@@ -126,7 +129,14 @@ export default function AdminDashboard() {
     const content = (
         <div style={{ padding: isMobile ? '0' : '0' }}>
 
-            {activeTab === 'stats' && <StatsPanel stats={stats} />}
+            <LaunchConsole />
+
+            {activeTab === 'stats' && (
+                <div className="space-y-6">
+                    <ForecastCard forecast={forecast} />
+                    <StatsPanel stats={stats} />
+                </div>
+            )}
 
             {activeTab === 'team' && (
                 <TeamManagement
@@ -170,6 +180,8 @@ export default function AdminDashboard() {
             {activeTab === 'complaints' && <ComplaintManager />}
 
             {activeTab === 'notifications' && <NotificationManager />}
+
+            {activeTab === 'settings' && <SettingsPanel />}
         </div>
     );
 

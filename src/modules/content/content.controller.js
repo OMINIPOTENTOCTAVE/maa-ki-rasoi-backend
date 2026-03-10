@@ -35,4 +35,14 @@ const getFAQs = async (req, res) => {
     res.json({ success: true, data: faqs });
 };
 
-module.exports = { getTodayMenu, getTestimonials, getFAQs };
+// GET /content/plans — Available plans
+const getPlans = async (req, res) => {
+    const plans = [
+        { id: 'BASIC', title: 'Basic Plan', meals: 6, price: 600, duration: 'Weekly' },
+        { id: 'STANDARD', title: 'Standard Plan', meals: 26, price: 2600, duration: 'Monthly' },
+        { id: 'PRO', title: 'Pro Plan', meals: 60, price: 5400, duration: 'Bi-Monthly' }
+    ];
+    res.json({ success: true, data: plans });
+};
+
+module.exports = { getTodayMenu, getTestimonials, getFAQs, getPlans };

@@ -20,6 +20,7 @@ const AppLayout = ({ children, activeTab, onTabChange, onLogout }) => {
         { id: 'complaints', icon: 'report_problem', label: 'Complaints' },
         { id: 'notifications', icon: 'send', label: 'Notifications' },
         { id: 'stats', icon: 'bar_chart', label: 'Stats' },
+        { id: 'settings', icon: 'settings', label: 'Settings' },
     ];
 
     if (location.pathname === '/admin/login') {

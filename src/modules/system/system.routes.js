@@ -1,22 +1,17 @@
-const express = require('express');
+﻿const express = require("express");
 const router = express.Router();
-const systemController = require('./system.controller');
-const { authenticateAdmin } = require('../../middleware/auth');
-const { auditLog } = require('../../middleware/audit');
+const notificationController = require("./notification.controller");
+const systemController = require("./system.controller");
+const { authenticateAdmin } = require("../../middleware/auth");
 
-const notificationController = require('./notification.controller');
+// App Settings
+router.get("/settings", authenticateAdmin, systemController.getSettings);
+router.put("/settings", authenticateAdmin, systemController.updateSetting);
 
-// Settings management (Step 4 feature flags access)
-router.get('/settings', authenticateAdmin, systemController.getSettings);
-router.patch('/settings', authenticateAdmin, auditLog("AppSetting"), systemController.updateSetting);
+// Notification history
+router.get("/notifications", authenticateAdmin, notificationController.getHistory);
 
-// Holiday Management (Step 14)
-router.get('/holidays', authenticateAdmin, systemController.getHolidays);
-router.post('/holidays', authenticateAdmin, auditLog("Holiday"), systemController.createHoliday);
-router.delete('/holidays/:id', authenticateAdmin, auditLog("Holiday"), systemController.deleteHoliday);
-
-// Notifications
-router.get('/notifications', authenticateAdmin, notificationController.getHistory);
-router.post('/notifications/send', authenticateAdmin, auditLog("Notification"), notificationController.sendNotification);
+// Send notification
+router.post("/notifications/send", authenticateAdmin, notificationController.sendNotification);
 
 module.exports = router;

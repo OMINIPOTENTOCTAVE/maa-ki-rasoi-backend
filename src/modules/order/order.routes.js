@@ -16,4 +16,15 @@ router.get("/stats", authenticateAdmin, orderController.getDashboardStats);
 // Cloud Scheduler Webhook (Auth via Secret Header in Controller)
 router.post("/cron/generate-orders", orderController.executeNightlyCronWebhook);
 
+const { generateOrdersForNextDelivery } = require("./order.generator");
+
+router.post("/cron/generate-orders", authenticateAdmin, async (req, res) => {
+    try {
+        await generateOrdersForNextDelivery();
+        res.json({ success: true, message: "Order generation triggered successfully" });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
 module.exports = router;

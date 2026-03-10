@@ -152,10 +152,12 @@ const toggleSubscriptionStatus = async (req, res) => {
 // Production & Dispatch uses Orders now (V4)
 const getDailyProduction = async (req, res) => {
     try {
-        const todayIST = timeUtils.startOfISTDay(timeUtils.getISTTimestamp());
+        const dateParam = req.query.date ? new Date(req.query.date) : timeUtils.getISTTimestamp();
+        const targetDate = timeUtils.startOfISTDay(dateParam);
+
         const orders = await prisma.order.findMany({
             where: {
-                dailyMenu: { date: todayIST }
+                dailyMenu: { date: targetDate }
             },
             include: {
                 dailyMenu: { include: { item1: true, item2: true } }
@@ -169,7 +171,7 @@ const getDailyProduction = async (req, res) => {
 
         res.json({
             success: true,
-            date: todayIST.toISOString(),
+            date: targetDate.toISOString(),
             metrics: {
                 totalTiffinsToPrepare: totalOrders,
                 totalGravy: `${totalOrders} bowls`,
@@ -185,10 +187,12 @@ const getDailyProduction = async (req, res) => {
 
 const getDispatchManifest = async (req, res) => {
     try {
-        const todayIST = timeUtils.startOfISTDay(timeUtils.getISTTimestamp());
+        const dateParam = req.query.date ? new Date(req.query.date) : timeUtils.getISTTimestamp();
+        const targetDate = timeUtils.startOfISTDay(dateParam);
+
         const orders = await prisma.order.findMany({
             where: {
-                dailyMenu: { date: todayIST }
+                dailyMenu: { date: targetDate }
             },
             include: {
                 customer: true,

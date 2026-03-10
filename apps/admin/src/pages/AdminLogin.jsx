@@ -22,7 +22,11 @@ export default function AdminLogin() {
             window.location.href = '/admin/dashboard';
         } catch (err) {
             console.error(err);
-            setError(err.response?.data?.message || 'Unauthorized access or authentication failed.');
+            if (!err.response) {
+                setError('Network error: Unable to reach the backend. Check CORS or URL settings.');
+            } else {
+                setError(err.response?.data?.message || 'Unauthorized access or authentication failed.');
+            }
             setIsLoading(false);
         }
     };

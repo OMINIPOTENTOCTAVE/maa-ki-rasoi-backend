@@ -45,9 +45,9 @@ const auditLog = (entity) => {
                     data: {
                         adminId,
                         action,
-                        entity,
-                        entityId,
-                        details,
+                        targetType: entity,
+                        targetId: entityId || "N/A",
+                        after: details,
                         ipAddress
                     }
                 }).catch(err => {

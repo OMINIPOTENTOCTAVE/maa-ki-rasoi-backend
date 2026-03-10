@@ -2,6 +2,60 @@ const prisma = require("../../prisma");
 
 const timeUtils = require("../../utils/timeUtils");
 
+/**
+ * GET /analytics/launch-console
+ * Founder Launch Console — 5 critical numbers for daily operations.
+ */
+const getLaunchConsole = async (req, res) => {
+    try {
+        const nowIST = timeUtils.getISTTimestamp();
+        const startOfDayIST = timeUtils.startOfISTDay(nowIST);
+
+        // Run all queries in parallel for speed
+        const [ordersToday, openComplaints, activeZones] = await Promise.all([
+            // 1 & 2 & 3: Orders, meals to cook, revenue
+            prisma.order.findMany({
+                where: { createdAt: { gte: startOfDayIST } },
+                select: { status: true, totalAmount: true, deliveryZoneId: true }
+            }),
+            // 4: Open complaints
+            prisma.complaint.count({
+                where: { status: 'Open' }
+            }),
+            // 5: Active delivery zones
+            prisma.order.findMany({
+                where: {
+                    createdAt: { gte: startOfDayIST },
+                    status: { in: ['Pending', 'Preparing', 'OutForDelivery', 'Delivered'] }
+                },
+                select: { deliveryZoneId: true },
+                distinct: ['deliveryZoneId']
+            })
+        ]);
+
+        const totalOrders = ordersToday.length;
+        const mealsToCook = ordersToday.filter(o => ['Pending', 'Preparing'].includes(o.status)).length;
+        const revenue = ordersToday
+            .filter(o => o.status === 'Delivered')
+            .reduce((sum, o) => sum + o.totalAmount, 0);
+        const zones = activeZones.map(z => z.deliveryZoneId).filter(Boolean);
+
+        res.json({
+            success: true,
+            data: {
+                todayOrders: totalOrders,
+                mealsToCook,
+                revenueToday: revenue,
+                openComplaints,
+                activeZones: zones.length,
+                zoneList: zones
+            }
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
 const getKPIs = async (req, res) => {
     try {
         const nowIST = timeUtils.getISTTimestamp();
@@ -117,4 +171,4 @@ const getKPIs = async (req, res) => {
     }
 };
 
-module.exports = { getKPIs };
+module.exports = { getKPIs, getLaunchConsole };

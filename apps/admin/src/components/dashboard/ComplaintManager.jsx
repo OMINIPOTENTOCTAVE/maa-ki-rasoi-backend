@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../config/api';
 
 export default function ComplaintManager() {
     const [complaints, setComplaints] = useState([]);
@@ -7,8 +7,10 @@ export default function ComplaintManager() {
 
     const fetchComplaints = async () => {
         try {
-            const res = await axios.get('/complaints');
+            const res = await api.get('/complaints');
             setComplaints(res.data.data);
+        } catch (err) {
+            console.error("Failed to fetch complaints:", err);
         } finally {
             setLoading(false);
         }
@@ -22,7 +24,7 @@ export default function ComplaintManager() {
 
     const handleResolve = async (id) => {
         try {
-            await axios.patch(`/complaints/${id}/resolve`);
+            await api.patch(`/complaints/${id}/resolve`);
             fetchComplaints();
         } catch (err) {
             alert('Error resolving complaint');

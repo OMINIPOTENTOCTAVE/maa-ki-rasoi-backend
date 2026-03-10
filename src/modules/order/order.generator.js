@@ -1,6 +1,8 @@
 const cron = require('node-cron');
 const prisma = require('../../prisma');
 const timeUtils = require('../../utils/timeUtils');
+const predictionService = require('../analytics/prediction.service');
+const appSettingsService = require('../system/appSettings.service');
 
 /**
  * Automates the generation of physical routing Orders based on 
@@ -83,6 +85,29 @@ async function generateOrdersForNextDelivery() {
 }
 
 function initOrderCron() {
+    // AI Forecasting cron — 9:50 PM IST, runs BEFORE order generation
+    cron.schedule('50 21 * * *', async () => {
+        try {
+            const forecastEnabled = await appSettingsService.getSetting('AI_FORECASTING_ENABLED');
+            if (!forecastEnabled) {
+                console.log('[FORECAST-CRON] AI Forecasting is disabled. Skipping.');
+                return;
+            }
+
+            const now = timeUtils.getISTTimestamp();
+            const targetDate = await timeUtils.getNextDeliveryDate(timeUtils.startOfISTDay(now));
+            console.log(`[FORECAST-CRON] Running forecast for ${targetDate.toISOString().split('T')[0]}`);
+
+            await predictionService.generatePredictions(targetDate);
+        } catch (error) {
+            console.error('[FORECAST-CRON] ERROR (non-blocking):', error.message);
+            // Never blocks — order generation proceeds independently at 10:30 PM
+        }
+    }, {
+        timezone: "Asia/Kolkata"
+    });
+    console.log('[FORECAST-CRON] Job registered. AI forecasting at 9:50 PM IST daily (feature-flag gated).');
+
     // 10:30 PM rigidly tied to IST mapping PRD Rule 10
     cron.schedule('30 22 * * *', async () => {
         try {

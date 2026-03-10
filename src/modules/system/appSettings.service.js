@@ -20,7 +20,8 @@ const DEFAULT_SETTINGS = {
     COD_DEPOSIT_AMOUNT: { value: '500', type: 'NUMBER' },
     MENU_PUBLISH_DEADLINE_IST: { value: '21:45', type: 'STRING' },
     MENU_VISIBLE_FROM_HOUR_IST: { value: '6', type: 'NUMBER' },
-    DELIVERY_DAYS: { value: '[1,2,3,4,5,6]', type: 'JSON' }
+    DELIVERY_DAYS: { value: '[1,2,3,4,5,6]', type: 'JSON' },
+    AI_FORECASTING_ENABLED: { value: 'false', type: 'BOOLEAN' }
 };
 
 /**

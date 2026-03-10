@@ -6,6 +6,7 @@ const { auditLog } = require("../../middleware/audit");
 
 // Public
 router.get("/", menuController.getMenuItems);
+router.get("/weekly", menuController.getWeeklyMenu);
 
 // Protected (Admin Menu Items)
 router.post("/", authenticateAdmin, auditLog("MenuItem"), menuController.createMenuItem);

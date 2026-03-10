@@ -1,3 +1,6 @@
+const Sentry = require("@sentry/node");
+const { nodeProfilingIntegration } = require("@sentry/profiling-node");
+
 const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
@@ -17,6 +20,16 @@ const contentRoutes = require("./modules/content/content.routes");
 const systemRoutes = require("./modules/system/system.routes");
 
 const app = express();
+
+Sentry.init({
+  dsn: process.env.SENTRY_DSN,
+  integrations: [
+    nodeProfilingIntegration(),
+  ],
+  tracesSampleRate: 1.0,
+});
+
+app.set('trust proxy', 1);
 
 // Security and Hardening
 app.use((req, res, next) => {
@@ -100,6 +113,8 @@ app.get("/health", (req, res) => {
 app.get("/", (req, res) => {
   res.send("Maa Ki Rasoi Backend Running 🚀");
 });
+
+Sentry.setupExpressErrorHandler(app);
 
 app.use(errorHandler);
 

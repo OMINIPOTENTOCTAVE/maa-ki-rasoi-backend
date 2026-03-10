@@ -25,7 +25,7 @@ const updateSetting = async (req, res) => {
         });
 
         // Invalidate the cache to ensure immediate system propagation
-        appSettingsService.invalidateCache();
+        appSettingsService.bustCache();
 
         res.json({ success: true, message: "Setting updated successfully", data: setting });
     } catch (error) {

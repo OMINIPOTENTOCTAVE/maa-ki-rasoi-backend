@@ -130,6 +130,18 @@ const getUnpublishedDates = async (req, res) => {
     }
 };
 
+const getWeeklyMenu = async (req, res) => {
+    try {
+        const today = new Date();
+        const nextWeek = new Date();
+        nextWeek.setDate(today.getDate() + 7);
+        const menus = await menuService.getDailyMenus(today, nextWeek);
+        res.json({ success: true, data: menus });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
 module.exports = {
     getMenuItems,
     createMenuItem,
@@ -140,5 +152,6 @@ module.exports = {
     createDraftMenu,
     updateDailyMenu,
     publishMenu,
-    getUnpublishedDates
+    getUnpublishedDates,
+    getWeeklyMenu
 };

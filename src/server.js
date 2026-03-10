@@ -1,4 +1,5 @@
 require("dotenv").config();
+const Sentry = require("@sentry/node");
 const app = require("./app");
 const prisma = require("./prisma");
 
@@ -43,5 +44,6 @@ process.on("SIGTERM", () => shutdown('SIGTERM'));
 
 process.on("unhandledRejection", (err) => {
   console.error("Unhandled Rejection:", err);
+  Sentry.captureException(err);
   shutdown('unhandledRejection');
 });

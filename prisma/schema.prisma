@@ -25,28 +25,25 @@ model MenuItem {
   isAvailable Boolean     @default(true)
   createdAt   DateTime    @default(now())
   isArchived  Boolean     @default(false)
-  
-  orderItems  OrderItem[]
   dailyMenus1 DailyMenu[] @relation("Item1")
   dailyMenus2 DailyMenu[] @relation("Item2")
+  orderItems  OrderItem[]
 }
 
 model DailyMenu {
-  id          String   @id @default(uuid())
-  date        DateTime @unique
+  id          String    @id @default(uuid())
+  date        DateTime  @unique
   item1Id     String
   item2Id     String
   saladNote   String?
-  status      String   @default("DRAFT")
+  status      String    @default("DRAFT")
   publishedAt DateTime?
   publishedBy String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  item1 MenuItem @relation("Item1", fields: [item1Id], references: [id])
-  item2 MenuItem @relation("Item2", fields: [item2Id], references: [id])
-  
-  orders Order[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  item1       MenuItem  @relation("Item1", fields: [item1Id], references: [id])
+  item2       MenuItem  @relation("Item2", fields: [item2Id], references: [id])
+  orders      Order[]
 }
 
 model Order {
@@ -57,9 +54,6 @@ model Order {
   totalAmount       Float
   status            String           @default("Pending")
   createdAt         DateTime         @default(now())
-  menuItemName      String?
-  snapshotPrice     Float?
-  assignedAt        DateTime?
   customerId        String?
   deliveryPartnerId String?
   dailyMenuId       String?
@@ -69,7 +63,6 @@ model Order {
   deliveryType      String           @default("IN_HOUSE")
   mealSlot          String           @default("LUNCH")
   subscriptionId    String?
-
   razorpayOrderId   String?
   razorpayPaymentId String?
   deliveredAt       DateTime?
@@ -78,24 +71,27 @@ model Order {
   feedback          String?
   preparingAt       DateTime?
   rating            Int?
+  assignedAt        DateTime?
+  menuItemName      String?
+  snapshotPrice     Float?
   complaints        Complaint[]
   customer          Customer?        @relation(fields: [customerId], references: [id])
-  deliveryPartner   DeliveryPartner? @relation(fields: [deliveryPartnerId], references: [id])
-  items             OrderItem[]
   dailyMenu         DailyMenu?       @relation(fields: [dailyMenuId], references: [id])
+  deliveryPartner   DeliveryPartner? @relation(fields: [deliveryPartnerId], references: [id])
   subscription      Subscription?    @relation(fields: [subscriptionId], references: [id])
+  items             OrderItem[]
 }
 
 model OrderItem {
-  id         String   @id @default(uuid())
-  orderId    String
-  menuItemId String
-  menuItemName String
-  quantity   Int
-  price      Float
+  id            String   @id @default(uuid())
+  orderId       String
+  menuItemId    String
+  quantity      Int
+  price         Float
+  menuItemName  String
   snapshotPrice Float
-  menuItem   MenuItem @relation(fields: [menuItemId], references: [id])
-  order      Order    @relation(fields: [orderId], references: [id])
+  menuItem      MenuItem @relation(fields: [menuItemId], references: [id])
+  order         Order    @relation(fields: [orderId], references: [id])
 }
 
 model Customer {
@@ -103,12 +99,12 @@ model Customer {
   phone         String?        @unique
   email         String?        @unique
   googleId      String?        @unique
-  firebaseUid   String?        @unique
   name          String?
   address       String?
   tokenVersion  Int            @default(0)
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
+  firebaseUid   String?        @unique
   complaints    Complaint[]
   orders        Order[]
   subscriptions Subscription[]
@@ -126,37 +122,29 @@ model Subscription {
   totalTiffins        Int                    @default(0)
   tiffinsDelivered    Int                    @default(0)
   tiffinsRemaining    Int                    @default(0)
-  
   paused              Boolean                @default(false)
   pausedAt            DateTime?
   pauseEffectiveFrom  DateTime?
   pausedTotalDays     Int                    @default(0)
-  
   paymentMethod       String                 @default("COD")
   paymentStatus       String                 @default("Pending")
   autoRenew           Boolean                @default(false)
   securityDepositPaid Boolean                @default(false)
   securityDepositAmt  Int                    @default(0)
   totalPrice          Float
-  
   deliveryZoneId      String                 @default("ZONE_1")
   riderId             String?
-  
   cancelledAt         DateTime?
   cancelledBy         String?
   cancellationReason  String?
-  
-  razorpayOrderId   String?
-  razorpayPaymentId String?
-  
-  createdAt         DateTime               @default(now())
-  updatedAt         DateTime               @updatedAt
-
-  complaints        Complaint[]
-  deliveries        SubscriptionDelivery[]
-  orders            Order[]
-  
-  customer          Customer               @relation(fields: [customerId], references: [id])
+  razorpayOrderId     String?
+  razorpayPaymentId   String?
+  createdAt           DateTime               @default(now())
+  updatedAt           DateTime               @updatedAt
+  complaints          Complaint[]
+  orders              Order[]
+  customer            Customer               @relation(fields: [customerId], references: [id])
+  deliveries          SubscriptionDelivery[]
 }
 
 model SubscriptionDelivery {
@@ -231,19 +219,32 @@ model AppSetting {
   id        String   @id @default(uuid())
   key       String   @unique
   value     String
-  type      String   @default("STRING") // "BOOLEAN" | "NUMBER" | "STRING" | "JSON"
+  type      String   @default("STRING")
   updatedAt DateTime @updatedAt
 }
 
 model Notification {
-  id        String   @id @default(uuid())
-  userId    String?
-  phone     String?
-  title     String?
-  content   String
-  type      String   @default("INDIVIDUAL") // "ALL" | "INDIVIDUAL" | "SUB_ONLY"
-  channel   String   @default("SMS")        // "SMS" | "WHATSAPP" | "IN_APP"
-  sentAt    DateTime @default(now())
-  status    String   @default("SENT")       // "PENDING" | "SENT" | "FAILED"
-  adminId   String?  // Reference to admin who sent it
+  id      String   @id @default(uuid())
+  userId  String?
+  phone   String?
+  title   String?
+  content String
+  type    String   @default("INDIVIDUAL")
+  channel String   @default("SMS")
+  sentAt  DateTime @default(now())
+  status  String   @default("SENT")
+  adminId String?
+}
+
+model ProductionPrediction {
+  id             String   @id @default(uuid())
+  date           DateTime
+  clusterId      String
+  predictedMeals Int
+  confidence     Float
+  createdAt      DateTime @default(now())
+
+  @@unique([date, clusterId])
+  @@index([date])
+  @@index([clusterId])
 }

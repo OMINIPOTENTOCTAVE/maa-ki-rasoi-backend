@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../config/api';
 import { Send, History, User, Users, CheckCircle, AlertCircle, RefreshCw } from 'lucide-react';
 
 export default function NotificationManager() {
@@ -16,7 +16,7 @@ export default function NotificationManager() {
     const loadHistory = async () => {
         setIsLoadingHistory(true);
         try {
-            const res = await axios.get('/system/notifications');
+            const res = await api.get('/system/notifications');
             setHistory(res.data.data || []);
         } catch (err) {
             console.error("Failed to load history", err);
@@ -38,7 +38,7 @@ export default function NotificationManager() {
         setSuccess('');
 
         try {
-            await axios.post('/system/notifications/send', { target, title, content: message, channel });
+            await api.post('/system/notifications/send', { target, title, content: message, channel });
             setSuccess(`Notification sent to ${target === 'ALL' ? 'all customers' : 'selected recipient(s)'}`);
             setMessage('');
             setTitle('');
