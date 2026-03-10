@@ -12,19 +12,21 @@ Maa Ki Rasoi (MKR) is a state-of-the-art, mobile-first PWA designed to deliver h
 ## ✨ Key Features
 
 ### 🍱 For Customers (PWA)
-- **1-Click Subscriptions**: Simple Weekly (5-day), Monthly (22 or 30-day) plans.
-- **One-Time Orders**: Instant meal bookings for non-subscribers with dynamic pricing.
+- **Secure Razorpay Checkout**: Fully integrated online payments for all plans and one-time orders.
+- **3-Tier Subscriptions**: Flexible plans to suit every need:
+    - **Basic (₹1,999)**: 1 Meal/Day (Lunch or Dinner)
+    - **Standard (₹3,499)**: 2 Meals/Day (Lunch + Dinner)
+    - **Premium (₹5,999)**: 3 Meals/Day (Breakfast + Lunch + Dinner)
+- **10 PM IST Cutoff**: Smart subscription logic. Subscribe before 10 PM to start tomorrow; else, start the day after.
 - **Pure Veg Guarantee**: 100% vegetarian meals curated from local home-kitchen networks.
-- **Smart Pause**: master pause toggle for subscribers (with 10 PM IST operational cutoff).
-- **Direct Support**: In-app ticketing system with WhatsApp escalation for urgent help.
-- **Live Order History**: Real-time tracking of past orders and meal credits.
+- **In-App Payment History**: Tracking for all successful and failed transactions.
 
 ### 🛠 For Operations (Admin & Delivery)
-- **AppSettings Service**: Real-time TTL-cached configuration for feature flags (COD, Pausing, Cutoffs).
+- **Revenue Dashboard**: Real-time tracking of Today's and Month-to-date Subscription + Instant Order revenue.
+- **Payment Operations**: Detailed transaction logs with Razorpay ID mapping and failure alerts (< 24hr).
 - **Dispatch Manifests**: Automated rider route optimization via address-clustered manifests.
 - **Subscription Engine**: Automated daily order generation from active subscription pools.
 - **Granular Logging**: Detailed system-level logs for audit-ready transaction tracking.
-- **Pure Veg Monitoring**: Centralized menu control for home-kitchen partners.
 
 ---
 
@@ -45,8 +47,8 @@ The application features a custom-built design system focused on "Warmth and Tru
 | **Core** | Node.js (Express 5), React 18 (Vite) |
 | **Styling** | Vanilla CSS + Tailwind (Custom Tokens) |
 | **Database** | PostgreSQL + Prisma ORM |
-| **Payments** | Razorpay (Live Subscriptions & COD Verification) |
-| **Auth** | JWT + OTP (Fast2SMS) |
+| **Payments** | Razorpay (HMAC SHA256 Secure Verification) |
+| **Auth** | JWT + Firebase Auth (Google & Phone OTP) |
 | **Infra** | Google Cloud Run (API), Firebase Hosting (Frontends), Cloud SQL (DB) |
 
 ---
@@ -56,14 +58,14 @@ The application features a custom-built design system focused on "Warmth and Tru
 ```bash
 maakirasoi/
 ├── src/                  # Backend API (Standard SOP Compliant)
-│   ├── modules/          # Route & Controller logic (Sub, Order, Delivery, System)
+│   ├── modules/          # Route & Controller logic (Payment, Sub, Order, Analytics)
 │   ├── middleware/        # Auth & Admin protection
 │   └── prisma.js          # Shared Prisma client instance
 ├── apps/
-│   ├── customer/         # Premium PWA (Refactored v3.0)
-│   ├── admin/            # Operational Dashboard
+│   ├── customer/         # Premium PWA (Razorpay Integrated)
+│   ├── admin/            # Operational Dashboard (Revenue & Audit)
 │   └── delivery/         # Rider Management App
-└── prisma/               # Database Schema & Migrations
+└── prisma/               # Database Schema (Payment & Audit Logs)
 ```
 
 ---
