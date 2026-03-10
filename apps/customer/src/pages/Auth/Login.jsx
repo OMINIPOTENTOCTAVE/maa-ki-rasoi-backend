@@ -15,7 +15,7 @@ export default function Login() {
 
     useEffect(() => {
         if (user && authToken) {
-            navigate('/dashboard');
+            navigate('/');
         }
     }, [user, authToken, navigate]);
 
@@ -144,6 +144,7 @@ export default function Login() {
                             className="w-full px-4 py-4 rounded-xl border border-border bg-white text-foreground focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
                             disabled={phoneLoading}
                         />
+                        <div id="recaptcha-container"></div>
                         <button
                             id="request-otp-btn"
                             type="submit"

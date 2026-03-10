@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth, GoogleAuthProvider } from 'firebase/auth';
+import { getAuth, GoogleAuthProvider, setPersistence, browserLocalPersistence } from 'firebase/auth';
 
 const firebaseConfig = {
     apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -12,6 +12,11 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+
+// Enforce local persistence for PWA silent auto-login
+setPersistence(auth, browserLocalPersistence).catch((err) => {
+    console.warn("Failed to set Firebase Auth persistence:", err);
+});
 const googleProvider = new GoogleAuthProvider();
 
 export { auth, googleProvider };

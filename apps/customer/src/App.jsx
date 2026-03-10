@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import axios from 'axios';
 
+// Configure Axios defaults
+axios.defaults.baseURL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 // Layout & UI
 import AppLayout from './layouts/AppLayout';
 import { Toaster } from './components/ui/sonner';

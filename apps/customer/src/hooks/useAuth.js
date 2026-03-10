@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { onAuthStateChanged, signInWithPopup, signOut as firebaseSignOut } from 'firebase/auth';
+import { onAuthStateChanged, signInWithPopup, signOut as firebaseSignOut, RecaptchaVerifier, signInWithPhoneNumber } from 'firebase/auth';
 import { auth, googleProvider } from '../config/firebase';
 import { toast } from 'sonner';
 
@@ -17,7 +17,7 @@ export function useAuth() {
                     const idToken = await firebaseUser.getIdToken(true);
 
                     // Exchange Firebase idToken for App JWT
-                    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/firebase`, {
+                    const res = await fetch(`${import.meta.env.VITE_API_URL}/auth/firebase`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ idToken }),
@@ -73,22 +73,51 @@ export function useAuth() {
         }
     };
 
-    const signInWithPhone = async (phoneNumber, buttonId) => {
+    const setupRecaptcha = () => {
+        if (!window.recaptchaVerifier) {
+            window.recaptchaVerifier = new RecaptchaVerifier(
+                auth,
+                "recaptcha-container",
+                {
+                    size: "invisible"
+                }
+            );
+        }
+    };
+
+    const signInWithPhone = async (phoneNumber) => {
         try {
             setLoading(true);
-            const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/otp/request`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ phone: phoneNumber })
-            });
 
-            if (!res.ok) throw new Error("Failed to send OTP");
-            window.pendingPhoneNumber = phoneNumber;
+            // Format phone number
+            const formattedPhone = `+91${phoneNumber.replace(/\s+/g, '').replace(/^\+91/, '')}`;
+
+            // 1. Setup Recaptcha Singleton
+            setupRecaptcha();
+            const appVerifier = window.recaptchaVerifier;
+
+            // 2. Request OTP from Firebase directly
+            const confirmation = await signInWithPhoneNumber(
+                auth,
+                formattedPhone,
+                appVerifier
+            );
+
+            // 3. Store result for verification step
+            window.confirmationResult = confirmation;
+            window.pendingPhoneNumber = formattedPhone;
+
             return true;
         } catch (error) {
             console.error("Phone sign-in error:", error);
-            toast.error('Failed to send OTP. Try again.');
-            throw error;
+
+            // Critical: Reset recaptcha on failure so user can try again
+            if (window.recaptchaVerifier) {
+                window.recaptchaVerifier.clear();
+                window.recaptchaVerifier = null;
+            }
+
+            throw new Error(error.message || 'Failed to send OTP. Try again.');
         } finally {
             setLoading(false);
         }
@@ -97,16 +126,32 @@ export function useAuth() {
     const verifyOtp = async (otp) => {
         try {
             setLoading(true);
-            const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/otp/verify`, {
+
+            if (!window.confirmationResult) {
+                throw new Error("Please request a new OTP.");
+            }
+
+            // 1. Verify OTP with Firebase
+            const result = await window.confirmationResult.confirm(otp);
+
+            // Force token refresh immediately
+            const idToken = await result.user.getIdToken(true);
+
+            // 2. Exchange with backend for App Token
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/auth/firebase`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ phone: window.pendingPhoneNumber, otp }),
+                body: JSON.stringify({ idToken }),
                 credentials: 'include'
             });
 
             if (!res.ok) {
-                const errorText = await res.text();
-                throw new Error(`Failed to verify OTP`);
+                let errorMsg = "Failed to authenticate with server";
+                try {
+                    const errData = await res.json();
+                    errorMsg = errData.message;
+                } catch (e) { }
+                throw new Error(errorMsg);
             }
 
             const data = await res.json();
@@ -130,7 +175,7 @@ export function useAuth() {
             await firebaseSignOut(auth);
 
             // Also hit the backend logout endpoint if needed
-            await fetch(`${import.meta.env.VITE_API_URL}/api/auth/otp/logout`, {
+            await fetch(`${import.meta.env.VITE_API_URL}/auth/otp/logout`, {
                 method: 'POST',
                 credentials: 'include' // clear httpOnly cookie
             });

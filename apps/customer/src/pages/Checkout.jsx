@@ -365,6 +365,7 @@ export default function Checkout({ cart, updateQty, clearCart }) {
                             className="input-field text-center text-4xl font-bold tracking-[0.5em] h-16"
                             placeholder="••••"
                         />
+                        <div id="recaptcha-container"></div>
 
                         {otpError && <p className="text-error font-bold text-sm">{otpError}</p>}
 
