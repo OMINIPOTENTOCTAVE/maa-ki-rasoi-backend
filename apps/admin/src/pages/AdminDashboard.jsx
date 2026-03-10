@@ -16,6 +16,7 @@ import NotificationManager from '../components/dashboard/NotificationManager';
 import ForecastCard from '../components/dashboard/ForecastCard';
 import SettingsPanel from '../components/dashboard/SettingsPanel';
 import LaunchConsole from '../components/dashboard/LaunchConsole';
+import PaymentHistory from '../components/dashboard/PaymentHistory';
 
 export default function AdminDashboard() {
     const [activeTab, setActiveTab] = useState('subscriptions');
@@ -24,7 +25,7 @@ export default function AdminDashboard() {
     const token = localStorage.getItem('adminToken');
 
     const {
-        orders, menuItems, stats, subscriptions, dailyProduction, partners, forecast, fetchData
+        orders, menuItems, stats, subscriptions, dailyProduction, partners, forecast, payments, fetchData
     } = useAdminData();
 
     // Form states remain local
@@ -175,6 +176,10 @@ export default function AdminDashboard() {
                     handleAssignDriver={handleAssignDriver}
                     handleStatusChange={handleStatusChange}
                 />
+            )}
+
+            {activeTab === 'payments' && (
+                <PaymentHistory payments={payments} />
             )}
 
             {activeTab === 'complaints' && <ComplaintManager />}

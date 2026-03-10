@@ -1,91 +1,61 @@
 /**
  * Maa Ki Rasoi — Single Source of Truth for Pricing
- * 
- * ALL plan prices, durations, and discounts are defined here.
- * Every component must import from this file instead of hardcoding prices.
  */
 
 export const PLANS = {
-    Weekly: {
-        id: 'Weekly',
-        title: 'Weekly Trial',
-        subtitle: 'Perfect for testing the taste',
-        duration: 7,
-        perMealPrice: 114,
-        totalPrice: 800,
-        description: '7 days of daily meals',
+    Basic: {
+        id: 'Basic',
+        title: 'Basic Plan',
+        subtitle: '1 meal per day',
+        duration: 30,
+        totalPrice: 1999,
         badge: null,
         features: [
-            '7 meals included',
+            '30 meals included',
             'Daily doorstep delivery',
             'Pure veg home-style food',
         ],
     },
-    Monthly: {
-        id: 'Monthly',
-        title: 'Monthly Standard',
-        subtitle: 'Our most popular plan',
+    Standard: {
+        id: 'Standard',
+        title: 'Standard Plan',
+        subtitle: '2 meals per day',
         duration: 30,
-        perMealPrice: 100,
-        totalPrice: 3000,
-        description: '30 days — Maximum savings',
-        badge: 'Best Value',
+        totalPrice: 3499,
+        badge: 'Most Popular',
         features: [
-            '30 meals included',
-            'Free delivery every day',
-            'Save ₹420 vs weekly',
-            'Priority delivery slot',
+            '60 meals included',
+            'Lunch & Dinner delivery',
+            'Save ₹499 vs Basic',
         ],
     },
+    Premium: {
+        id: 'Premium',
+        title: 'Premium Plan',
+        subtitle: '3 meals per day',
+        duration: 30,
+        totalPrice: 5999,
+        badge: 'Best Value',
+        features: [
+            '90 meals included',
+            'Morning, Lunch & Dinner',
+            'Maximum savings',
+        ],
+    }
 };
 
 export const MEAL_TYPES = {
     Lunch: { id: 'Lunch', label: 'Lunch', icon: '☀️' },
     Dinner: { id: 'Dinner', label: 'Dinner', icon: '🌙' },
-    Both: { id: 'Both', label: 'Lunch + Dinner', icon: '🍽️' },
 };
 
-/**
- * Compute the final price for a given plan + meal combination.
- * Both meals = 1.85x (15% combo discount)
- */
-export function computePrice(planType, mealType) {
+export function computePrice(planType) {
     const plan = PLANS[planType];
-    if (!plan) return 0;
-    const mealsPerDay = mealType === 'Both' ? 2 : 1;
-    const comboDiscount = mealType === 'Both' ? 0.85 : 1;
-    return Math.round(plan.totalPrice * mealsPerDay * comboDiscount);
+    return plan ? plan.totalPrice : 0;
 }
 
-/**
- * GST rate applied at checkout (5%)
- */
-export const GST_RATE = 0.05;
+export const GST_RATE = 0; // GST is omitted for now or you can put 0.05 
 
-/**
- * Format a price with GST for display.
- * Returns { subtotal, gst, total } — all as formatted strings.
- */
-export function computePriceWithGST(planType, mealType) {
-    const subtotal = computePrice(planType, mealType);
-    const gst = Math.round(subtotal * GST_RATE);
-    const total = subtotal + gst;
-    return {
-        subtotal: subtotal.toFixed(2),
-        gst: gst.toFixed(2),
-        total: total.toFixed(2),
-        subtotalRaw: subtotal,
-        gstRaw: gst,
-        totalRaw: total,
-    };
-}
-
-/**
- * WhatsApp support number — used across the app
- */
 export const SUPPORT_WHATSAPP = '917428020104';
 
-/**
- * Dietary preference (hardcoded to Pure Veg)
- */
 export const DIETARY_PREFERENCE = 'Veg';

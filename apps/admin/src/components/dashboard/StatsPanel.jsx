@@ -5,6 +5,17 @@ export default function StatsPanel({ stats }) {
 
     return (
         <div className="space-y-6">
+            {/* Failed Payments Alert (Rule 6.2: Support Readiness) */}
+            {stats.failedPaymentsLast24h > 0 && (
+                <div className="bg-amber-50 dark:bg-amber-900/20 border-l-4 border-amber-500 p-4 rounded-xl flex items-center gap-4 animate-pulse">
+                    <span className="material-symbols-outlined text-amber-500 text-3xl">credit_card_off</span>
+                    <div>
+                        <h4 className="text-amber-800 dark:text-amber-400 font-bold">{stats.failedPaymentsLast24h} FAILED PAYMENTS TODAY</h4>
+                        <p className="text-amber-600 dark:text-amber-500 text-sm font-medium">Check the Payments tab to assist customers with failed transactions.</p>
+                    </div>
+                </div>
+            )}
+
             {/* Rule 10: Critical Health Status */}
             {stats.criticalAlert && (
                 <div className="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 p-4 rounded-xl flex items-center gap-4">
@@ -61,25 +72,26 @@ export default function StatsPanel({ stats }) {
                     <div className="flex items-end justify-between">
                         <div>
                             <div className="text-3xl font-black text-slate-900 dark:text-white">₹{stats.revenueToday}</div>
-                            <p className="text-sm font-medium text-slate-500">Gross Revenue (Delivered Only)</p>
+                            <p className="text-sm font-medium text-slate-500">Gross Cash In (Sub + Instant)</p>
                         </div>
                         <div className="text-right">
-                            <div className="text-xl font-bold text-brand-saffron">{stats.totalOrdersToday}</div>
-                            <p className="text-xs text-slate-400">Instant Orders</p>
+                            <div className="text-xl font-bold text-brand-saffron">{stats.totalOrdersToday || 0}</div>
+                            <p className="text-xs text-slate-400">Total Activities</p>
                         </div>
                     </div>
                 </div>
 
-                {/* Complaint Handling Rule 2.4 */}
+                {/* Subscription Cash Flow */}
                 <div className="bg-white dark:bg-[#2d2418] rounded-2xl p-6 border border-gray-100 dark:border-gray-800 shadow-sm">
-                    <h3 className="text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-widest mb-4">Complaint Pulse</h3>
-                    <div className="flex items-center gap-6">
-                        <div className="size-16 rounded-full border-4 border-red-500/20 flex items-center justify-center text-red-500 text-2xl font-black">
-                            {stats.complaintsThisWeek}
-                        </div>
+                    <h3 className="text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-widest mb-4">Subscription Cash Flow</h3>
+                    <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <p className="text-sm font-bold text-slate-900 dark:text-white">New Complaints (Last 7 Days)</p>
-                            <p className="text-xs text-slate-500">Resolution Target: Within 2 Hours (Rule 2.4)</p>
+                            <div className="text-2xl font-black text-emerald-600">₹{stats.subscriptionRevenueToday || 0}</div>
+                            <p className="text-[10px] font-bold text-slate-400 uppercase">Collected Today</p>
+                        </div>
+                        <div className="text-right">
+                            <div className="text-2xl font-black text-blue-600">₹{stats.subscriptionRevenueMonth || 0}</div>
+                            <p className="text-[10px] font-bold text-slate-400 uppercase">This Month</p>
                         </div>
                     </div>
                 </div>

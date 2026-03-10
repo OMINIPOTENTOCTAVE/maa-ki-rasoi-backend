@@ -108,6 +108,7 @@ model Customer {
   complaints    Complaint[]
   orders        Order[]
   subscriptions Subscription[]
+  payments      Payment[]
 }
 
 model Subscription {
@@ -145,6 +146,7 @@ model Subscription {
   orders              Order[]
   customer            Customer               @relation(fields: [customerId], references: [id])
   deliveries          SubscriptionDelivery[]
+  payments            Payment[]
 }
 
 model SubscriptionDelivery {
@@ -247,4 +249,25 @@ model ProductionPrediction {
   @@unique([date, clusterId])
   @@index([date])
   @@index([clusterId])
+}
+
+model Payment {
+  id                String   @id @default(uuid())
+  userId            String
+  subscriptionId    String?
+  razorpayOrderId   String   @unique
+  razorpayPaymentId String?  @unique
+  razorpaySignature String?
+  amount            Int
+  currency          String   @default("INR")
+  status            String   // PENDING / SUCCESS / FAILED
+  planId            String
+  createdAt         DateTime @default(now())
+
+  customer     Customer      @relation(fields: [userId], references: [id])
+  subscription Subscription? @relation(fields: [subscriptionId], references: [id])
+
+  @@index([userId])
+  @@index([createdAt])
+  @@index([status])
 }

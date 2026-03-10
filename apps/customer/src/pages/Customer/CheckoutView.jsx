@@ -1,6 +1,5 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef } from 'react';
 import axios from 'axios';
-import { PLANS, GST_RATE, DIETARY_PREFERENCE } from '../../config/pricing';
 
 const loadRazorpayScript = () => {
     return new Promise((resolve) => {
@@ -13,66 +12,41 @@ const loadRazorpayScript = () => {
 };
 
 export default function CheckoutView({ onBack, onSuccessComplete, planConfig }) {
-    const isWeekly = planConfig?.planType === 'Weekly';
     const [isProcessing, setIsProcessing] = useState(false);
     const [showOtpModal, setShowOtpModal] = useState(false);
     const [otp, setOtp] = useState('');
     const [otpLoading, setOtpLoading] = useState(false);
     const [otpError, setOtpError] = useState('');
     const [showSuccess, setShowSuccess] = useState(false);
-    const [paymentMethod, setPaymentMethod] = useState('ONLINE');
-    const [address, setAddress] = useState('');
+    const [startDateMsg, setStartDateMsg] = useState('');
+
+    // Form fields
     const storedUser = JSON.parse(localStorage.getItem('customer_data') || '{}');
     const [name, setName] = useState(storedUser.name || '');
     const [phone, setPhone] = useState(storedUser.phone || '');
+    const [address, setAddress] = useState(storedUser.address || '');
+
     const payDebounceRef = useRef(false);
-
-    const mealLabel = planConfig?.mealType === 'Both' ? 'Lunch + Dinner' : (planConfig?.mealType || 'Lunch');
-    const planLabel = planConfig?.planType === 'MonthlyFull' ? '30-Day' : (planConfig?.planType === 'Weekly' ? '5-Day' : '22-Day');
-    const uiTitle = `${planLabel} ${mealLabel} Plan`;
-    const uiRange = isWeekly ? 'Mon–Fri, 5 working days' : (planConfig?.planType === 'MonthlyFull' ? '30 consecutive days' : 'Mon–Fri, 22 working days');
-
-    const uiPrice = planConfig?.totalPrice || 0;
-    const gstAmount = Math.round(uiPrice * GST_RATE);
-    const totalPayable = uiPrice + gstAmount;
-
-    const getSubscriptionPayload = () => {
-        const currentUser = JSON.parse(localStorage.getItem('customer_data') || '{}');
-        return {
-            customerName: name || currentUser.name || "Customer",
-            customerPhone: phone || currentUser.phone || "9999999999",
-            customerId: currentUser.id,
-            address: address || currentUser.address || "Address not provided",
-            planType: planConfig?.planType || "Monthly",
-            mealType: planConfig?.mealType || "Lunch",
-            dietaryPreference: DIETARY_PREFERENCE,
-            startDate: new Date().toISOString()
-        };
-    };
-
-    // Require OTP if phone isn't already verified
     const [isPhoneVerified, setIsPhoneVerified] = useState(false);
+
+    const uiTitle = planConfig?.title || 'Subscription Plan';
+    const uiPrice = planConfig?.totalPrice || 0;
 
     const handleVerifyOtp = async () => {
         if (otp.length < 4) return;
         setOtpError('');
         setOtpLoading(true);
-        const payload = getSubscriptionPayload();
         try {
-            const verifyRes = await axios.post('/auth/otp/verify', { phone: payload.customerPhone, otp, name: payload.customerName });
+            const verifyRes = await axios.post('/auth/otp/verify', { phone, otp, name });
             if (verifyRes.data.success) {
                 setShowOtpModal(false);
                 setIsPhoneVerified(true);
-
-                // Keep the token up to date with the newly linked phone number
                 if (verifyRes.data.token) {
                     localStorage.setItem('customer_token', verifyRes.data.token);
                     localStorage.setItem('customer_data', JSON.stringify(verifyRes.data.customer));
                     axios.defaults.headers.common['Authorization'] = `Bearer ${verifyRes.data.token}`;
                 }
-
-                // Immediately proceed with payment after successful verification
-                processPayment(payload);
+                processPayment();
             }
         } catch (err) {
             setOtpError(err.response?.data?.message || 'Invalid OTP');
@@ -98,14 +72,11 @@ export default function CheckoutView({ onBack, onSuccessComplete, planConfig }) 
             return;
         }
 
-        const subscriptionPayload = getSubscriptionPayload();
-
-        // If phone hasn't been verified yet (especially for Google Logins), verify it now
-        if (!isPhoneVerified) {
+        if (!isPhoneVerified && storedUser.phone !== phone) {
             payDebounceRef.current = true;
             setIsProcessing(true);
             try {
-                await axios.post('/auth/otp/request', { phone: subscriptionPayload.customerPhone });
+                await axios.post('/auth/otp/request', { phone });
                 setShowOtpModal(true);
             } catch (err) {
                 alert("Failed to send OTP to verify your number.");
@@ -116,93 +87,77 @@ export default function CheckoutView({ onBack, onSuccessComplete, planConfig }) 
             return;
         }
 
-        // If already verified, directly process payment
-        processPayment(subscriptionPayload);
+        processPayment();
     };
 
-    const processPayment = async (subscriptionPayload) => {
+    const processPayment = async () => {
         payDebounceRef.current = true;
         setIsProcessing(true);
 
-        if (paymentMethod === 'COD') {
-            try {
-                await axios.post('/subscriptions', subscriptionPayload);
-                setShowSuccess(true);
-            } catch (err) {
-                alert("Failed to create COD order");
-            } finally {
-                setIsProcessing(false);
-                payDebounceRef.current = false;
-            }
-            return;
-        }
-
         try {
-            const subRes = await axios.post('/subscriptions', subscriptionPayload);
-            const subscriptionId = subRes.data.subscription.id;
-            const totalPrice = subRes.data.subscription.totalPrice;
-
             const scriptLoaded = await loadRazorpayScript();
             if (!scriptLoaded) {
-                alert("Payment Gateway SDK failed to load. Are you offline?");
+                alert("Connection lost. Check your network before retrying.");
                 setIsProcessing(false);
                 payDebounceRef.current = false;
                 return;
             }
 
+            const currentUser = JSON.parse(localStorage.getItem('customer_data') || '{}');
+
+            // 1. Create backend order & PENDING payment record
             const orderRes = await axios.post('/payments/create-order', {
-                amount: totalPrice,
-                orderType: 'Subscription',
-                referenceId: subscriptionId
+                planId: planConfig.planId,
+                userId: currentUser.id
             });
 
-            const { id: razorpayOrderId, isMock } = orderRes.data.order;
+            const { orderId, amount, keyId } = orderRes.data;
 
-            if (isMock) {
-                const verifyRes = await axios.post('/payments/verify', {
-                    razorpay_order_id: razorpayOrderId,
-                    razorpay_payment_id: "pay_mock_" + Date.now(),
-                    razorpay_signature: "mock_signature",
-                    orderType: 'Subscription',
-                    referenceId: subscriptionId
-                });
-                if (verifyRes.data.success) setShowSuccess(true);
-                setIsProcessing(false);
-                payDebounceRef.current = false;
-                return;
-            }
-
+            // 2. Open Razorpay Checkbox
             const options = {
-                key: import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_dummykey',
-                amount: Math.round(totalPrice * 100),
+                key: keyId || import.meta.env.VITE_RAZORPAY_KEY_ID,
+                amount: amount,
                 currency: "INR",
                 name: "Maa Ki Rasoi",
-                description: uiTitle,
-                order_id: razorpayOrderId,
+                description: "Ghar ka swaad, ab aapke paas",
+                order_id: orderId,
                 handler: async function (response) {
                     try {
+                        // 3. Verify exactly on the backend
                         const verifyRes = await axios.post('/payments/verify', {
                             razorpay_order_id: response.razorpay_order_id,
                             razorpay_payment_id: response.razorpay_payment_id,
                             razorpay_signature: response.razorpay_signature,
-                            orderType: 'Subscription',
-                            referenceId: subscriptionId
+                            planId: planConfig.planId,
+                            userId: currentUser.id
                         });
-                        if (verifyRes.data.success) setShowSuccess(true);
+
+                        if (verifyRes.data.success) {
+                            const dateObj = new Date(verifyRes.data.startDate);
+                            const formattedDate = dateObj.toLocaleDateString("en-US", { weekday: 'long', month: 'long', day: 'numeric' });
+                            setStartDateMsg(formattedDate);
+                            setShowSuccess(true);
+                        }
                     } catch (err) {
-                        alert("Payment successful but verification failed. Please contact support.");
+                        alert("Payment verification failed. Contact us on WhatsApp immediately.");
+                    }
+                },
+                modal: {
+                    ondismiss: function () {
+                        alert("Payment cancelled. Your plan is ready when you are.");
                     }
                 },
                 prefill: {
-                    name: subscriptionPayload.customerName,
-                    contact: subscriptionPayload.customerPhone,
+                    name: name,
+                    contact: phone,
+                    email: currentUser.email || ""
                 },
                 theme: { color: "#C8550A" }
             };
 
             const rzp1 = new window.Razorpay(options);
             rzp1.on('payment.failed', function (response) {
-                alert("Payment Failed: " + response.error.description);
+                alert("Payment verification failed. Contact us on WhatsApp immediately.");
             });
             rzp1.open();
         } catch (error) {
@@ -219,15 +174,15 @@ export default function CheckoutView({ onBack, onSuccessComplete, planConfig }) 
                 <div className="w-24 h-24 bg-success/10 text-success rounded-full flex items-center justify-center mb-6">
                     <span className="material-symbols-outlined text-5xl">verified</span>
                 </div>
-                <h1 className="text-3xl font-bold mb-4">Subscription Active!</h1>
+                <h1 className="text-3xl font-bold mb-4">Subscription Active! 🎉</h1>
                 <p className="text-text-muted mb-8 max-w-sm">
-                    Your "{uiTitle}" is now active. We'll start delivering from tomorrow.
+                    Your {uiTitle} is now active. We'll start delivering firmly on <strong className="text-foreground">{startDateMsg}</strong>.
                 </p>
                 <button
                     onClick={onSuccessComplete}
                     className="btn px-12"
                 >
-                    Great, Let's Go
+                    Back to Dashboard
                 </button>
             </div>
         );
@@ -247,14 +202,12 @@ export default function CheckoutView({ onBack, onSuccessComplete, planConfig }) 
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
                 <div className="space-y-6">
-                    {/* Summary Card */}
                     <div className="card !p-6 flex items-center gap-4">
                         <div className="w-16 h-16 rounded-xl bg-brand-orange/10 flex items-center justify-center text-brand-orange">
                             <span className="material-symbols-outlined text-3xl">restaurant</span>
                         </div>
                         <div>
                             <h3 className="font-bold text-lg">{uiTitle}</h3>
-                            <p className="text-xs text-text-muted">{uiRange}</p>
                             <p className="text-xs font-bold text-success mt-1 flex items-center gap-1">
                                 <span className="material-symbols-outlined text-sm">bolt</span>
                                 Pure Veg Guaranteed
@@ -262,7 +215,6 @@ export default function CheckoutView({ onBack, onSuccessComplete, planConfig }) 
                         </div>
                     </div>
 
-                    {/* Address Section */}
                     <div className="card">
                         <h4 className="text-sm font-bold uppercase tracking-widest text-text-muted mb-4 flex items-center gap-2">
                             <span className="material-symbols-outlined text-brand-orange">location_on</span>
@@ -301,37 +253,19 @@ export default function CheckoutView({ onBack, onSuccessComplete, planConfig }) 
                                     placeholder="Enter your flat/house no, street, landmark..."
                                     rows={3}
                                 />
-                                {!address && <p className="text-[10px] text-error font-bold mt-1">* Exact address required for deliveries</p>}
                             </div>
                         </div>
                     </div>
 
-                    {/* Payment Section */}
-                    <div className="card">
-                        <h4 className="text-sm font-bold uppercase tracking-widest text-text-muted mb-4 flex items-center gap-2">
-                            <span className="material-symbols-outlined text-brand-orange">payments</span>
-                            Payment Method
+                    <div className="card border-brand-orange bg-brand-orange/5">
+                        <h4 className="text-sm font-bold uppercase tracking-widest text-brand-orange mb-2 flex items-center gap-2">
+                            <span className="material-symbols-outlined">verified_user</span>
+                            Secure Online Payment
                         </h4>
-                        <div className="space-y-3">
-                            <label className={`flex items-center gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all ${paymentMethod === 'ONLINE' ? 'border-brand-orange bg-brand-orange/5' : 'border-transparent opacity-70'}`}>
-                                <input type="radio" checked={paymentMethod === 'ONLINE'} onChange={() => setPaymentMethod('ONLINE')} className="accent-brand-orange size-5" />
-                                <div className="flex-1">
-                                    <p className="font-bold text-sm">Secure Online Payment</p>
-                                    <p className="text-[10px] text-text-muted">UPI, Cards, Mandates enabled</p>
-                                </div>
-                            </label>
-                            <label className={`flex items-center gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all ${paymentMethod === 'COD' ? 'border-brand-orange bg-brand-orange/5' : 'border-transparent opacity-70'}`}>
-                                <input type="radio" checked={paymentMethod === 'COD'} onChange={() => setPaymentMethod('COD')} className="accent-brand-orange size-5" />
-                                <div className="flex-1">
-                                    <p className="font-bold text-sm">Pay on Delivery</p>
-                                    <p className="text-[10px] text-text-muted">OTP verification required</p>
-                                </div>
-                            </label>
-                        </div>
+                        <p className="text-xs text-text-muted">UPI, Cards, and Netbanking natively supported via Razorpay Checkout.</p>
                     </div>
                 </div>
 
-                {/* Right: Price Sidebar */}
                 <div className="lg:sticky lg:top-8">
                     <div className="card !bg-brand-dark text-white shadow-premium !p-8">
                         <h3 className="text-lg font-bold mb-6 flex items-center gap-2 text-brand-orange-light">
@@ -345,25 +279,21 @@ export default function CheckoutView({ onBack, onSuccessComplete, planConfig }) 
                                 <span>₹{uiPrice}</span>
                             </div>
                             <div className="flex justify-between text-sm text-brand-dark/60">
-                                <span>GST (5%)</span>
-                                <span>₹{gstAmount}</span>
-                            </div>
-                            <div className="flex justify-between text-sm text-brand-dark/60">
                                 <span>Delivery Fee</span>
                                 <span className="text-success font-bold">FREE</span>
                             </div>
                             <div className="pt-4 border-t border-white/10 flex justify-between items-center">
                                 <span className="text-sm font-bold uppercase">Total Payable</span>
-                                <span className="text-3xl font-bold text-brand-orange-light">₹{totalPayable}</span>
+                                <span className="text-3xl font-bold text-brand-orange-light">₹{uiPrice}</span>
                             </div>
                         </div>
 
                         <button
                             disabled={isProcessing || !address}
                             onClick={handlePayClick}
-                            className="btn btn-block py-4 text-lg"
+                            className="btn btn-block py-4 text-lg bg-brand-orange text-white"
                         >
-                            {isProcessing ? 'Processing...' : (paymentMethod === 'ONLINE' ? 'Pay & Activate' : 'Activate with COD')}
+                            {isProcessing ? 'Processing securely...' : 'Pay & Activate'}
                         </button>
 
                         <p className="text-[10px] text-center text-brand-dark/40 mt-4 leading-relaxed">
@@ -378,7 +308,7 @@ export default function CheckoutView({ onBack, onSuccessComplete, planConfig }) 
             {showOtpModal && (
                 <div className="fixed inset-0 z-[2000] flex items-center justify-center p-4 bg-brand-dark/80 backdrop-blur-md animate-fade-in">
                     <div className="card w-full max-w-sm !p-8 text-center space-y-6">
-                        <h3 className="text-2xl font-bold">Verify COD Order</h3>
+                        <h3 className="text-2xl font-bold">Verify Security OTP</h3>
                         <p className="text-text-muted">Enter the 4-digit code sent to your phone to proceed.</p>
 
                         <input
@@ -399,7 +329,7 @@ export default function CheckoutView({ onBack, onSuccessComplete, planConfig }) 
                                 disabled={otp.length < 4 || otpLoading}
                                 className="btn btn-block py-4"
                             >
-                                {otpLoading ? 'Verifying...' : 'Confirm Activation'}
+                                {otpLoading ? 'Verifying...' : 'Confirm'}
                             </button>
                             <button
                                 onClick={() => setShowOtpModal(false)}

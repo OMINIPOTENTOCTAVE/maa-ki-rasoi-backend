@@ -10,10 +10,10 @@ export default function useAdminData() {
     const [dailyProduction, setDailyProduction] = useState(null);
     const [partners, setPartners] = useState([]);
     const [forecast, setForecast] = useState(null);
+    const [payments, setPayments] = useState([]);
     const navigate = useNavigate();
 
     const fetchData = useCallback(async (activeTab, token) => {
-        // Safe check: Don't fire if no token
         if (!token) return;
 
         try {
@@ -26,6 +26,9 @@ export default function useAdminData() {
             } else if (activeTab === 'menu') {
                 const res = await api.get('/menu');
                 setMenuItems(res.data.data);
+            } else if (activeTab === 'payments') {
+                const res = await api.get('/payments/history');
+                setPayments(res.data.data);
             } else if (activeTab === 'stats') {
                 const [statsRes, kpiRes, forecastRes] = await Promise.all([
                     api.get('/orders/stats'),
@@ -37,13 +40,11 @@ export default function useAdminData() {
             } else if (activeTab === 'subscriptions') {
                 const subRes = await api.get('/subscriptions');
                 setSubscriptions(subRes.data.data);
-                // Schema normalization is now handled in api.js interceptor
                 const prodRes = await api.get('/subscriptions/production/today');
                 setDailyProduction(prodRes.data);
             }
         } catch (err) {
             console.error("Admin data fetch error:", err);
-            // Error is already captured in Sentry via api.js interceptor
         }
     }, [navigate]);
 
@@ -55,6 +56,7 @@ export default function useAdminData() {
         dailyProduction,
         partners,
         forecast,
+        payments,
         fetchData
     };
 }

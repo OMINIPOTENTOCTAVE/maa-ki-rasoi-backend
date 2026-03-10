@@ -15,6 +15,7 @@ const AppLayout = ({ children, activeTab, onTabChange, onLogout }) => {
     const navItems = [
         { id: 'subscriptions', icon: 'card_membership', label: 'Subscriptions' },
         { id: 'orders', icon: 'receipt_long', label: 'Orders' },
+        { id: 'payments', icon: 'payments', label: 'Payments' },
         { id: 'team', icon: 'local_shipping', label: 'Team' },
         { id: 'menu', icon: 'restaurant_menu', label: 'Menu' },
         { id: 'complaints', icon: 'report_problem', label: 'Complaints' },
