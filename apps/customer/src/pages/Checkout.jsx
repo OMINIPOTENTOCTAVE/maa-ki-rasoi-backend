@@ -85,6 +85,12 @@ export default function Checkout({ cart, updateQty, clearCart }) {
             return;
         }
 
+        if (!/^[6-9]\d{9}$/.test(formData.phone.replace(/\D/g, '').slice(-10))) {
+            setErrorMsg("Please enter a valid 10-digit Indian mobile number.");
+            setIsProcessing(false);
+            return;
+        }
+
         const payload = {
             customerName: formData.name,
             customerPhone: formData.phone,

@@ -3,6 +3,26 @@ import { onAuthStateChanged, signInWithPopup, signOut as firebaseSignOut, Recapt
 import { auth, googleProvider } from '../config/firebase';
 import { toast } from 'sonner';
 
+export const formatIndianPhone = (phone) => {
+    let cleaned = phone.replace(/\D/g, ""); // remove spaces/dashes
+
+    if (cleaned.startsWith("0")) {
+        cleaned = cleaned.substring(1);
+    }
+
+    if (cleaned.startsWith("91")) {
+        cleaned = cleaned.substring(2);
+    }
+
+    return `+91${cleaned.slice(-10)}`; // Ensure we only take the last 10 digits
+};
+
+export const isValidIndianMobile = (phone) => {
+    const cleaned = phone.replace(/\D/g, "");
+    const last10 = cleaned.slice(-10);
+    return /^[6-9]\d{9}$/.test(last10);
+};
+
 export function useAuth() {
     const [user, setUser] = useState(null);
     const [authToken, setAuthToken] = useState(null);
@@ -90,7 +110,7 @@ export function useAuth() {
             setLoading(true);
 
             // Format phone number
-            const formattedPhone = `+91${phoneNumber.replace(/\s+/g, '').replace(/^\+91/, '')}`;
+            const formattedPhone = formatIndianPhone(phoneNumber);
 
             // 1. Setup Recaptcha Singleton
             setupRecaptcha();
@@ -191,5 +211,5 @@ export function useAuth() {
         }
     };
 
-    return { user, authToken, loading, signInWithGoogle, signInWithPhone, verifyOtp, signOut };
+    return { user, authToken, loading, signInWithGoogle, signInWithPhone, verifyOtp, signOut, formatIndianPhone, isValidIndianMobile };
 }

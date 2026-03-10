@@ -4,13 +4,14 @@ import { useEffect, useState } from 'react';
 
 export default function Login() {
     const navigate = useNavigate();
-    const { signInWithGoogle, signInWithPhone, verifyOtp, user, authToken } = useAuthContext();
+    const { signInWithGoogle, signInWithPhone, verifyOtp, user, authToken, isValidIndianMobile } = useAuthContext();
     const [googleLoading, setGoogleLoading] = useState(false);
     const [phoneLoading, setPhoneLoading] = useState(false);
     const [otpLoading, setOtpLoading] = useState(false);
     const [phone, setPhone] = useState('');
     const [otp, setOtp] = useState('');
     const [isOtpSent, setIsOtpSent] = useState(false);
+    const [maskedPhone, setMaskedPhone] = useState('');
     const [errorMsg, setErrorMsg] = useState('');
 
     useEffect(() => {
@@ -34,15 +35,21 @@ export default function Login() {
     const handlePhoneSubmit = async (e) => {
         e.preventDefault();
         setErrorMsg('');
-        if (!phone || phone.length < 10) {
-            setErrorMsg('Please enter a valid phone number.');
+
+        if (!phone || !isValidIndianMobile(phone)) {
+            setErrorMsg('Please enter a valid 10-digit Indian mobile number.');
             return;
         }
 
         setPhoneLoading(true);
         try {
-            const phoneNumber = phone.length === 10 ? `+91${phone}` : phone;
-            await signInWithPhone(phoneNumber, 'request-otp-btn');
+            await signInWithPhone(phone); // formatting happens inside the hook
+
+            // create masked version for display: +91 XXXXX 43210
+            const cleaned = phone.replace(/\D/g, '').slice(-10);
+            const masked = `+91 ${cleaned.slice(0, 5).replace(/./g, 'X')} ${cleaned.slice(-5)}`;
+            setMaskedPhone(masked);
+
             setIsOtpSent(true);
         } catch (err) {
             setErrorMsg(err.message || 'Failed to send OTP. Try again.');
@@ -140,8 +147,9 @@ export default function Login() {
                             type="tel"
                             placeholder="Mobile Number (e.g. 9876543210)"
                             value={phone}
-                            onChange={(e) => setPhone(e.target.value)}
-                            className="w-full px-4 py-4 rounded-xl border border-border bg-white text-foreground focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
+                            maxLength={10}
+                            onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
+                            className="w-full px-4 py-4 rounded-xl border border-border bg-white text-foreground focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all tracking-wider text-center font-bold text-lg"
                             disabled={phoneLoading}
                         />
                         <div id="recaptcha-container"></div>
@@ -156,6 +164,9 @@ export default function Login() {
                     </form>
                 ) : (
                     <form onSubmit={handleOtpSubmit} className="w-full space-y-4 mb-4">
+                        <div className="bg-success/10 text-success p-3 rounded-xl text-sm font-bold mb-4">
+                            OTP sent to {maskedPhone}
+                        </div>
                         <input
                             type="text"
                             placeholder="Enter 6-digit OTP"
@@ -176,12 +187,26 @@ export default function Login() {
                 )}
 
                 <div className="mt-4 text-center space-y-4 w-full">
-                    <button
-                        onClick={() => navigate('/')}
-                        className="text-muted-foreground font-bold hover:text-primary transition-colors text-sm"
-                    >
-                        Maybe Later
-                    </button>
+                    {!isOtpSent && (
+                        <button
+                            onClick={() => navigate('/')}
+                            className="text-muted-foreground font-bold hover:text-primary transition-colors text-sm"
+                        >
+                            Maybe Later
+                        </button>
+                    )}
+                    {isOtpSent && (
+                        <button
+                            onClick={() => {
+                                setIsOtpSent(false);
+                                setOtp('');
+                                setErrorMsg('');
+                            }}
+                            className="text-muted-foreground font-bold hover:text-primary transition-colors text-sm"
+                        >
+                            Change Mobile Number
+                        </button>
+                    )}
 
                     <p className="text-[11px] text-muted-foreground leading-relaxed px-4 mx-auto max-w-[250px]">
                         By authenticating, you agree to our <br />
